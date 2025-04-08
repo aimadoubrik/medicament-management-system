@@ -87,9 +87,9 @@ export default function AuthenticatedLayout({ header, children }) {
     // Navigation items for sidebar
     const navigationItems = [
         { name: 'Home', href: route('dashboard'), icon: Home, current: route().current('dashboard') },
-        { name: 'Medicaments', href: '#', icon: BriefcaseMedical, current: false },
-        { name: 'Stocks', href: '#', icon: Package, current: false },
-        { name: 'Users', href: '#', icon: Users, current: false },
+        { name: 'Medicaments', href: route('medications.index'), icon: BriefcaseMedical, current: false },
+        { name: 'Stocks', href: route('stocks.index'), icon: Package, current: false },
+        { name: 'Suppliers', href: route('suppliers.index'), icon: Users, current: false },
         { name: 'Settings', href: '#', icon: Settings2, current: false },
     ];
 
@@ -367,7 +367,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 {/* Footer */}
                 <footer className="py-4 text-sm text-center text-gray-500 border-t border-gray-200 dark:border-gray-700 dark:text-gray-400">
                     <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                        &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+                        &copy; {new Date().getFullYear()} MediTrack. All rights reserved.
                     </div>
                 </footer>
             </div>
