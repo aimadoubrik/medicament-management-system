@@ -9,7 +9,7 @@ import GuestLayout from '@/Layouts/GuestLayout';
 export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -35,10 +35,10 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title="S'enregistrer" />
             
             <div className="flex flex-col items-center">
-                {/* Logo and branding */}
+                {/* Logo et marque */}
                 <div className="mb-8 text-center">
                     <div className="flex items-center justify-center mb-3">
                         <svg className="w-10 h-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,17 +46,17 @@ export default function Register() {
                         </svg>
                         <h1 className="ml-2 text-3xl font-bold text-blue-600">MediTrack</h1>
                     </div>
-                    <p className="text-gray-600">Medicament Stock Management System</p>
+                    <p className="text-gray-600">Système de Gestion des Stocks de Médicaments</p>
                 </div>
 
-                {/* Register Card */}
+                {/* Carte d'enregistrement */}
                 <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-xl">
-                    <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">Create Your Account</h2>
+                    <h2 className="mb-6 text-2xl font-bold text-center text-gray-800">Créez votre compte</h2>
                     
                     <form onSubmit={submit}>
-                        {/* Name Field */}
+                        {/* Champ Nom */}
                         <div className="mb-5">
-                            <InputLabel htmlFor="name" value="Full Name" className="font-medium text-gray-700" />
+                            <InputLabel htmlFor="name" value="Nom Complet" className="font-medium text-gray-700" />
                             
                             <div className="relative mt-1 rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -73,7 +73,7 @@ export default function Register() {
                                     autoComplete="name"
                                     isFocused={true}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="John Doe"
+                                    placeholder="Jean Dupont"
                                     required
                                 />
                             </div>
@@ -81,9 +81,9 @@ export default function Register() {
                             <InputError message={errors.name} className="mt-2" />
                         </div>
 
-                        {/* Email Field */}
+                        {/* Champ Email */}
                         <div className="mb-5">
-                            <InputLabel htmlFor="email" value="Email Address" className="font-medium text-gray-700" />
+                            <InputLabel htmlFor="email" value="Adresse Email" className="font-medium text-gray-700" />
                             
                             <div className="relative mt-1 rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -100,7 +100,7 @@ export default function Register() {
                                     className="block w-full pl-10 border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                                     autoComplete="username"
                                     onChange={(e) => setData('email', e.target.value)}
-                                    placeholder="you@example.com"
+                                    placeholder="vous@example.com"
                                     required
                                 />
                             </div>
@@ -108,9 +108,9 @@ export default function Register() {
                             <InputError message={errors.email} className="mt-2" />
                         </div>
 
-                        {/* Password Field */}
+                        {/* Champ Mot de Passe */}
                         <div className="mb-5">
-                            <InputLabel htmlFor="password" value="Password" className="font-medium text-gray-700" />
+                            <InputLabel htmlFor="password" value="Mot de Passe" className="font-medium text-gray-700" />
                             
                             <div className="relative mt-1 rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -152,12 +152,12 @@ export default function Register() {
                             </div>
                             
                             <InputError message={errors.password} className="mt-2" />
-                            <p className="mt-1 text-xs text-gray-500">Password must be at least 8 characters</p>
+                            <p className="mt-1 text-xs text-gray-500">Le mot de passe doit comporter au moins 8 caractères</p>
                         </div>
 
-                        {/* Confirm Password Field */}
+                        {/* Champ Confirmation Mot de Passe */}
                         <div className="mb-6">
-                            <InputLabel htmlFor="password_confirmation" value="Confirm Password" className="font-medium text-gray-700" />
+                            <InputLabel htmlFor="password_confirmation" value="Confirmez le Mot de Passe" className="font-medium text-gray-700" />
                             
                             <div className="relative mt-1 rounded-md shadow-sm">
                                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -201,7 +201,7 @@ export default function Register() {
                             <InputError message={errors.password_confirmation} className="mt-2" />
                         </div>
 
-                        {/* Terms and Privacy */}
+                        {/* Conditions et Confidentialité */}
                         <div className="mb-6">
                             <div className="flex items-start">
                                 <div className="flex items-center h-5">
@@ -215,16 +215,16 @@ export default function Register() {
                                 </div>
                                 <div className="ml-3 text-sm">
                                     <label htmlFor="terms" className="text-gray-600">
-                                        I agree to the 
-                                        <a href="#" className="mx-1 text-blue-600 hover:text-blue-500">Terms of Service</a>
-                                        and
-                                        <a href="#" className="mx-1 text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                                        J'accepte les 
+                                        <a href="#" className="mx-1 text-blue-600 hover:text-blue-500">Conditions d'utilisation</a>
+                                        et la
+                                        <a href="#" className="mx-1 text-blue-600 hover:text-blue-500">Politique de confidentialité</a>
                                     </label>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Register Button */}
+                        {/* Bouton Enregistrer */}
                         <div className="mb-6">
                             <PrimaryButton 
                                 className="flex justify-center w-full px-4 py-3 font-medium text-white transition duration-150 ease-in-out bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -236,26 +236,24 @@ export default function Register() {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Creating account...
+                                        Création du compte...
                                     </>
-                                ) : 'Create Account'}
+                                ) : 'Créer un compte'}
                             </PrimaryButton>
                         </div>
                     </form>
 
-                    
-
                 </div>
 
-                {/* Already have an account link */}
+                {/* Déjà un compte lien */}
                 <div className="mt-8 text-center">
                     <p className="text-sm text-gray-600">
-                        Already have an account?{' '}
+                        Vous avez déjà un compte ?{' '}
                         <Link 
                             href={route('login')} 
                             className="font-medium text-blue-600 transition duration-150 ease-in-out hover:text-blue-500"
                         >
-                            Sign in
+                            Connectez-vous
                         </Link>
                     </p>
                 </div>
