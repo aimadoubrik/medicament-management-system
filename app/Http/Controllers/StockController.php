@@ -2,89 +2,94 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Stock;
-use App\Models\Medication;
+use App\Models\Batch;
+use App\Models\Product;
+use App\Models\Supplier;
+use App\Http\Requests\StoreBatchRequest;
+use App\Http\Requests\UpdateBatchRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class StockController extends Controller
 {
-
-    public function index()
+    public function index(Request $request)
     {
-        $stocks = Stock::with('medication')->get()->map(function ($stock) {
-            $stock->is_expiring = false;
+        $batches = Batch::with(['product', 'supplier'])
+            ->when($request->search, function ($query, $search) {
+                $query->whereHas('product', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })->orWhere('batch_number', 'like', "%{$search}%");
+            })
+            ->when($request->expiry_from, function ($query, $date) {
+                $query->where('expiry_date', '>=', $date);
+            })
+            ->when($request->expiry_to, function ($query, $date) {
+                $query->where('expiry_date', '<=', $date);
+            })
+            ->paginate(10)
+            ->withQueryString();
 
-            if ($stock->end_time) {
-                $endTime = \Carbon\Carbon::parse($stock->end_time);
-                $stock->is_expiring = $endTime->isBetween(now(), now()->addDays(3));
-            }
-
-            return $stock;
-        });
-
-        $role = auth()->user()->role->name;
-
-        return Inertia::render('Stocks/Index', [
-            'stocks' => $stocks,
-            'canNotify' => in_array($role, ['admin', 'superuser']),
+        return Inertia::render('Stock/Index', [
+            'batches' => $batches,
+            'filters' => $request->only(['search', 'expiry_from', 'expiry_to']),
+            'products' => Product::select('id', 'name')->get(),
         ]);
     }
-
-    
 
     public function create()
     {
-        return Inertia::render('Stocks/Create', [
-            'medications' => Medication::all(),
+        return Inertia::render('Stock/Create', [
+            'products' => Product::select('id', 'name')->get(),
+            'suppliers' => Supplier::select('id', 'name')->get(),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreBatchRequest $request)
+    {
+        Batch::create($request->validated());
+
+        return redirect()->route('stock.index')
+            ->with('success', 'Batch created successfully.');
+    }
+
+    public function edit(Batch $batch)
+    {
+        return Inertia::render('Stock/Edit', [
+            'batch' => $batch->load(['product', 'supplier']),
+            'products' => Product::select('id', 'name')->get(),
+            'suppliers' => Supplier::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function update(UpdateBatchRequest $request, Batch $batch)
+    {
+        $batch->update($request->validated());
+
+        return redirect()->route('stock.index')
+            ->with('success', 'Batch updated successfully.');
+    }
+
+    public function adjust(Request $request, Batch $batch)
     {
         $request->validate([
-            'medication_id' => 'required|exists:medications,id',
-            'quantity' => 'required|integer|min:1',
-            'start_time' => 'nullable|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-            'notes' => 'nullable|string',
+            'adjustment' => 'required|integer',
+            'reason' => 'required|string|max:255',
         ]);
 
-        Stock::create([
-            ...$request->all(),
-            'created_by' => auth()->id(),
+        $newQuantity = $batch->quantity + $request->adjustment;
+        
+        if ($newQuantity < 0) {
+            return back()->withErrors(['adjustment' => 'Cannot adjust to negative stock.']);
+        }
+
+        $batch->update([
+            'quantity' => $newQuantity
         ]);
 
-        return redirect()->route('stocks.index')->with('success', 'Stock added!');
-    }
+        // Log the adjustment if you have a StockAdjustment model
+        // StockAdjustment::create([...]);
 
-    public function edit(Stock $stock)
-    {
-        return Inertia::render('Stocks/Edit', [
-            'stock' => $stock,
-            'medications' => Medication::all(),
-        ]);
-    }
-
-    public function update(Request $request, Stock $stock)
-    {
-        $request->validate([
-            'medication_id' => 'required|exists:medications,id',
-            'quantity' => 'required|integer|min:1',
-            'start_time' => 'nullable|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-            'notes' => 'nullable|string',
-        ]);
-
-        $stock->update($request->all());
-
-        return redirect()->route('stocks.index')->with('success', 'Stock updated!');
-    }
-
-    public function destroy(Stock $stock)
-    {
-        $stock->delete();
-        return redirect()->route('stocks.index')->with('success', 'Stock deleted!');
+        return redirect()->route('stock.index')
+            ->with('success', 'Stock adjusted successfully.');
     }
 }
-

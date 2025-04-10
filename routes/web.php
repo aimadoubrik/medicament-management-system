@@ -1,37 +1,34 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MedicationController;
-use App\Http\Controllers\StockController;
 use Inertia\Inertia;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StockController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+    return Inertia::render('welcome');
+})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('suppliers', SupplierController::class);
-    Route::resource('medications', MedicationController::class);
-    Route::resource('stocks', StockController::class);
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard');
 
+    // Product routes
+    Route::resource('products', ProductController::class);
+
+    // Stock routes
+    Route::resource('stock', StockController::class);
+
+    // Supplier routes
+    Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
+
+    // Category routes
+    Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+    
+    // Optional: Add custom product routes if needed
+    // Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
 });
 
+require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
