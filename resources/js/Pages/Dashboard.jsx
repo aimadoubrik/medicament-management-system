@@ -20,9 +20,9 @@ export default function Dashboard() {
     });
 
     const [recentActivity] = useState([
-        { id: 1, action: "Stock Update", item: "Paracetamol 500mg", quantity: "+150", date: "2025-04-05", status: "completed" },
-        { id: 2, action: "Dispensed", item: "Amoxicillin 250mg", quantity: "-35", date: "2025-04-05", status: "completed" },
-        { id: 3, action: "Expiry Notification", item: "Vitamin C 1000mg", quantity: "45", date: "2025-04-03", status: "warning" }
+        { id: 1, action: "Mise à jour du stock", item: "Paracetamol 500mg", quantity: "+150", date: "2025-04-05", status: "terminé" },
+        { id: 2, action: "Distribué", item: "Amoxicillin 250mg", quantity: "-35", date: "2025-04-05", status: "terminé" },
+        { id: 3, action: "Notification d'expiration", item: "Vitamine C 1000mg", quantity: "45", date: "2025-04-03", status: "avertissement" }
     ]);
 
     return (
@@ -31,7 +31,7 @@ export default function Dashboard() {
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
                         <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-gray-100">
-                            Dashboard
+                            Tableau de bord
                             <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
                                 (Données aléatoires)
                             </span>
@@ -40,41 +40,41 @@ export default function Dashboard() {
                     <div className="flex justify-end">
                         <PrimaryButton>
                             <AlertTriangle size={16} className="mr-2" />
-                            Add Medicament
+                            Ajouter Médicament
                         </PrimaryButton>
                     </div>
                 </div>
             }
         >
-            <Head title="Dashboard" />
+            <Head title="Tableau de bord" />
 
             <div className="py-6">
                 <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    {/* Welcome Section */}
+                    {/* Section de Bienvenue */}
                     <div className="p-6 mb-6 rounded-lg shadow-md bg-gradient-to-r from-blue-500 to-blue-700">
-                        <h3 className="mb-2 text-xl font-semibold text-white">Welcome to MediTrack</h3>
+                        <h3 className="mb-2 text-xl font-semibold text-white">Bienvenue sur MediTrack</h3>
                         <p className="text-blue-100">
-                            Your comprehensive medicament inventory management system.
+                            Votre système complet de gestion de l'inventaire des médicaments.
                         </p>
                     </div>
 
-                    {/* Stats */}
+                    {/* Statistiques */}
                     <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-3">
                         {[
                             {
-                                title: 'Total Medicaments',
+                                title: 'Total Médicaments',
                                 value: stats.totalMedicaments,
                                 icon: <AlertTriangle size={20} className="text-blue-600 dark:text-blue-300" />,
                                 bg: 'bg-blue-100 dark:bg-blue-900'
                             },
                             {
-                                title: 'Low Stock Items',
+                                title: 'Articles en Stock Faible',
                                 value: stats.lowStock,
                                 icon: <AlertCircle size={20} className="text-amber-600 dark:text-amber-300" />,
                                 bg: 'bg-amber-100 dark:bg-amber-900'
                             },
                             {
-                                title: 'Expiring Soon',
+                                title: 'Expiration Prochaine',
                                 value: stats.expiringItems,
                                 icon: <Calendar size={20} className="text-red-600 dark:text-red-300" />,
                                 bg: 'bg-red-100 dark:bg-red-900'
@@ -92,20 +92,20 @@ export default function Dashboard() {
                         ))}
                     </div>
 
-                    {/* Content Grid */}
+                    {/* Grille de Contenu */}
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        {/* Quick Actions */}
+                        {/* Actions Rapides */}
                         <div className="bg-white rounded-lg shadow-md dark:bg-gray-800">
                             <div className="px-6 py-4 border-b dark:border-gray-700">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Quick Actions</h3>
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Actions Rapides</h3>
                             </div>
                             <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-3">
                                 {[
-                                    { icon: <AlertTriangle size={24} />, label: 'View Medicaments' },
-                                    { icon: <PackageOpen size={24} />, label: 'View Stock' },
-                                    { icon: <TrendingUp size={24} />, label: 'Reports' },
-                                    { icon: <Users size={24} />, label: 'Suppliers' },
-                                    { icon: <Calendar size={24} />, label: 'Expiry Dates' },
+                                    { icon: <AlertTriangle size={24} />, label: 'Voir Médicaments' },
+                                    { icon: <PackageOpen size={24} />, label: 'Voir Stock' },
+                                    { icon: <TrendingUp size={24} />, label: 'Rapports' },
+                                    { icon: <Users size={24} />, label: 'Fournisseurs' },
+                                    { icon: <Calendar size={24} />, label: 'Dates d\'Expiration' },
                                 ].map((action, i) => (
                                     <Link href="#" key={i}>
                                         <div className="flex flex-col items-center p-4 text-center transition border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-700">
@@ -117,18 +117,18 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Recent Activity */}
+                        {/* Activité Récente */}
                         <div className="bg-white rounded-lg shadow-md lg:col-span-2 dark:bg-gray-800">
                             <div className="px-6 py-4 border-b dark:border-gray-700">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h3>
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Activité Récente</h3>
                             </div>
                             <div className="divide-y dark:divide-gray-700">
                                 {recentActivity.map((a) => (
                                     <div key={a.id} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <div className="flex items-center">
                                             <Activity size={18} className={`
-                        ${a.status === 'completed' ? 'text-green-500' : ''}
-                        ${a.status === 'warning' ? 'text-amber-500' : ''}
+                        ${a.status === 'terminé' ? 'text-green-500' : ''}
+                        ${a.status === 'avertissement' ? 'text-amber-500' : ''}
                       `} />
                                             <div className="ml-3">
                                                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{a.action}</p>
@@ -146,28 +146,28 @@ export default function Dashboard() {
                                 ))}
                                 <div className="p-4 text-center">
                                     <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                                        View All Activity
+                                        Voir Toute l'Activité
                                     </Link>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Alerts */}
+                    {/* Alertes */}
                     <div className="mt-6 space-y-4 bg-white rounded-lg shadow-md dark:bg-gray-800">
                         <div className="px-6 py-4 border-b dark:border-gray-700">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Alerts & Notifications</h3>
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Alertes & Notifications</h3>
                         </div>
                         <div className="px-6 pb-6 space-y-4">
                             <div className="flex p-4 rounded-lg bg-amber-50 dark:bg-amber-900 dark:bg-opacity-30">
                                 <AlertCircle size={20} className="text-amber-700 dark:text-amber-400" />
                                 <div className="ml-3">
-                                    <h4 className="text-sm font-medium text-amber-800 dark:text-amber-300">Low Stock Alert</h4>
+                                    <h4 className="text-sm font-medium text-amber-800 dark:text-amber-300">Alerte de Stock Faible</h4>
                                     <p className="text-sm text-amber-700 dark:text-amber-400">
-                                        12 medicaments are running low on stock.
+                                        12 médicaments sont en rupture de stock.
                                     </p>
                                     <Link href="#" className="text-sm font-medium underline text-amber-800 dark:text-amber-300">
-                                        View Low Stock Items
+                                        Voir Articles en Stock Faible
                                     </Link>
                                 </div>
                             </div>
@@ -175,12 +175,12 @@ export default function Dashboard() {
                             <div className="flex p-4 rounded-lg bg-red-50 dark:bg-red-900 dark:bg-opacity-30">
                                 <Calendar size={20} className="text-red-700 dark:text-red-400" />
                                 <div className="ml-3">
-                                    <h4 className="text-sm font-medium text-red-800 dark:text-red-300">Expiration Alert</h4>
+                                    <h4 className="text-sm font-medium text-red-800 dark:text-red-300">Alerte d'Expiration</h4>
                                     <p className="text-sm text-red-700 dark:text-red-400">
-                                        5 medicaments are expiring within the next 30 days.
+                                        5 médicaments expirent dans les 30 prochains jours.
                                     </p>
                                     <Link href="#" className="text-sm font-medium text-red-800 underline dark:text-red-300">
-                                        View Expiring Items
+                                        Voir Articles Expirants
                                     </Link>
                                 </div>
                             </div>
@@ -191,3 +191,4 @@ export default function Dashboard() {
         </AuthenticatedLayout>
     );
 }
+
