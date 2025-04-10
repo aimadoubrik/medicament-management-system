@@ -22,7 +22,8 @@ import {
   Calendar,
   User,
   Building,
-  FileText
+  FileText,
+  Pill
 } from 'lucide-react';
 
 export default function Index() {
@@ -97,10 +98,9 @@ export default function Index() {
                     <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between md:mb-8">
                         <div>
                             <h1 className="flex items-center gap-2 text-2xl font-bold text-gray-800 md:text-3xl dark:text-white">
-                                <AlertCircleIcon className="text-blue-600" />
+                                <Pill className="text-blue-600" />
                                 <span>Medications</span>
                             </h1>
-                            <p className="mt-1 text-sm text-gray-600 md:text-base dark:text-gray-300">Manage your medication inventory</p>
                         </div>
                         
                         <div className="flex flex-col gap-3 sm:flex-row">
