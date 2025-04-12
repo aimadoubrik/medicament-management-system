@@ -1,4 +1,4 @@
-import { createBooleanColumn, createDateColumn, createSelectionColumn, createTextColumn, createNumberColumn } from '@/components/data-table/column-def';
+import { createDateColumn, createSelectionColumn, createTextColumn, createNumberColumn } from '@/components/data-table/column-def';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,

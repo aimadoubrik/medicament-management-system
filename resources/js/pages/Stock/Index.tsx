@@ -4,22 +4,11 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
 import { Batch, batchColumns, batchColumnVisibility } from './table-definition';
+import { PaginatedResponse } from '@/types';
 
-interface PaginatedData<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    links: Array<{
-        url: string | null;
-        label: string;
-        active: boolean;
-    }>;
-}
 
 interface Props {
-    batches: PaginatedData<Batch>;
+    batches: PaginatedResponse<Batch>;
 }
 
 const StockPage = ({ batches }: Props) => {
