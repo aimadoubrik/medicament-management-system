@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "bg-blue-500 text-white shadow-xs hover:bg-blue-600", // Medical blue
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "bg-red-500 text-white shadow-xs hover:bg-red-600 focus-visible:ring-red-300 dark:focus-visible:ring-red-500", // Medical red for warnings
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border border-gray-300 bg-white text-gray-700 shadow-xs hover:bg-gray-100", // Neutral outline
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-green-500 text-white shadow-xs hover:bg-green-600", // Medical green
+        ghost: "hover:bg-gray-100 text-gray-700", // Subtle hover
+        link: "text-blue-500 underline-offset-4 hover:underline", // Link styled as medical blue
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
