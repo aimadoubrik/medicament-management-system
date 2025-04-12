@@ -22,8 +22,8 @@ class ExpiryWarningNotification extends Notification implements ShouldQueue // I
     public function __construct(Batch $batch)
     {
         $this->batch = $batch;
-        // Eager load product relationship if needed elsewhere
-        $this->batch->loadMissing('product');
+        // Eager load medicine relationship if needed elsewhere
+        $this->batch->loadMissing('medicine');
     }
 
     /**
@@ -43,14 +43,14 @@ class ExpiryWarningNotification extends Notification implements ShouldQueue // I
     public function toMail(object $notifiable): MailMessage
     {
         $expiryDate = Carbon::parse($this->batch->expiry_date)->format('Y-m-d');
-        $productName = $this->batch->product->name ?? 'N/A'; // Handle potential missing product relation
+        $medicineName = $this->batch->medicine->name ?? 'N/A'; // Handle potential missing medicine relation
 
         return (new MailMessage)
-            ->subject('Product Expiry Warning: ' . $productName)
-            ->line("Warning: A batch of product '{$productName}' (Batch number: {$this->batch->batch_number}) is expiring soon.")
+            ->subject('Medicine Expiry Warning: ' . $medicineName)
+            ->line("Warning: A batch of medicine '{$medicineName}' (Batch number: {$this->batch->batch_number}) is expiring soon.")
             ->line("Expiry Date: {$expiryDate}")
-            ->line("Quantity in Batch: {$this->batch->quantity}")
-            ->action('View Product Batches', route('products.show', $this->batch->product_id)) // Adjust route as needed
+            ->line("Quantity in Batch: {$this->batch->current_quantity}")
+            ->action('View Medicine Batches', route('medicines.show', $this->batch->medicine_id)) // Adjust route as needed
             ->line('Please take appropriate action.');
     }
 
@@ -62,18 +62,18 @@ class ExpiryWarningNotification extends Notification implements ShouldQueue // I
     public function toArray(object $notifiable): array
     {
         $expiryDate = Carbon::parse($this->batch->expiry_date)->format('Y-m-d');
-        $productName = $this->batch->product->name ?? 'N/A';
+        $medicineName = $this->batch->medicine->name ?? 'N/A';
 
         // Data to be stored in the notifications table
         return [
             'batch_id' => $this->batch->id,
             'batch_number' => $this->batch->batch_number,
-            'product_id' => $this->batch->product_id,
-            'product_name' => $productName,
+            'medicine_id' => $this->batch->medicine_id,
+            'medicine_name' => $medicineName,
             'expiry_date' => $expiryDate,
-            'quantity' => $this->batch->quantity,
-            'message' => "Batch #{$this->batch->batch_number} of '{$productName}' expires on {$expiryDate}.",
-            'action_url' => route('products.show', $this->batch->product_id), // Adjust route as needed
+            'current_quantity' => $this->batch->current_quantity,
+            'message' => "Batch #{$this->batch->batch_number} of '{$medicineName}' expires on {$expiryDate}.",
+            'action_url' => route('medicines.show', $this->batch->medicine_id), // Adjust route as needed
         ];
     }
 }

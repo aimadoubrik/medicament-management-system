@@ -11,8 +11,8 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 
-// This type is used to define the structure of a product object.
-export type Product = {
+// This type is used to define the structure of a medicine object.
+export type Medicine = {
     id: number;
     name: string;
     generic_name: string | null;
@@ -35,27 +35,27 @@ export type Product = {
 };
 
 
-export const productColumns: ColumnDef<Product>[] = [
-    createSelectionColumn<Product>(),
-    createTextColumn<Product>('name', 'Name'),
-    createTextColumn<Product>('generic_name', 'Generic Name'),
-    createTextColumn<Product>('manufacturer', 'Manufacturer'),
-    createTextColumn<Product>('strength', 'Strength'),
-    createTextColumn<Product>('form', 'Form'),
-    createBooleanColumn<Product>('requires_prescription', 'Prescription Required'),
-    createDateColumn<Product>('created_at', 'Created'),
-    createDateColumn<Product>('updated_at', 'Updated'),
+export const medicineColumns: ColumnDef<Medicine>[] = [
+    createSelectionColumn<Medicine>(),
+    createTextColumn<Medicine>('name', 'Name'),
+    createTextColumn<Medicine>('generic_name', 'Generic Name'),
+    createTextColumn<Medicine>('manufacturer', 'Manufacturer'),
+    createTextColumn<Medicine>('strength', 'Strength'),
+    createTextColumn<Medicine>('form', 'Form'),
+    createBooleanColumn<Medicine>('requires_prescription', 'Prescription Required'),
+    createDateColumn<Medicine>('created_at', 'Created'),
+    createDateColumn<Medicine>('updated_at', 'Updated'),
     {
         accessorFn: (row) => row.category.name,
         id: 'categoryName',
         header: 'Category',
     },
-    createTextColumn<Product>('description', 'Description'),
-    createTextColumn<Product>('low_stock_threshold', 'Low Stock Threshold'),
+    createTextColumn<Medicine>('description', 'Description'),
+    createTextColumn<Medicine>('low_stock_threshold', 'Low Stock Threshold'),
     {
         id: 'actions',
         cell: ({ row }) => {
-            const product = row.original;
+            const medicine = row.original;
 
             return (
                 <DropdownMenu>
@@ -67,11 +67,11 @@ export const productColumns: ColumnDef<Product>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions </DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id.toString())}>Copy product ID</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(medicine.id.toString())}>Copy medicine ID</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem> View product </DropdownMenuItem>
-                        <DropdownMenuItem> Edit product </DropdownMenuItem>
-                        <DropdownMenuItem> Delete product </DropdownMenuItem>
+                        <DropdownMenuItem> View medicine </DropdownMenuItem>
+                        <DropdownMenuItem> Edit medicine </DropdownMenuItem>
+                        <DropdownMenuItem> Delete medicine </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );
@@ -81,7 +81,7 @@ export const productColumns: ColumnDef<Product>[] = [
 
 
 // Default visibility for responsive design
-export const productColumnVisibility = {
+export const medicineColumnVisibility = {
     name: true,
     generic_name: true,
     manufacturer: false,

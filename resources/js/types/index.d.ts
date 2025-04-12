@@ -46,8 +46,8 @@ export interface User {
 export type NotificationData = {
     batch_id: number;
     batch_number: string;
-    product_id: number;
-    product_name: string;
+    medicine_id: number;
+    medicine_name: string;
     expiry_date: string;
     quantity: number | null;
     message: string;
@@ -88,4 +88,11 @@ export interface PaginatedResponse<T> {
     prev_page_url: string | null;
     to: number;
     total: number;
+}
+
+export interface NewNotificationEventPayload {
+    message: string;
+    type: 'info' | 'success' | 'error' | 'warning'; // Use specific types if possible
+    userId: number; // Included in the event, though not directly used by sonner here
+    // Add any other properties you might broadcast
 }

@@ -13,7 +13,7 @@ import { MoreHorizontal } from 'lucide-react';
 
 export type Batch = {
     id: number;
-    product_id: number;
+    medicine_id: number;
     supplier_id: number;
     batch_number: string | null;
     quantity_received: number;
@@ -35,7 +35,7 @@ export const batchColumns: ColumnDef<Batch>[] = [
     createNumberColumn<Batch>('selling_price', 'Selling Price'),
     createDateColumn<Batch>('manufacture_date', 'Manufacture Date'),
     createDateColumn<Batch>('expiry_date', 'Expiry Date'),
-    createTextColumn<Batch>('product_id', 'Product ID'),
+    createTextColumn<Batch>('medicine_id', 'Medicine ID'),
     createTextColumn<Batch>('supplier_id', 'Supplier ID'),
     createDateColumn<Batch>('created_at', 'Created'),
     createDateColumn<Batch>('updated_at', 'Updated'),
@@ -75,7 +75,7 @@ export const batchColumnVisibility = {
     selling_price: true,
     manufacture_date: false,
     expiry_date: true,
-    product_id: false,
+    medicine_id: false,
     supplier_id: false,
     created_at: false,
     updated_at: false,

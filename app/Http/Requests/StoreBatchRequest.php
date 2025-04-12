@@ -23,7 +23,7 @@ class StoreBatchRequest extends FormRequest
     {
         return [
             'batch_number' => 'required|string|unique:batches',
-            'product_id' => 'required|exists:products,id',
+            'medicine_id' => 'required|exists:medicines,id',
             'supplier_id' => 'required|exists:suppliers,id',
             'quantity_received' => 'required|integer|min:1',
             'current_quantity' => 'required|integer|min:0',

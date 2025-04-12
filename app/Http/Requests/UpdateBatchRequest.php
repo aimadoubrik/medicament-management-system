@@ -23,7 +23,7 @@ class UpdateBatchRequest extends FormRequest
     {
         return [
             'batch_number' => 'sometimes|string|max:255',
-            'product_id' => 'sometimes|exists:products,id',
+            'medicine_id' => 'sometimes|exists:medicines,id',
             'supplier_id' => 'sometimes|exists:suppliers,id',
             'quantity_received' => 'sometimes|numeric|min:0',
             'current_quantity' => 'sometimes|numeric|min:0',

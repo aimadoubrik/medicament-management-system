@@ -7,7 +7,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | The default stock level at which a LowStockNotification should be triggered
-    | if a product does not have a specific threshold set.
+    | if a medicine does not have a specific threshold set.
     |
     */
     'default_stock_alert_threshold' => 5,

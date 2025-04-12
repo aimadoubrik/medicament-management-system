@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios'; // Or your preferred HTTP client
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react'; // Import usePage
 import { Bell, CheckCheck } from 'lucide-react';
 
-import { Button } from '@/components/ui/button'; // Assuming Shadcn UI setup
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
     DropdownMenu,
@@ -13,57 +13,88 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { toast } from 'sonner'; // Assuming you use sonner for toasts
+import { toast } from 'sonner';
+import type { PageProps } from '@/types'; // Import PageProps to get auth user if needed elsewhere
 
 export function NotificationBell() {
+    // Use usePage hook if you need user info for *other* reasons in this component
+    // const { auth } = usePage<PageProps>().props;
+    // const userId = auth.user?.id;
+
     const [unreadCount, setUnreadCount] = useState<number>(0);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const fetchUnreadCount = async () => {
+        // Avoid fetching if already loading
+        // This check might need refinement if polling and manual fetches overlap
+        // if (isLoading) return;
+
         try {
             setIsLoading(true);
             const response = await axios.get<{ count: number }>(route('notifications.unreadCount'));
             setUnreadCount(response.data.count);
         } catch (error) {
             console.error('Failed to fetch unread notification count:', error);
-            // Optionally show a toast or error message
-            // toast.error('Failed to load notification count.');
+            // toast.error('Failed to load notification count.'); // Consider rate-limiting this
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchUnreadCount();
+        fetchUnreadCount(); // Fetch initial count
 
-        // Optional: Poll for new notifications periodically
-        // const intervalId = setInterval(fetchUnreadCount, 60000); // Fetch every 60 seconds
-        // return () => clearInterval(intervalId); // Cleanup on unmount
+        // --- Keep Polling (Optional - Remove if WebSocket updates work reliably) ---
+        // Consider if you still need this polling as a fallback or if
+        // the real-time updates from NotificationHandler are sufficient.
+        const intervalId = setInterval(fetchUnreadCount, 60000); // Fetch every 60 seconds
+        return () => clearInterval(intervalId); // Cleanup on unmount
+        // --- End Polling ---
 
-        // Listen for custom events if you implement broadcasting/websockets
-        // window.Echo?.private(`App.Models.User.${userId}`) // Replace userId
-        //    .notification((notification: any) => {
-        //        fetchUnreadCount(); // Re-fetch count when a new notification arrives
-        //        toast.info("You have a new notification!");
-        //    });
+        // --- REMOVED Echo Listener Block ---
+        // Real-time listening should be handled centrally, e.g., in NotificationHandler.tsx
 
-    }, []);
+    }, []); // Empty dependency array means this runs once on mount
+
+
+    // *** Add this useEffect to allow NotificationHandler to trigger refetch ***
+    // This listens for a custom browser event that NotificationHandler can dispatch
+    useEffect(() => {
+        const handleRefetch = () => {
+            console.log('NotificationBell: Refetching count due to event.');
+            fetchUnreadCount();
+        };
+        window.addEventListener('refetch-notification-count', handleRefetch);
+        return () => window.removeEventListener('refetch-notification-count', handleRefetch);
+    }, []); // Runs once on mount
+
 
     const handleMarkAllRead = () => {
+        // Prevent multiple requests if already processing
+        if (isLoading) return;
+
+        // Optimistic update (optional)
+        // const previousCount = unreadCount;
+        // setUnreadCount(0);
+        // setIsLoading(true); // Maybe use a different loading state for actions
+
         router.post(route('notifications.markAllRead'), {}, {
             onSuccess: () => {
-                setUnreadCount(0);
-                setIsOpen(false); // Close dropdown after action
+                setUnreadCount(0); // Definite update on success
+                setIsOpen(false);
                 toast.success('All notifications marked as read.');
-                // Optionally, trigger a refresh of the notifications page if open
-                router.reload({ only: ['notifications'] });
+                // Reload notification list if it's part of shared props
+                router.reload({ only: ['notifications'], preserveState: true });
             },
             onError: (errors) => {
                 console.error('Failed to mark all notifications as read:', errors);
                 toast.error('Failed to mark all notifications as read.');
+                // Revert optimistic update if used
+                // setUnreadCount(previousCount);
             },
-            preserveState: true, // Keep current page state
+            // onFinish: () => setIsLoading(false), // Reset action loading state
+            preserveState: true,
             preserveScroll: true,
         });
     };
@@ -75,7 +106,7 @@ export function NotificationBell() {
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                         <Badge
-                            variant="destructive" // Or another variant
+                            variant="destructive"
                             className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 py-0.5 text-xs flex items-center justify-center rounded-full"
                         >
                             {unreadCount > 9 ? '9+' : unreadCount}
@@ -87,9 +118,9 @@ export function NotificationBell() {
             <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {/* Optional: Could show latest 1-2 unread notifications here */}
                 <DropdownMenuItem asChild>
-                    <Link href={route('notifications.index')} className="w-full">
+                    {/* Ensure link closes dropdown on navigation */}
+                    <Link href={route('notifications.index')} onClick={() => setIsOpen(false)} className="w-full cursor-pointer">
                         View All Notifications
                     </Link>
                 </DropdownMenuItem>
@@ -99,6 +130,7 @@ export function NotificationBell() {
                         e.preventDefault(); // Prevent closing dropdown immediately
                         handleMarkAllRead();
                     }}
+                    className="cursor-pointer" // Ensure it looks clickable
                 >
                     <CheckCheck className="mr-2 h-4 w-4" />
                     <span>Mark all as read</span>

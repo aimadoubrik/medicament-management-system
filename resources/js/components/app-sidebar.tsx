@@ -6,6 +6,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { LayoutGrid, Package, PillBottle, Shapes, Users } from 'lucide-react';
 import AppLogo from './app-logo';
+import { NotificationBell } from './notification-bell';
 
 const mainNavItems: NavItem[] = [
     {
@@ -14,8 +15,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Products',
-        href: '/products',
+        title: 'Medicines',
+        href: '/medicines',
         icon: PillBottle,
     },
     {
@@ -68,6 +69,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                <NotificationBell />
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

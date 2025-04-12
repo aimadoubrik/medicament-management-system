@@ -1,37 +1,37 @@
-// src/pages/products/index.tsx
+// src/pages/medicines/index.tsx
 import { DataTable } from '@/components/data-table';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
-import { Product, productColumns, productColumnVisibility } from './table-definition';
+import { Medicine, medicineColumns, medicineColumnVisibility } from './table-definition';
 import { PaginatedResponse } from '@/types';
 
 
 interface Props {
-    products: PaginatedResponse<Product>;
+    medicines: PaginatedResponse<Medicine>;
 }
 
-const ProductsPage = ({ products }: Props) => {
+const MedicinesPage = ({ medicines }: Props) => {
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Products', href: '/products' }]}>
-            <Head title="Products" />
+        <AppLayout breadcrumbs={[{ title: 'Medicines', href: '/medicines' }]}>
+            <Head title="Medicines" />
             <div className="container mx-auto p-4">
                 <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Products</h1>
-                    <Button onClick={() => (window.location.href = '/products/create')}>
+                    <h1 className="text-2xl font-bold">Medicines</h1>
+                    <Button onClick={() => (window.location.href = '/medicines/create')}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Product
+                        Add Medicine
                     </Button>
                 </div>
 
                 <DataTable
-                    columns={productColumns}
-                    data={products.data}
+                    columns={medicineColumns}
+                    data={medicines.data}
                     searchKey="name"
-                    searchPlaceholder="Search products..."
-                    initialVisibility={productColumnVisibility}
+                    searchPlaceholder="Search medicines..."
+                    initialVisibility={medicineColumnVisibility}
                     pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
                 />
@@ -40,4 +40,4 @@ const ProductsPage = ({ products }: Props) => {
     );
 };
 
-export default ProductsPage;
+export default MedicinesPage;

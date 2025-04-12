@@ -30,7 +30,7 @@ class StoreSaleRequest extends FormRequest
             'prescription_reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
             'sale_items' => 'required|array|min:1', // Assuming you'll send sale items
-            'sale_items.*.product_id' => 'required|exists:products,id',
+            'sale_items.*.medicine_id' => 'required|exists:medicines,id',
             'sale_items.*.quantity' => 'required|integer|min:1',
             'sale_items.*.price' => 'required|numeric|min:0'
         ];

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class Medicine extends Model
 {
     protected $fillable = [
         'name',
@@ -36,9 +36,9 @@ class Product extends Model
         return $this->hasMany(Batch::class);
     }
 
-    public function totalStockAttribute()
+    public function getTotalStockAttribute(): int
     {
-        return $this->batches()->sum('quantity');
+        return $this->batches()->sum('current_quantity');
     }
     public function lowStock($query, $threshold = null)
     {
