@@ -11,6 +11,7 @@ import {
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 
+// This type is used to define the structure of a product object.
 export type Product = {
     id: number;
     name: string;
@@ -20,11 +21,19 @@ export type Product = {
     form: string | null;
     description: string | null;
     category_id: number;
+    category: {
+        id: number;
+        name: string;
+        description: string;
+        created_at: string;
+        updated_at: string;
+    };
     requires_prescription: boolean;
     low_stock_threshold: number | null;
     created_at: string;
     updated_at: string;
 };
+
 
 export const productColumns: ColumnDef<Product>[] = [
     createSelectionColumn<Product>(),
@@ -36,7 +45,11 @@ export const productColumns: ColumnDef<Product>[] = [
     createBooleanColumn<Product>('requires_prescription', 'Prescription Required'),
     createDateColumn<Product>('created_at', 'Created'),
     createDateColumn<Product>('updated_at', 'Updated'),
-    createTextColumn<Product>('category_id', 'Category ID'),
+    {
+        accessorFn: (row) => row.category.name,
+        id: 'categoryName',
+        header: 'Category',
+    },
     createTextColumn<Product>('description', 'Description'),
     createTextColumn<Product>('low_stock_threshold', 'Low Stock Threshold'),
     {
@@ -66,6 +79,7 @@ export const productColumns: ColumnDef<Product>[] = [
     },
 ];
 
+
 // Default visibility for responsive design
 export const productColumnVisibility = {
     name: true,
@@ -74,7 +88,7 @@ export const productColumnVisibility = {
     strength: false,
     form: false,
     description: false,
-    category_id: false,
+    'category.name': true,
     requires_prescription: true,
     low_stock_threshold: false,
     created_at: false,

@@ -5,22 +5,10 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
 import { Supplier, supplierColumns, supplierColumnVisibility } from './table-definition';
-
-interface PaginatedData<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    links: Array<{
-        url: string | null;
-        label: string;
-        active: boolean;
-    }>;
-}
+import { PaginatedResponse } from '@/types';
 
 interface Props {
-    suppliers: PaginatedData<Supplier>;
+    suppliers: PaginatedResponse<Supplier>;
 }
 
 const SuppliersPage = ({ suppliers }: Props) => {

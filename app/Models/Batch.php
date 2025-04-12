@@ -18,7 +18,7 @@ class Batch extends Model
         'expiry_date',
     ];
 
-    protected function catsts(): array
+    protected function casts(): array
     {
         return [
             'expiry_date' => 'date',
