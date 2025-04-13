@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $thirtyDaysFromNow = $now->copy()->addDays($EXPIRING_SOON_DAYS);
 
         // Combine queries to reduce database calls
-        $batches = Batch::with('product')
+        $batches = Batch::with('medicine')
             ->select('*')
             ->selectRaw('
             CASE 
@@ -42,22 +42,22 @@ class DashboardController extends Controller
             ->get();
 
         // Filter results
-        $lowStockProducts = $batches->where('is_low_stock', 1);
-        $expiringSoonProducts = $batches->where('is_expiring_soon', 1);
-        $expiredProducts = $batches->where('is_expired', 1);
+        $lowStockMedicines = $batches->where('is_low_stock', 1);
+        $expiringSoonMedicines = $batches->where('is_expiring_soon', 1);
+        $expiredMedicines = $batches->where('is_expired', 1);
 
         $summaryData = [
-            'lowStockProducts' => $lowStockProducts->count(),
-            'expiringSoonProducts' => $expiringSoonProducts->count(),
-            'expiredProducts' => $expiredProducts->count(),
-            'totalProducts' => $batches->count(),
+            'lowStockMedicines' => $lowStockMedicines->count(),
+            'expiringSoonMedicines' => $expiringSoonMedicines->count(),
+            'expiredMedicines' => $expiredMedicines->count(),
+            'totalMedicines' => $batches->count(),
         ];
 
         return Inertia::render('Dashboard', [
             'summaryData' => $summaryData,
-            'lowStockProducts' => $lowStockProducts->values(),
-            'expiringSoonProducts' => $expiringSoonProducts->values(),
-            'expiredProducts' => $expiredProducts->values(),
+            'lowStockMedicines' => $lowStockMedicines->values(),
+            'expiringSoonMedicines' => $expiringSoonMedicines->values(),
+            'expiredMedicines' => $expiredMedicines->values(),
         ]);
     }
 }

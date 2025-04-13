@@ -41,3 +41,58 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+// Define notification data structure based on actual response
+export type NotificationData = {
+    batch_id: number;
+    batch_number: string;
+    medicine_id: number;
+    medicine_name: string;
+    expiry_date: string;
+    quantity: number | null;
+    message: string;
+    action_url: string;
+};
+
+// Inertia Page Props
+export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+    auth: {
+        user: User;
+        roles: string[]; // Assuming roles are passed if needed
+    };
+    ziggy: Ziggy; // Assuming ziggy setup
+    flash: { // Standard Laravel flash messages
+        success?: string;
+        error?: string;
+        // Add other flash types if used
+    };
+    // Add other shared props from HandleInertiaRequests
+};
+
+// Generic Paginated Response Type from Laravel Resource/Controller
+export interface PaginatedResponse<T> {
+    data: T[];
+    current_page: number;
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: Array<{
+        url: string | null;
+        label: string;
+        active: boolean;
+    }>;
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+}
+
+export interface NewNotificationEventPayload {
+    message: string;
+    type: 'info' | 'success' | 'error' | 'warning'; // Use specific types if possible
+    userId: number; // Included in the event, though not directly used by sonner here
+    // Add any other properties you might broadcast
+}

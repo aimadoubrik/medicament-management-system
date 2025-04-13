@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -14,8 +15,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    // Product routes
-    Route::resource('products', ProductController::class);
+    // Medicine routes
+    Route::resource('medicines', MedicineController::class);
 
     // Stock routes
     Route::resource('stock', StockController::class);
@@ -25,10 +26,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Category routes
     Route::resource('categories', \App\Http\Controllers\CategoryController::class);
-    
-    // Optional: Add custom product routes if needed
-    // Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
+
+    // Notification Routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead'); // Use PATCH for update
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead'); // Use POST or PATCH
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unreadCount'); // For AJAX calls
+
+    // Optional: Add custom medicine routes if needed
+    // Route::get('medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

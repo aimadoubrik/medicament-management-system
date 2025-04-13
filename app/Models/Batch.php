@@ -8,7 +8,7 @@ class Batch extends Model
 {
     protected $fillable = [
         'batch_number',
-        'product_id',
+        'medicine_id',
         'supplier_id',
         'quantity_received',
         'current_quantity',
@@ -18,7 +18,7 @@ class Batch extends Model
         'expiry_date',
     ];
 
-    protected function catsts(): array
+    protected function casts(): array
     {
         return [
             'expiry_date' => 'date',
@@ -28,9 +28,9 @@ class Batch extends Model
         ];
     }
 
-    public function product()
+    public function medicine()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Medicine::class);
     }
 
     public function supplier()

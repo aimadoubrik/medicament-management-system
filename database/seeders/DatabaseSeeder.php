@@ -80,8 +80,8 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
-        // Products
-        DB::table('products')->insert([
+        // Medicines
+        DB::table('medicines')->insert([
             [
                 'name' => 'Paracetamol',
                 'generic_name' => 'Acetaminophen',
@@ -109,7 +109,7 @@ class DatabaseSeeder extends Seeder
         // Batches
         DB::table('batches')->insert([
             [
-                'product_id' => 1,
+                'medicine_id' => 1,
                 'supplier_id' => 1,
                 'batch_number' => 'B001',
                 'quantity_received' => 100,
@@ -120,7 +120,7 @@ class DatabaseSeeder extends Seeder
                 'expiry_date' => now()->addYears(2),
             ],
             [
-                'product_id' => 2,
+                'medicine_id' => 2,
                 'supplier_id' => 2,
                 'batch_number' => 'B002',
                 'quantity_received' => 50,
@@ -159,7 +159,7 @@ class DatabaseSeeder extends Seeder
                 'notifiable_id' => 1,
                 'data' => json_encode([
                     'message' => 'Low stock alert for Paracetamol',
-                    'product_id' => 1
+                    'medicine_id' => 1
                 ]),
                 'created_at' => now(),
                 'updated_at' => now()
@@ -171,7 +171,7 @@ class DatabaseSeeder extends Seeder
                 'notifiable_id' => 1,
                 'data' => json_encode([
                     'message' => 'Expiry alert for Amoxicillin',
-                    'product_id' => 2
+                    'medicine_id' => 2
                 ]),
                 'created_at' => now(),
                 'updated_at' => now()

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
-use App\Models\Product;
+use App\Models\Medicine;
 use App\Models\Supplier;
 use App\Http\Requests\StoreBatchRequest;
 use App\Http\Requests\UpdateBatchRequest;
@@ -14,9 +14,9 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
-        $batches = Batch::with(['product', 'supplier'])
+        $batches = Batch::with(['medicine', 'supplier'])
             ->when($request->search, function ($query, $search) {
-                $query->whereHas('product', function ($q) use ($search) {
+                $query->whereHas('medicine', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%");
                 })->orWhere('batch_number', 'like', "%{$search}%");
             })
@@ -32,14 +32,14 @@ class StockController extends Controller
         return Inertia::render('Stock/Index', [
             'batches' => $batches,
             'filters' => $request->only(['search', 'expiry_from', 'expiry_to']),
-            'products' => Product::select('id', 'name')->get(),
+            'medicines' => Medicine::select('id', 'name')->get(),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Stock/Create', [
-            'products' => Product::select('id', 'name')->get(),
+            'medicines' => Medicine::select('id', 'name')->get(),
             'suppliers' => Supplier::select('id', 'name')->get(),
         ]);
     }
@@ -55,8 +55,8 @@ class StockController extends Controller
     public function edit(Batch $batch)
     {
         return Inertia::render('Stock/Edit', [
-            'batch' => $batch->load(['product', 'supplier']),
-            'products' => Product::select('id', 'name')->get(),
+            'batch' => $batch->load(['medicine', 'supplier']),
+            'medicines' => Medicine::select('id', 'name')->get(),
             'suppliers' => Supplier::select('id', 'name')->get(),
         ]);
     }

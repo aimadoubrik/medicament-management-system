@@ -22,8 +22,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Products',
-        href: '/products',
+        title: 'Medicines',
+        href: '/medicines',
         icon: PillBottle,
     },
 ];

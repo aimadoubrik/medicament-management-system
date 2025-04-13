@@ -4,8 +4,9 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Box, Folder, GitBranchIcon, LayoutGrid, Package, PillBottle, Shapes, Users } from 'lucide-react';
+import { LayoutGrid, Package, PillBottle, Shapes, Users } from 'lucide-react';
 import AppLogo from './app-logo';
+import { NotificationBell } from './notification-bell';
 
 const mainNavItems: NavItem[] = [
     {
@@ -14,8 +15,8 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Medications',
-        href: '/products',
+        title: 'Medicines',
+        href: '/medicines',
         icon: PillBottle,
     },
     {
@@ -35,6 +36,18 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
+const footerNavItems: NavItem[] = [
+    // {
+    //     title: 'Repository',
+    //     href: 'https://github.com/laravel/react-starter-kit',
+    //     icon: Folder,
+    // },
+    // {
+    //     title: 'Documentation',
+    //     href: 'https://laravel.com/docs/starter-kits',
+    //     icon: BookOpen,
+    // },
+];
 
 export function AppSidebar() {
     return (
@@ -56,6 +69,9 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                <NotificationBell />
+                <NavFooter items={footerNavItems} className="mt-auto" />
+
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

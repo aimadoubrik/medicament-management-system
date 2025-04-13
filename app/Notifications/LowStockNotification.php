@@ -2,25 +2,31 @@
 
 namespace App\Notifications;
 
+use App\Models\Medicine;
+use App\Models\User; // Import User model
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log; // Import Log facade
 
-class LowStockNotification extends Notification
+class LowStockNotification extends Notification implements ShouldQueue // Implement ShouldQueue for background processing
 {
     use Queueable;
+
+    public Medicine $medicine;
+    public int $currentStock;
 
     /**
      * Create a new notification instance.
      */
-    protected $product;
-    protected $currentStock;
-
-    public function __construct($product, $currentStock)
+    public function __construct(Medicine $medicine)
     {
-        $this->product = $product;
-        $this->currentStock = $currentStock;
+        $this->medicine = $medicine;
+        // Eager load batches to calculate total stock efficiently if not already loaded
+        $this->medicine->loadMissing('batches');
+        $this->currentStock = $this->medicine->totalStock; // Use the accessor
+        Log::info("LowStockNotification created for Medicine ID: {$medicine->id} with stock: {$this->currentStock}"); // Add logging
     }
 
     /**
@@ -30,7 +36,8 @@ class LowStockNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'databse'];
+        // Send via email and store in the database
+        return ['mail', 'database'];
     }
 
     /**
@@ -38,24 +45,15 @@ class LowStockNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
-    }
+        $threshold = $this->medicine->stock_alert_threshold ?? config('inventory.default_stock_alert_threshold', 5); // Use medicine specific or default threshold
 
-    /**
-     * Get the database representation of the notification.
-     */
-    public function toDatabase(object $notifiable): array
-    {
-        return [
-            'product_id' => $this->product->id,
-            'product_name' => $this->product->name,
-            'current_stock' => $this->currentStock,
-            'threshold' => $this->product->low_stock_threshold,
-            'message' => "Stock for {$this->product->name} is low ({$this->currentStock}). Threshold: {$this->product->low_stock_threshold}.",
-        ];
+        return (new MailMessage)
+            ->subject('Low Stock Alert: ' . $this->medicine->name)
+            ->line("Warning: The stock for medicine '{$this->medicine->name}' (ID: {$this->medicine->id}) is low.")
+            ->line("Current Stock: {$this->currentStock}")
+            ->line("Alert Threshold: {$threshold}")
+            ->action('View Medicine', route('medicines.show', $this->medicine)) // Link to the medicine page
+            ->line('Please restock soon.');
     }
 
     /**
@@ -65,8 +63,16 @@ class LowStockNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $threshold = $this->medicine->stock_alert_threshold ?? config('inventory.default_stock_alert_threshold', 5);
+
+        // Data to be stored in the notifications table
         return [
-            //
+            'medicine_id' => $this->medicine->id,
+            'medicine_name' => $this->medicine->name,
+            'current_stock' => $this->currentStock,
+            'stock_threshold' => $threshold,
+            'message' => "Stock for '{$this->medicine->name}' is low ({$this->currentStock}/{$threshold}). Please restock.",
+            'action_url' => route('medicines.show', $this->medicine), // Include relevant URL
         ];
     }
 }

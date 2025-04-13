@@ -5,25 +5,13 @@ import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
 import { Category, categoryColumns, categoryColumnVisibility } from './table-definition';
-
-interface PaginatedData<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    links: Array<{
-        url: string | null;
-        label: string;
-        active: boolean;
-    }>;
-}
+import { PaginatedResponse } from '@/types';
 
 interface Props {
-    categories: PaginatedData<Category>;
+    categories: PaginatedResponse<Category>;
 }
 
-const ProductsPage = ({ categories }: Props) => {
+const CategoriesPage = ({ categories }: Props) => {
     return (
         <AppLayout breadcrumbs={[{ title: 'Categories', href: '/categories' }]}>
             <Head title="Categories" />
@@ -50,4 +38,4 @@ const ProductsPage = ({ categories }: Props) => {
     );
 };
 
-export default ProductsPage;
+export default CategoriesPage;
