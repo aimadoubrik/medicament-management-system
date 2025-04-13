@@ -12,32 +12,53 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
     const { name, quote } = usePage<SharedData>().props;
 
     return (
-        <div className="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
+        <div className="relative min-h-dvh grid lg:grid-cols-2">
+            {/* Left Panel - Hidden on mobile */}
+            <div className="bg-muted relative hidden lg:flex flex-col p-12 text-white dark:border-r">
                 <div className="absolute inset-0 bg-zinc-900" />
-                <Link href={route('home')} className="relative z-20 flex items-center text-lg font-medium">
-                    <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
+                {/* Logo and Brand */}
+                <Link href={route('home')} className="relative z-20 flex items-center text-xl font-semibold">
+                    <AppLogoIcon className="mr-3 size-10 fill-current text-white" />
                     {name}
                 </Link>
+                {/* Quote Section */}
                 {quote && (
                     <div className="relative z-20 mt-auto">
-                        <blockquote className="space-y-2">
-                            <p className="text-lg">&ldquo;{quote.message}&rdquo;</p>
-                            <footer className="text-sm text-neutral-300">{quote.author}</footer>
+                        <blockquote className="space-y-3">
+                            <p className="text-xl font-light italic leading-relaxed">
+                                &ldquo;{quote.message}&rdquo;
+                            </p>
+                            <footer className="text-sm font-medium text-neutral-200">
+                                — {quote.author}
+                            </footer>
                         </blockquote>
                     </div>
                 )}
             </div>
-            <div className="w-full lg:p-8">
-                <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <Link href={route('home')} className="relative z-20 flex items-center justify-center lg:hidden">
-                        <AppLogoIcon className="h-10 fill-current text-black sm:h-12" />
+
+            {/* Right Panel - Content */}
+            <div className="flex items-center justify-center p-6 lg:p-12">
+                <div className="w-full max-w-[400px] space-y-8">
+                    {/* Mobile Logo */}
+                    <Link 
+                        href={route('home')} 
+                        className="relative z-20 flex items-center justify-center lg:hidden mb-8"
+                    >
+                        <AppLogoIcon className="h-12 fill-current text-black sm:h-14" />
                     </Link>
-                    <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
-                        <h1 className="text-xl font-medium">{title}</h1>
-                        <p className="text-muted-foreground text-sm text-balance">{description}</p>
+                    
+                    {/* Header Section */}
+                    <div className="flex flex-col items-start gap-3 text-left sm:items-center sm:text-center">
+                        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+                        <p className="text-muted-foreground text-base text-balance leading-relaxed">
+                            {description}
+                        </p>
                     </div>
-                    {children}
+
+                    {/* Main Content */}
+                    <div className="space-y-6">
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>
