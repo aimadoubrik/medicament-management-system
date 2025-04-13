@@ -30,7 +30,7 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: 'Categories',
+        title: 'Consomation',
         href: '/categories',
         icon: Shapes,
     },
@@ -71,6 +71,7 @@ export function AppSidebar() {
             <SidebarFooter>
                 <NotificationBell />
                 <NavFooter items={footerNavItems} className="mt-auto" />
+
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { HandHeart, ChevronRight, ShieldCheck, Package, LogInIcon, BarChart2, Bell, CheckCircle,} from 'lucide-react';
+import { HandHeart, ChevronRight, ShieldCheck, Package, LogInIcon, BarChart2, Bell, CheckCircle, } from 'lucide-react';
 
 function Welcome() {
     const { auth } = usePage<SharedData>().props;
     const currentYear = new Date().getFullYear();
-    
+
     return (
         <>
             <Head title="MediTrack - Gestion d'inventaire pharmaceutique" />
@@ -32,12 +32,12 @@ function Welcome() {
                                     </Button>
                                 ) : (
                                     <>
-                                        <Button variant="outline" className="hidden sm:flex" asChild>
+                                        <Button variant="outline" asChild>
                                             <Link href={route('register')}>
                                                 S'inscrire
                                             </Link>
                                         </Button>
-                                        <Button asChild>
+                                        <Button variant={"default"} asChild>
                                             <Link href={route('login')}>
                                                 <LogInIcon className="w-4 h-4 mr-2" />
                                                 Connexion
@@ -64,14 +64,16 @@ function Welcome() {
                                 Une solution complète conçue pour les pharmacies et les établissements de santé afin de suivre, gérer et optimiser efficacement l'inventaire des médicaments.
                             </p>
                             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                                <Link
-                                    href={route('login')}
-                                    className="flex items-center justify-center w-full px-8 py-3 font-medium text-white transition-all rounded-full shadow-md sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg group"
-                                >
-                                    Commencer
-                                    <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                                </Link>
-                                <Button className="flex items-center justify-center w-full gap-2 px-8 py-6 font-medium text-gray-700 transition-all bg-white border border-gray-200 rounded-full shadow-sm sm:w-auto dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <Button className="flex cursor-pointer items-center justify-center w-full gap-2 px-8 py-6 font-medium text-white transition-all bg-blue-600 rounded-full shadow-sm sm:w-auto hover:bg-blue-700 dark:bg-blue-800 dark:hover:bg-blue-700">
+                                    <Link
+                                        href={route('login')}
+                                        className="flex items-center justify-center  transition-all rounded-full shadow-md sm:w-auto  hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg group"
+                                    >
+                                        Commencer
+                                        <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                                    </Link>
+                                </Button>
+                                <Button className="cursor-pointer flex items-center justify-center w-full gap-2 px-8 py-6 font-medium text-gray-700 transition-all bg-white border border-gray-200 rounded-full shadow-sm sm:w-auto dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <HandHeart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                     Soutenez-nous
                                 </Button>
@@ -186,13 +188,13 @@ function Welcome() {
 
                 {/* Footer */}
                 <footer className="py-12">
-                        <div className="pt-4 ">
-                            <div className="flex  items-center justify-center gap-4 md:flex-row">
-                                <p className="text-sm text-muted-foreground">
-                                    © {currentYear} MediTrack. Tous droits réservés.
-                                </p>
-                            </div>
+                    <div className="pt-4 ">
+                        <div className="flex  items-center justify-center gap-4 md:flex-row">
+                            <p className="text-sm text-muted-foreground">
+                                © {currentYear} MediTrack. Tous droits réservés.
+                            </p>
                         </div>
+                    </div>
                 </footer>
             </div>
         </>
