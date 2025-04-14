@@ -30,7 +30,7 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: 'Consomation',
+        title: 'Categories',
         href: '/categories',
         icon: Shapes,
     },

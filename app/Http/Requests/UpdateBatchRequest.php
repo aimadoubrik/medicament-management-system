@@ -27,8 +27,6 @@ class UpdateBatchRequest extends FormRequest
             'supplier_id' => 'sometimes|exists:suppliers,id',
             'quantity_received' => 'sometimes|numeric|min:0',
             'current_quantity' => 'sometimes|numeric|min:0',
-            'cost_price' => 'sometimes|numeric|min:0',
-            'selling_price' => 'sometimes|numeric|min:0',
             'manufacture_date' => 'sometimes|date',
             'expiry_date' => 'sometimes|date|after:manufacture_date',
         ];
