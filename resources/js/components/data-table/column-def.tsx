@@ -26,6 +26,10 @@ export function createTextColumn<TData>(accessorKey: keyof TData & string, heade
     return {
         accessorKey,
         header: ({ column }) => <DataTableColumnHeader column={column} title={header} />,
+        cell: ({ row }) => <span>{row.getValue(accessorKey)}</span>,
+        meta: {
+            exportHeader: header,
+        }
     };
 }
 
@@ -35,6 +39,9 @@ export function createNumberColumn<TData>(accessorKey: keyof TData & string, hea
         accessorKey,
         header: ({ column }) => <DataTableColumnHeader column={column} title={header} />,
         cell: ({ row }) => <span>{row.getValue(accessorKey)}</span>,
+        meta: {
+            exportHeader: header,
+        }
     };
 }
 
@@ -44,6 +51,9 @@ export function createBooleanColumn<TData>(accessorKey: keyof TData & string, he
         accessorKey,
         header: ({ column }) => <DataTableColumnHeader column={column} title={header} />,
         cell: ({ row }) => <span>{row.getValue(accessorKey) ? 'Yes' : 'No'}</span>,
+        meta: {
+            exportHeader: header,
+        }
     };
 }
 
@@ -57,6 +67,9 @@ export function createDateColumn<TData>(accessorKey: keyof TData & string, heade
             if (!value) return null;
             return <span>{new Date(value).toLocaleDateString()}</span>;
         },
+        meta: {
+            exportHeader: header,
+        }
     };
 }
 

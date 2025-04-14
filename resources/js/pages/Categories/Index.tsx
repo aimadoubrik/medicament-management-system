@@ -32,6 +32,7 @@ const CategoriesPage = ({ categories }: Props) => {
                     initialVisibility={categoryColumnVisibility}
                     pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
+                    exportFileName={`categories-${new Date().toISOString().split('T')[0]}`}
                 />
             </div>
         </AppLayout>

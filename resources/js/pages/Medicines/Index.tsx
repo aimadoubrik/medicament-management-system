@@ -34,6 +34,7 @@ const MedicinesPage = ({ medicines }: Props) => {
                     initialVisibility={medicineColumnVisibility}
                     pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
+                    exportFileName={`medicines-${new Date().toISOString().split('T')[0]}`}
                 />
             </div>
         </AppLayout>
