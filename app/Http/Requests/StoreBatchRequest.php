@@ -27,8 +27,6 @@ class StoreBatchRequest extends FormRequest
             'supplier_id' => 'required|exists:suppliers,id',
             'quantity_received' => 'required|integer|min:1',
             'current_quantity' => 'required|integer|min:0',
-            'cost_price' => 'required|numeric|min:0',
-            'selling_price' => 'required|numeric|min:0',
             'manufacture_date' => 'required|date|before:expiry_date',
             'expiry_date' => 'required|date|after:manufacture_date',
         ];
