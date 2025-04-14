@@ -18,33 +18,31 @@ const reverbHost = import.meta.env.VITE_REVERB_HOST;
 const reverbPort = parseInt(import.meta.env.VITE_REVERB_PORT || '8080', 10);
 const reverbScheme = import.meta.env.VITE_REVERB_SCHEME || 'http';
 
-// Initialize Echo only if environment variables are present
-let AppEcho: Echo | null = null;
-
-try {
-    if (!reverbAppKey || !reverbHost) {
-        console.warn('Reverb environment variables are not set. Real-time features will be disabled.');
-    } else {
-        AppEcho = new Echo({
-            broadcaster: 'reverb',
-            key: reverbAppKey,
-            wsHost: reverbHost,
-            wsPort: reverbPort,
-            wssPort: reverbPort,
-            forceTLS: reverbScheme === 'https',
-            enabledTransports: ['ws', 'wss'],
-            authEndpoint: '/broadcasting/auth',
-        });
-    }
-} catch (error) {
-    console.error('Failed to initialize Echo:', error);
+if (!reverbAppKey || !reverbHost) {
+    console.error('Reverb environment variables (VITE_REVERB_APP_KEY, VITE_REVERB_HOST) are not set.');
+    // You might want to throw an error or handle this case appropriately
 }
 
+// Instantiate Echo
+const echoInstance = new Echo({
+    broadcaster: 'reverb',
+    key: reverbAppKey,
+    wsHost: reverbHost,
+    wsPort: reverbPort,
+    wssPort: reverbPort, // Use same port for secure connections
+    forceTLS: reverbScheme === 'https',
+    enabledTransports: ['ws', 'wss'], // Enable WebSocket transports
+    // You might need to explicitly type Pusher if Echo doesn't infer it well
+    // client: new Pusher(reverbAppKey, { ... pusher options ... })
+    authEndpoint: '/broadcasting/auth', // For private/presence channels
+});
+
 // Export the instance for use in other components
-export { AppEcho };
+export const AppEcho = echoInstance;
 // --- End Echo Configuration ---
 
 const appName = import.meta.env.VITE_APP_NAME || 'MediTrack';
+
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

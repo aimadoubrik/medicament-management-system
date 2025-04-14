@@ -13,13 +13,34 @@ import { MoreHorizontal } from 'lucide-react';
 
 export type Batch = {
     id: number;
-    medicine_id: number;
+    medicine: {
+        id: number;
+        name: string;
+        generic_name: string | null;
+        manufacturer: string | null;
+        strength: string | null;
+        form: string | null;
+        description: string | null;
+        category_id: number;
+        requires_prescription: boolean;
+        low_stock_threshold: number;
+        created_at: string;
+        updated_at: string;
+    };
+    supplier: {
+        id: number;
+        name: string;
+        contact_person: string | null;
+        email: string | null;
+        phone: string | null;
+        address: string | null;
+        created_at: string;
+        updated_at: string;
+    };
     supplier_id: number;
     batch_number: string | null;
     quantity_received: number;
     current_quantity: number;
-    cost_price: number;
-    selling_price: number;
     manufacture_date: string | null;
     expiry_date: string;
     created_at: string;
@@ -31,12 +52,16 @@ export const batchColumns: ColumnDef<Batch>[] = [
     createTextColumn<Batch>('batch_number', 'Batch Number'),
     createNumberColumn<Batch>('quantity_received', 'Quantity Received'),
     createNumberColumn<Batch>('current_quantity', 'Current Quantity'),
-    createNumberColumn<Batch>('cost_price', 'Cost Price'),
-    createNumberColumn<Batch>('selling_price', 'Selling Price'),
     createDateColumn<Batch>('manufacture_date', 'Manufacture Date'),
     createDateColumn<Batch>('expiry_date', 'Expiry Date'),
-    createTextColumn<Batch>('medicine_id', 'Medicine ID'),
-    createTextColumn<Batch>('supplier_id', 'Supplier ID'),
+    {
+        accessorFn: (row) => row.medicine.name,
+        header: 'Medicine',
+    },
+    {
+        accessorFn: (row) => row.supplier.name,
+        header: 'Supplier',
+    },
     createDateColumn<Batch>('created_at', 'Created'),
     createDateColumn<Batch>('updated_at', 'Updated'),
     {
@@ -71,12 +96,10 @@ export const batchColumnVisibility = {
     batch_number: true,
     quantity_received: true,
     current_quantity: true,
-    cost_price: true,
-    selling_price: true,
     manufacture_date: false,
     expiry_date: true,
-    medicine_id: false,
-    supplier_id: false,
+    "medicine.name": false,
+    "supplier.name": false,
     created_at: false,
     updated_at: false,
 };

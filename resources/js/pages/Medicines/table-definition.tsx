@@ -47,7 +47,7 @@ export const medicineColumns: ColumnDef<Medicine>[] = [
     createDateColumn<Medicine>('updated_at', 'Updated'),
     {
         accessorFn: (row) => row.category.name,
-        id: 'categoryName',
+        id: 'category',
         header: 'Category',
     },
     createTextColumn<Medicine>('description', 'Description'),
