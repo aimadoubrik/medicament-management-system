@@ -19,20 +19,10 @@ class MedicineController extends Controller
     public function index()
     {
         $medicines = Medicine::with('category')->paginate(10);
+        $categories = Category::all();
 
         return Inertia::render('Medicines/Index', [
             'medicines' => $medicines,
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $categories = Category::all();
-
-        return Inertia::render('Medicines/Create', [
             'categories' => $categories,
         ]);
     }
@@ -47,8 +37,7 @@ class MedicineController extends Controller
         // Create the medicine
         $medicine = Medicine::create($validatedData);
 
-        // Redirect to the medicine index page with a success message
-        return redirect()->route('medicines.index')->with('success', 'Medicine created successfully.');
+        return redirect()->back()->with('success', 'Medicine created successfully.');
     }
 
     /**
@@ -64,20 +53,6 @@ class MedicineController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $medicine = Medicine::findOrFail($id);
-        $categories = Category::all();
-
-        return Inertia::render('Medicines/Edit', [
-            'medicine' => $medicine,
-            'categories' => $categories,
-        ]);
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UpdateMedicineRequest $request, string $id)
@@ -88,8 +63,7 @@ class MedicineController extends Controller
         $medicine = Medicine::findOrFail($id);
         $medicine->update($validatedData);
 
-        // Redirect to the medicine index page with a success message
-        return redirect()->route('medicines.index')->with('success', 'Medicine updated successfully.');
+        return redirect()->back()->with('success', 'Medicine updated successfully.');
     }
 
     /**
@@ -101,7 +75,6 @@ class MedicineController extends Controller
         $medicine = Medicine::findOrFail($id);
         $medicine->delete();
 
-        // Redirect to the medicine index page with a success message
-        return redirect()->route('medicines.index')->with('success', 'Medicine deleted successfully.');
+        return redirect()->back()->with('success', 'Medicine deleted successfully.');
     }
 }
