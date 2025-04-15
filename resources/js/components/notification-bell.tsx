@@ -85,7 +85,7 @@ export function NotificationBell() {
                 setIsOpen(false);
                 toast.success('All notifications marked as read.');
                 // Reload notification list if it's part of shared props
-                router.reload({ only: ['notifications'], preserveState: true });
+                router.reload({ only: ['notifications'] });
             },
             onError: (errors) => {
                 console.error('Failed to mark all notifications as read:', errors);
@@ -107,7 +107,7 @@ export function NotificationBell() {
                     {unreadCount > 0 && (
                         <Badge
                             variant="destructive"
-                            className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 py-0.5 text-xs flex items-center justify-center rounded-full"
+                            className="absolute -top-0.5 -right-1 min-w-[1.2rem]  px-1 text-xs flex items-center justify-center rounded-full"
                         >
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </Badge>

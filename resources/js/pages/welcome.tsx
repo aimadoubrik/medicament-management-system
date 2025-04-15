@@ -29,13 +29,13 @@ function Welcome() {
             <Head title="MediTrack - Gestion d'inventaire pharmaceutique" />
             <div className="flex flex-col min-h-screen bg-background">
                 {/* Navigation Bar */}
-                <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+                <header className="fixed top-0 left-0 right-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center h-16">
                             <div className="flex items-center">
                                 <Link href="/">
                                     <h1 className="text-xl font-bold text-primary flex items-center sm:text-2xl">
-                                        <AppLogoIcon className="w-6 h-6 mr-2" />
+                                        <AppLogoIcon className="w-8 h-8 mr-2" />
                                         MediTrack
                                     </h1>
                                 </Link>
@@ -79,14 +79,14 @@ function Welcome() {
                     style={{
                         content: '',
                         position: 'absolute',
-                        top: '-50px',
+                        top: '-30px',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         width: 'min(600px, 100vw)',
                         height: 'min(700px, 100vh)',
                         background: 'radial-gradient(circle, rgba(56, 139, 253, 0.15) 30%, rgba(13, 17, 23, 0) 70%)',
                         pointerEvents: 'none',
-                        zIndex: 0,
+                        zIndex: 1000,
                     }}
                 ></div>
 

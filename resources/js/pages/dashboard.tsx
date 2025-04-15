@@ -48,13 +48,6 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Stock Management Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold"></h1>
-                    <Button variant="default" size="sm">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add New Medication
-                    </Button>
-                </div>
                 {/* Stats Cards */}
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     {stats.map((stat, index) => (
