@@ -27,13 +27,14 @@ const SuppliersPage = ({ suppliers }: Props) => {
 
                 <DataTable
                     columns={supplierColumns}
-                    data={suppliers.data}
+                    paginatedData={suppliers}
                     searchKey="name"
                     searchPlaceholder="Search suppliers..."
                     initialVisibility={supplierColumnVisibility}
-                    pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`suppliers-${new Date().toISOString().split('T')[0]}`}
+                    inertiaVisitUrl={route('suppliers.index')}
+                    inertiaDataPropName='suppliers'
                 />
             </div>
         </AppLayout>

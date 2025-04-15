@@ -26,13 +26,14 @@ const CategoriesPage = ({ categories }: Props) => {
 
                 <DataTable
                     columns={categoryColumns}
-                    data={categories.data}
+                    paginatedData={categories}
                     searchKey="name"
                     searchPlaceholder="Search categories..."
                     initialVisibility={categoryColumnVisibility}
-                    pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`categories-${new Date().toISOString().split('T')[0]}`}
+                    inertiaVisitUrl={route('categories.index')}
+                    inertiaDataPropName='categories'
                 />
             </div>
         </AppLayout>

@@ -14,6 +14,8 @@ interface Props {
 
 const MedicinesPage = ({ medicines }: Props) => {
 
+    console.log('MedicinesPage', medicines);
+
     return (
         <AppLayout breadcrumbs={[{ title: 'Medicines', href: '/medicines' }]}>
             <Head title="Medicines" />
@@ -28,13 +30,14 @@ const MedicinesPage = ({ medicines }: Props) => {
 
                 <DataTable
                     columns={medicineColumns}
-                    data={medicines.data}
+                    paginatedData={medicines}
                     searchKey="name"
                     searchPlaceholder="Search medicines..."
                     initialVisibility={medicineColumnVisibility}
-                    pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`medicines-${new Date().toISOString().split('T')[0]}`}
+                    inertiaVisitUrl={route('medicines.index')}
+                    inertiaDataPropName='medicines'
                 />
             </div>
         </AppLayout>
