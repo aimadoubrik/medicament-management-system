@@ -1,16 +1,15 @@
 import { Head, Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
-import { 
-    HandHeart, 
-    ChevronRight, 
-    ShieldCheck, 
-    LogInIcon, 
+import {
+    HandHeart,
+    ChevronRight,
+    ShieldCheck,
+    LogInIcon,
     BarChart2,
     Stethoscope,
     Pill,
     Syringe,
-    Bell,
     Heart,
     UserPlus,
     Thermometer,
@@ -35,8 +34,8 @@ function Welcome() {
                             <div className="flex items-center">
                                 <Link href="/">
                                     <h1 className="text-xl font-bold text-primary flex items-center sm:text-2xl">
-                                        <AppLogoIcon className="w-8 h-8 mr-2" />
-                                        MediTrack
+                                        <AppLogoIcon className="size-8 fill-current text-primary" />
+                                        <span className='px-2'>MediTrack</span>
                                     </h1>
                                 </Link>
                             </div>
@@ -51,9 +50,9 @@ function Welcome() {
                                     </Button>
                                 ) : (
                                     <>
-                                        <Button 
-                                            variant="outline" 
-                                            asChild 
+                                        <Button
+                                            variant="outline"
+                                            asChild
                                             className="shadow-sm hidden md:inline-flex"
                                         >
                                             <Link href={route('register')}>
@@ -98,15 +97,15 @@ function Welcome() {
                                 <Stethoscope className="w-4 h-4 sm:w-5 sm:h-5 inline mr-2" />
                                 Solutions de santé
                             </Badge>
-                            
+
                             <h1 className="mb-4 text-3xl font-bold leading-tight text-gray-900 dark:text-white sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl">
                                 Rationalisez votre gestion d'inventaire de <span className="text-blue-600 dark:text-blue-400">médicaments</span>
                             </h1>
-                            
+
                             <p className="max-w-2xl mx-auto mb-8 text-base text-gray-600 dark:text-gray-300 sm:mb-10 sm:text-lg md:text-xl">
                                 Une solution complète conçue pour les pharmacies et les établissements de santé afin de suivre, gérer et optimiser efficacement l'inventaire des médicaments.
                             </p>
-                            
+
                             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                                 <Button size="lg" variant="default" className="shadow-lg w-full sm:w-auto" asChild>
                                     <Link href={route('login')} className="flex items-center justify-center py-4 px-6 sm:py-6 sm:px-8">
@@ -115,7 +114,7 @@ function Welcome() {
                                         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                 </Button>
-                                
+
                                 <Button size="lg" variant="outline" className="shadow-md w-full sm:w-auto" asChild>
                                     <Link href="#" className="flex items-center justify-center py-4 px-6 sm:py-6 sm:px-8">
                                         <HandHeart className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600 dark:text-blue-400" />
@@ -138,7 +137,7 @@ function Welcome() {
                                 Tout ce dont vous avez besoin pour gérer efficacement votre inventaire de médicaments et améliorer le service à votre clientèle
                             </p>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 sm:gap-8">
                             <Card className="shadow-md hover:shadow-lg transition-shadow">
                                 <CardHeader className="pb-2">
@@ -155,7 +154,7 @@ function Welcome() {
                                     </p>
                                 </CardContent>
                             </Card>
-                            
+
                             <Card className="shadow-md hover:shadow-lg transition-shadow">
                                 <CardHeader className="pb-2">
                                     <div className="flex items-center gap-4">
@@ -171,7 +170,7 @@ function Welcome() {
                                     </p>
                                 </CardContent>
                             </Card>
-                            
+
                             <Card className="shadow-md hover:shadow-lg transition-shadow">
                                 <CardHeader className="pb-2">
                                     <div className="flex items-center gap-4">
@@ -274,9 +273,9 @@ function Welcome() {
                 {/* Footer */}
                 <footer className="py-8">
                     <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                        
+
                         <div className="text-center text-xs text-muted-foreground sm:text-sm">
-                            © {new Date().getFullYear()} MediTrack. Tous droits réservés.
+                            © {new Date().getFullYear()} MediTrack.
                         </div>
                     </div>
                 </footer>

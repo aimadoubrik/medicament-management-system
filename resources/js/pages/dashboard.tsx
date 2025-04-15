@@ -1,7 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { Head, Link } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -150,8 +149,8 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiringSoon
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle>Critical Medications</CardTitle>
-                                <CardDescription>Medications that need attention</CardDescription>
+                                <CardTitle>Recent Critical Medications</CardTitle>
+                                <CardDescription>5 Medications that need attention</CardDescription>
                             </div>
                         </div>
                     </CardHeader>
@@ -190,14 +189,6 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiringSoon
                             </TableBody>
                         </Table>
                     </CardContent>
-                    <CardFooter className="border-t px-6 py-4">
-                        <div className="flex items-center justify-between w-full">
-                            <p className="text-sm text-muted-foreground">
-                                Showing {medicationsToDisplay.length} of {summaryData.totalMedicines} medications
-                            </p>
-                            <Button variant="outline" size="sm">View All</Button>
-                        </div>
-                    </CardFooter>
                 </Card>
 
                 {/* Goals Card */}
