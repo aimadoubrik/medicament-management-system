@@ -94,6 +94,7 @@ export function DataTable<TData, TValue>({
     const [sorting, setSorting] = useState<SortingState>([]);
     // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // Keep if server-side column filters needed
     const [globalFilter, setGlobalFilter] = useState<string>(''); // For the main search input
+    const [searchValue, setSearchValue] = useState<string>(''); // Immediate value for the search input UI
     const [rowSelection, setRowSelection] = useState({});
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(initialVisibility || {});
 
@@ -164,22 +165,22 @@ export function DataTable<TData, TValue>({
     // This runs when the component receives new `paginatedData` after an Inertia visit
     useEffect(() => {
         setPagination(currentPaginationState => {
-             // Check if the incoming data reflects a different state than local
+            // Check if the incoming data reflects a different state than local
             const serverPageIndex = paginatedData.current_page - 1;
             const serverPageSize = paginatedData.per_page;
 
             // Update local state only if it differs from the server response,
             // respecting user's potential page size selection if server hasn't caught up.
             if (serverPageIndex !== currentPaginationState.pageIndex || serverPageSize !== currentPaginationState.pageSize) {
-                 return {
-                      pageIndex: serverPageIndex,
-                      // Prefer server's page size if it differs, otherwise keep local state
-                      pageSize: serverPageSize,
-                 };
+                return {
+                    pageIndex: serverPageIndex,
+                    // Prefer server's page size if it differs, otherwise keep local state
+                    pageSize: serverPageSize,
+                };
             }
             // If server state matches local, no change needed
             return currentPaginationState;
-       });
+        });
     }, [paginatedData.current_page, paginatedData.per_page]);
 
 
@@ -224,7 +225,9 @@ export function DataTable<TData, TValue>({
     // --- Search Logic ---
     const canSearch = !!searchKey;
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        debouncedSetGlobalFilter(event.target.value);
+        const newValue = event.target.value;
+        setSearchValue(newValue); // Update input display immediately
+        debouncedSetGlobalFilter(newValue); // Trigger debounced state update for API call
     };
     const currentSearchValue = globalFilter;
 
@@ -232,24 +235,24 @@ export function DataTable<TData, TValue>({
     // --- Export Logic ---
     // CAVEAT: Exports only the currently displayed page data.
     const getExportData = (tableInstance: ReactTable<TData>): { headers: string[], body: unknown[][] } => {
-       const visibleColumns = tableInstance.getVisibleLeafColumns();
-       const headers = visibleColumns.map(col => {
-           const metaHeader = (col.columnDef.meta as any)?.exportHeader;
-           return metaHeader || getHeaderText(col.columnDef.header || col.id);
-       });
+        const visibleColumns = tableInstance.getVisibleLeafColumns();
+        const headers = visibleColumns.map(col => {
+            const metaHeader = (col.columnDef.meta as any)?.exportHeader;
+            return metaHeader || getHeaderText(col.columnDef.header || col.id);
+        });
 
-       const dataRows = tableInstance.getRowModel().rows; // Data from current page
-       const body = dataRows.map((row: Row<TData>) =>
-           visibleColumns.map(col => {
-               const cell = row.getVisibleCells().find(cell => cell.column.id === col.id);
-               const value = cell?.getValue();
-               if (value instanceof Date) return value.toISOString().split('T')[0];
-               if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-               if (typeof value === 'object' && value !== null) return JSON.stringify(value);
-               return value != null ? String(value) : ''; // Ensure null/undefined are empty strings
-           })
-       );
-       return { headers, body };
+        const dataRows = tableInstance.getRowModel().rows; // Data from current page
+        const body = dataRows.map((row: Row<TData>) =>
+            visibleColumns.map(col => {
+                const cell = row.getVisibleCells().find(cell => cell.column.id === col.id);
+                const value = cell?.getValue();
+                if (value instanceof Date) return value.toISOString().split('T')[0];
+                if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+                if (typeof value === 'object' && value !== null) return JSON.stringify(value);
+                return value != null ? String(value) : ''; // Ensure null/undefined are empty strings
+            })
+        );
+        return { headers, body };
     };
 
     const handleExportExcel = () => {
@@ -300,7 +303,7 @@ export function DataTable<TData, TValue>({
                     {canSearch && (
                         <Input
                             placeholder={searchPlaceholder || `Search ${String(searchKey).replace(/_/g, ' ')}...`}
-                            value={currentSearchValue}
+                            value={searchValue}
                             onChange={handleSearchChange}
                             className="h-10 max-w-sm"
                         />
@@ -311,26 +314,26 @@ export function DataTable<TData, TValue>({
                 <div className="flex items-center gap-2">
                     {enableColumnVisibility && <DataTableViewOptions table={table} />}
                     <DropdownMenu>
-                         <DropdownMenuTrigger asChild>
-                             <Button
-                                 variant="outline"
-                                 size="sm"
-                                 className="ml-auto hidden h-10 lg:flex items-center gap-1"
-                                 disabled={noDataToExport}
-                             >
-                                 <Download className="h-4 w-4" />
-                                 <span>Export</span>
-                             </Button>
-                         </DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-auto hidden h-10 lg:flex items-center gap-1"
+                                disabled={noDataToExport}
+                            >
+                                <Download className="h-4 w-4" />
+                                <span>Export</span>
+                            </Button>
+                        </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                           <DropdownMenuLabel>Export Options</DropdownMenuLabel>
-                             <DropdownMenuSeparator />
-                             <DropdownMenuItem onSelect={handleExportExcel} disabled={noDataToExport}>
-                                 Export to Excel (.xlsx)
-                             </DropdownMenuItem>
-                             <DropdownMenuItem onSelect={handleExportPdf} disabled={noDataToExport}>
-                                 Export to PDF (.pdf)
-                             </DropdownMenuItem>
+                            <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={handleExportExcel} disabled={noDataToExport}>
+                                Export to Excel (.xlsx)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={handleExportPdf} disabled={noDataToExport}>
+                                Export to PDF (.pdf)
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
