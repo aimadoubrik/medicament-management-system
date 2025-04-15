@@ -13,8 +13,6 @@ interface Props {
 
 const SuppliersPage = ({ suppliers }: Props) => {
 
-    console.log('suppliers', suppliers);
-
     return (
         <AppLayout breadcrumbs={[{ title: 'Suppliers', href: '/suppliers' }]}>
             <Head title="Suppliers" />
