@@ -16,7 +16,7 @@ export default function AppLayout({ children, breadcrumbs, ...props }: AppLayout
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
             {children}
-            <Toaster richColors position="top-right" />
+            <Toaster richColors position="bottom-right" />
             {auth.user && <NotificationHandler />}
         </AppLayoutTemplate>
     );

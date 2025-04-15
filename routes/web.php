@@ -5,15 +5,16 @@ use Inertia\Inertia;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    // Dashboard route
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Medicine routes
     Route::resource('medicines', MedicineController::class);
