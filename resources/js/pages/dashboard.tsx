@@ -1,7 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { Head, Link } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -236,65 +235,7 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiringSoon
                                 ))}
                         </CardContent>
                     </Card>
-                </div>
 
-                {/* Combined Medications Table & Health Metrics */}
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-
-                    {/* Medications Table */}
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle>Attention Required Batches</CardTitle>
-                            <CardDescription>
-                                Showing top {medicationsToDisplay.length} expired, low stock, or expiring soon batches.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead className="hidden sm:table-cell">Batch#</TableHead> {/* Hide on small */}
-                                        <TableHead>Quantity</TableHead>
-                                        <TableHead>Expiry Date</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {medicationsToDisplay.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={5} className="h-24 text-center">
-                                                No medications require immediate attention.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                    {medicationsToDisplay.map((med) => (
-                                        <TableRow key={med.id}> {/* Fixed key */}
-                                            <TableCell className="font-medium">{med.medicine.name}</TableCell>
-                                            <TableCell className="hidden sm:table-cell">{med.batch_number}</TableCell> {/* Hide on small */}
-                                            <TableCell>{med.current_quantity}</TableCell>
-                                            <TableCell>{new Date(med.expiry_date).toLocaleDateString()}</TableCell>
-                                            <TableCell>
-                                                <span
-                                                    className={cn("px-2 py-0.5 rounded-full text-xs font-medium", { // Adjusted padding/font
-                                                        'bg-red-100 text-red-800': med.status === 'Expired',
-                                                        'bg-yellow-100 text-yellow-800': med.status === 'Low Stock',
-                                                        'bg-blue-100 text-blue-800': med.status === 'Expiring Soon',
-                                                    })}
-                                                >
-                                                    {med.status}
-                                                </span>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                        {/* Keep footer if pagination/view all is intended */}
-                        <CardFooter className="justify-end">
-                            <Button variant="outline" size="sm" disabled>View All</Button> {/* Disabled example */}
-                        </CardFooter>
-                    </Card>
 
 
                     {/* Inventory Health Metrics */}
