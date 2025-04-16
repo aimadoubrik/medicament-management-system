@@ -191,4 +191,21 @@ class StockController extends Controller
         return redirect()->route('stock.index')
             ->with('success', 'Stock adjusted successfully.');
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id) // Route model binding
+    {
+        $batch = Batch::findOrFail($id);
+        $batch->delete();
+
+        // For Inertia, you can either redirect or return a JSON response
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Batch deleted successfully']);
+        }
+
+        return redirect()->route('stock.index')
+            ->with('success', 'Batch deleted successfully.');
+    }
 }

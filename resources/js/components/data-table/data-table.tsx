@@ -292,7 +292,7 @@ export function DataTable<TData, TValue>({
                     {enableColumnVisibility && <DataTableViewOptions table={table} />}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="ml-auto hidden h-10 items-center gap-1 lg:flex" disabled={noDataToExport}>
+                            <Button variant="outline" size="sm" className="flex items-center" disabled={noDataToExport}>
                                 <Download className="h-4 w-4" />
                                 <span>Export</span>
                             </Button>

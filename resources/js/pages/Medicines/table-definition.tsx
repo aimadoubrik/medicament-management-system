@@ -9,8 +9,21 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { toast } from 'sonner';
 
 // This type is used to define the structure of a medicine object.
 export type Medicine = {
@@ -61,17 +74,51 @@ export const medicineColumns: ColumnDef<Medicine>[] = [
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only"> Open menu </span>
+                            <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions </DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(medicine.id.toString())}>Copy medicine ID</DropdownMenuItem>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem> View medicine </DropdownMenuItem>
-                        <DropdownMenuItem> Edit medicine </DropdownMenuItem>
-                        <DropdownMenuItem> Delete medicine </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Eye className="h-4 w-4" />
+                            <span>View</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Pencil className="h-4 w-4" />
+                            <span>Edit</span>
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+                                    <Trash className="h-4 w-4" />
+                                    <span>Delete</span>
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the medicine.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() => {
+                                            router.delete(`/medicines/${medicine.id}`, {
+                                                onSuccess: () => {
+                                                    toast.success('Medicine deleted successfully');
+                                                },
+                                            });
+                                        }}
+                                    >
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );

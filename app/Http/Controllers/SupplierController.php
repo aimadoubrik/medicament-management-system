@@ -151,7 +151,12 @@ class SupplierController extends Controller
         $supplier = Supplier::findOrFail($id);
         $supplier->delete();
 
-        // Redirect to the supplier index page with a success message
-        return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
+        // For Inertia, return either JSON response or redirect
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Supplier deleted successfully']);
+        }
+
+        return redirect()->route('suppliers.index')
+            ->with('success', 'Supplier deleted successfully.');
     }
 }

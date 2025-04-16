@@ -116,6 +116,12 @@ class MedicineController extends Controller
         $medicine = Medicine::findOrFail($id);
         $medicine->delete();
 
-        return redirect()->back()->with('success', 'Medicine deleted successfully.');
+        // For Inertia, you can either redirect or return a JSON response
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Medicine deleted successfully']);
+        }
+
+        return redirect()->route('medicines.index')
+            ->with('success', 'Medicine deleted successfully.');
     }
 }

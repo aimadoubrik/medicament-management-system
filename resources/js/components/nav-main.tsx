@@ -8,7 +8,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
         <SidebarGroup className="px-2 py-0">
             <SidebarMenu>
                 {items.map((item) => (
-                    <SidebarMenuItem key={item.title} className="hover:bg-primary/10 hover:shadow-sm transition-all duration-200 ease-in-out rounded-md">
+                    <SidebarMenuItem
+                        key={item.title}
+                        className="hover:bg-primary/10 rounded-md transition-all duration-200 ease-in-out hover:shadow-sm"
+                    >
                         <SidebarMenuButton asChild isActive={item.href === page.url} tooltip={{ children: item.title }}>
                             <Link href={item.href} prefetch>
                                 {item.icon && <item.icon />}

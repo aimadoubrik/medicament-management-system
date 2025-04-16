@@ -133,6 +133,12 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        // For Inertia, you can either redirect or return a JSON response
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Category deleted successfully']);
+        }
+
+        return redirect()->route('categories.index')
+            ->with('success', 'Category deleted successfully.');
     }
 }
