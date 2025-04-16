@@ -1,15 +1,18 @@
+import { LaravelPaginator } from '@/types/laravel-paginator'; // Import the type
 import { Column, ColumnDef, Table, VisibilityState } from '@tanstack/react-table';
 
 export interface DataTableProps<TData, TValue> {
+    paginatedData: LaravelPaginator<TData>; // Data structure from Laravel/Inertia
     columns: ColumnDef<TData, TValue>[];
-    data: TData[];
-    searchKey?: string;
+    searchKey?: keyof TData;
     searchPlaceholder?: string;
     initialVisibility?: VisibilityState;
-    pageSize?: number;
     pageSizeOptions?: number[];
     enableRowSelection?: boolean;
     enableColumnVisibility?: boolean;
+    exportFileName?: string;
+    inertiaVisitUrl: string; // URL for Inertia requests
+    inertiaDataPropName: string; // Prop name Inertia should update
 }
 
 export interface DataTableColumnHeaderProps<TData, TValue> extends React.HTMLAttributes<HTMLDivElement> {

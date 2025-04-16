@@ -14,13 +14,11 @@ interface ExtendedDataTablePaginationProps<TData> extends DataTablePaginationPro
     rowCount: number; // Pass total row count from the server
 }
 
-
 export function DataTablePagination<TData>({
     table,
     pageSizeOptions = [10, 20, 30, 40, 50],
-    rowCount // Receive total row count
+    rowCount, // Receive total row count
 }: ExtendedDataTablePaginationProps<TData>) {
-
     const currentPage = table.getState().pagination.pageIndex + 1;
     const pageSize = table.getState().pagination.pageSize;
     const pageCount = table.getPageCount(); // This is now correctly set via manual mode
@@ -32,15 +30,15 @@ export function DataTablePagination<TData>({
     return (
         <div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
             {/* Row Selection Info (optional, consider if selection persistence across pages is needed) */}
-            <div className="flex-1 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex-1 text-sm">
                 {table.getFilteredSelectedRowModel().rows.length > 0
                     ? `${table.getFilteredSelectedRowModel().rows.length} of ${
-                    // Display total selected if needed, otherwise maybe just current page selection
-                    table.getRowModel().rows.length // Rows on current page
-                    } row(s) selected on this page.`
+                          // Display total selected if needed, otherwise maybe just current page selection
+                          table.getRowModel().rows.length // Rows on current page
+                      } row(s) selected on this page.`
                     : rowCount > 0
-                        ? `Showing ${startRow} to ${endRow} of ${rowCount} results.`
-                        : 'No results.'}
+                      ? `Showing ${startRow} to ${endRow} of ${rowCount} results.`
+                      : 'No results.'}
             </div>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">

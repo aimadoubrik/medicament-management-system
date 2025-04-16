@@ -1,4 +1,4 @@
-import { createDateColumn, createSelectionColumn, createTextColumn, createNumberColumn } from '@/components/data-table/column-def';
+import { createDateColumn, createNumberColumn, createSelectionColumn, createTextColumn } from '@/components/data-table/column-def';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -98,8 +98,8 @@ export const batchColumnVisibility = {
     current_quantity: true,
     manufacture_date: false,
     expiry_date: true,
-    "medicine.name": false,
-    "supplier.name": false,
+    'medicine.name': false,
+    'supplier.name': false,
     created_at: false,
     updated_at: false,
 };

@@ -34,9 +34,6 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-
-
-
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -52,12 +49,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent className='mt-6'>
+            <SidebarContent className="mt-6">
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
-
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

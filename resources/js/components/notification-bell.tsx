@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { Link, router } from '@inertiajs/react'; // Import usePage
 import axios from 'axios'; // Or your preferred HTTP client
-import { Link, router, usePage } from '@inertiajs/react'; // Import usePage
 import { Bell, CheckCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,7 +14,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import type { PageProps } from '@/types'; // Import PageProps to get auth user if needed elsewhere
 
 export function NotificationBell() {
     // Use usePage hook if you need user info for *other* reasons in this component
@@ -54,9 +53,7 @@ export function NotificationBell() {
 
         // --- REMOVED Echo Listener Block ---
         // Real-time listening should be handled centrally, e.g., in NotificationHandler.tsx
-
     }, []); // Empty dependency array means this runs once on mount
-
 
     // *** Add this useEffect to allow NotificationHandler to trigger refetch ***
     // This listens for a custom browser event that NotificationHandler can dispatch
@@ -69,7 +66,6 @@ export function NotificationBell() {
         return () => window.removeEventListener('refetch-notification-count', handleRefetch);
     }, []); // Runs once on mount
 
-
     const handleMarkAllRead = () => {
         // Prevent multiple requests if already processing
         if (isLoading) return;
@@ -79,24 +75,28 @@ export function NotificationBell() {
         // setUnreadCount(0);
         // setIsLoading(true); // Maybe use a different loading state for actions
 
-        router.post(route('notifications.markAllRead'), {}, {
-            onSuccess: () => {
-                setUnreadCount(0); // Definite update on success
-                setIsOpen(false);
-                toast.success('All notifications marked as read.');
-                // Reload notification list if it's part of shared props
-                router.reload({ only: ['notifications'] });
+        router.post(
+            route('notifications.markAllRead'),
+            {},
+            {
+                onSuccess: () => {
+                    setUnreadCount(0); // Definite update on success
+                    setIsOpen(false);
+                    toast.success('All notifications marked as read.');
+                    // Reload notification list if it's part of shared props
+                    router.reload({ only: ['notifications'] });
+                },
+                onError: (errors) => {
+                    console.error('Failed to mark all notifications as read:', errors);
+                    toast.error('Failed to mark all notifications as read.');
+                    // Revert optimistic update if used
+                    // setUnreadCount(previousCount);
+                },
+                // onFinish: () => setIsLoading(false), // Reset action loading state
+                preserveState: true,
+                preserveScroll: true,
             },
-            onError: (errors) => {
-                console.error('Failed to mark all notifications as read:', errors);
-                toast.error('Failed to mark all notifications as read.');
-                // Revert optimistic update if used
-                // setUnreadCount(previousCount);
-            },
-            // onFinish: () => setIsLoading(false), // Reset action loading state
-            preserveState: true,
-            preserveScroll: true,
-        });
+        );
     };
 
     return (
@@ -107,7 +107,7 @@ export function NotificationBell() {
                     {unreadCount > 0 && (
                         <Badge
                             variant="destructive"
-                            className="absolute -top-0.5 -right-1 min-w-[1.2rem]  px-1 text-xs flex items-center justify-center rounded-full"
+                            className="absolute -top-0.5 -right-1 flex min-w-[1.2rem] items-center justify-center rounded-full px-1 text-xs"
                         >
                             {unreadCount > 9 ? '9+' : unreadCount}
                         </Badge>

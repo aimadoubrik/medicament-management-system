@@ -2,10 +2,10 @@
 import { DataTable } from '@/components/data-table';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { PaginatedResponse } from '@/types';
 import { Head } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
 import { Category, categoryColumns, categoryColumnVisibility } from './table-definition';
-import { PaginatedResponse } from '@/types';
 
 interface Props {
     categories: PaginatedResponse<Category>;
@@ -33,7 +33,7 @@ const CategoriesPage = ({ categories }: Props) => {
                     pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`categories-${new Date().toISOString().split('T')[0]}`}
                     inertiaVisitUrl={route('categories.index')}
-                    inertiaDataPropName='categories'
+                    inertiaDataPropName="categories"
                 />
             </div>
         </AppLayout>

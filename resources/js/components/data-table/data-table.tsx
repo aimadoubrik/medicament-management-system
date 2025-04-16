@@ -1,46 +1,48 @@
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
-    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from '@/components/ui/table';
-import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { router } from '@inertiajs/react'; // Import Inertia router
-import { useState, useEffect, useMemo, useRef } from 'react';
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { router } from '@inertiajs/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTablePagination } from './pagination';
-import { DataTableProps } from './types'; // Assuming types.ts exists and is correctly defined
-import { DataTableViewOptions } from './view-options'; // Assuming view-options.tsx exists
-import { LaravelPaginator } from '@/types/laravel-paginator'; // Import the type
+import { DataTableProps } from './types';
+import { DataTableViewOptions } from './view-options';
 
 import {
     // Column, // Not explicitly used, can be removed if not needed directly
     ColumnDef,
-    ColumnFiltersState,
+    PaginationState,
+    Table as ReactTable,
+    Row,
+    // ColumnFiltersState, // Uncomment if using server-side column filters
     SortingState,
     VisibilityState,
     flexRender,
     getCoreRowModel,
     useReactTable,
-    Table as ReactTable,
-    Row,
-    PaginationState,
 } from '@tanstack/react-table';
 
 // Import export libraries
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 // Import icons
 import { Download } from 'lucide-react';
 
 // --- Helper function: getHeaderText ---
-const getHeaderText = (headerDef: unknown): string => {
+const getHeaderText = <T extends object>(headerDef: unknown): string => {
     if (typeof headerDef === 'string') {
         return headerDef;
     }
-    const col = headerDef as ColumnDef<any, any>; // Basic type assertion
+    const col = headerDef as ColumnDef<T, unknown>; // Use generic type parameter
     // Use meta.exportHeader first, then fallback to column ID
     return col?.meta?.exportHeader || col?.id || '';
 };
@@ -49,7 +51,7 @@ const getHeaderText = (headerDef: unknown): string => {
 function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     return (...args: Parameters<F>): Promise<ReturnType<F>> =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
             if (timeoutId) {
                 clearTimeout(timeoutId);
             }
@@ -60,36 +62,19 @@ function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
         });
 }
 
-
-// Define the component props
-interface ExtendedDataTableProps<TData, TValue> extends Omit<DataTableProps<TData, TValue>, 'data'> {
-    paginatedData: LaravelPaginator<TData>; // Data structure from Laravel/Inertia
-    columns: ColumnDef<TData, TValue>[];
-    searchKey?: keyof TData;
-    searchPlaceholder?: string;
-    initialVisibility?: VisibilityState;
-    pageSizeOptions?: number[];
-    enableRowSelection?: boolean;
-    enableColumnVisibility?: boolean;
-    exportFileName?: string;
-    inertiaVisitUrl: string; // URL for Inertia requests
-    inertiaDataPropName: string; // *** ADDED: Prop name Inertia should update ***
-}
-
 export function DataTable<TData, TValue>({
     paginatedData,
     columns,
     searchKey,
     searchPlaceholder,
     initialVisibility,
-    pageSizeOptions = [10, 20, 30, 40, 50],
+    pageSizeOptions = [10, 20, 50, 100],
     enableRowSelection = true,
     enableColumnVisibility = true,
     exportFileName = 'data-export',
     inertiaVisitUrl,
-    inertiaDataPropName, // *** Destructure the new prop ***
-}: ExtendedDataTableProps<TData, TValue>) {
-
+    inertiaDataPropName,
+}: DataTableProps<TData, TValue>) {
     // --- State Management ---
     const [sorting, setSorting] = useState<SortingState>([]);
     // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // Keep if server-side column filters needed
@@ -145,10 +130,8 @@ export function DataTable<TData, TValue>({
             preserveState: true,
             preserveScroll: true,
             replace: true, // Avoids polluting browser history on pagination/sort/filter
-            // *** CRITICAL FIX: Use the dynamic prop name for the `only` array ***
             only: [inertiaDataPropName],
         });
-
     }, [
         // Dependencies that trigger the data fetch
         pagination.pageIndex,
@@ -164,7 +147,7 @@ export function DataTable<TData, TValue>({
     // --- Sync local pagination state with incoming props ---
     // This runs when the component receives new `paginatedData` after an Inertia visit
     useEffect(() => {
-        setPagination(currentPaginationState => {
+        setPagination((currentPaginationState) => {
             // Check if the incoming data reflects a different state than local
             const serverPageIndex = paginatedData.current_page - 1;
             const serverPageSize = paginatedData.per_page;
@@ -182,7 +165,6 @@ export function DataTable<TData, TValue>({
             return currentPaginationState;
         });
     }, [paginatedData.current_page, paginatedData.per_page]);
-
 
     // --- TanStack Table Instance ---
     const table = useReactTable({
@@ -231,26 +213,25 @@ export function DataTable<TData, TValue>({
     };
     const currentSearchValue = globalFilter;
 
-
     // --- Export Logic ---
     // CAVEAT: Exports only the currently displayed page data.
-    const getExportData = (tableInstance: ReactTable<TData>): { headers: string[], body: unknown[][] } => {
+    const getExportData = (tableInstance: ReactTable<TData>): { headers: string[]; body: unknown[][] } => {
         const visibleColumns = tableInstance.getVisibleLeafColumns();
-        const headers = visibleColumns.map(col => {
+        const headers = visibleColumns.map((col) => {
             const metaHeader = (col.columnDef.meta as any)?.exportHeader;
             return metaHeader || getHeaderText(col.columnDef.header || col.id);
         });
 
         const dataRows = tableInstance.getRowModel().rows; // Data from current page
         const body = dataRows.map((row: Row<TData>) =>
-            visibleColumns.map(col => {
-                const cell = row.getVisibleCells().find(cell => cell.column.id === col.id);
+            visibleColumns.map((col) => {
+                const cell = row.getVisibleCells().find((cell) => cell.column.id === col.id);
                 const value = cell?.getValue();
                 if (value instanceof Date) return value.toISOString().split('T')[0];
                 if (typeof value === 'boolean') return value ? 'Yes' : 'No';
                 if (typeof value === 'object' && value !== null) return JSON.stringify(value);
                 return value != null ? String(value) : ''; // Ensure null/undefined are empty strings
-            })
+            }),
         );
         return { headers, body };
     };
@@ -261,10 +242,7 @@ export function DataTable<TData, TValue>({
         const wsData = [headers, ...body];
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         const colWidths = headers.map((_, i) => ({
-            wch: Math.max(
-                headers[i]?.length || 10,
-                ...body.map(row => row[i]?.toString().length || 0)
-            ) + 2
+            wch: Math.max(headers[i]?.length || 10, ...body.map((row) => row[i]?.toString().length || 0)) + 2,
         }));
         ws['!cols'] = colWidths;
         const wb = XLSX.utils.book_new();
@@ -292,7 +270,6 @@ export function DataTable<TData, TValue>({
 
     const noDataToExport = table.getRowModel().rows.length === 0;
 
-
     // --- Render Component ---
     return (
         <div className="space-y-4">
@@ -315,12 +292,7 @@ export function DataTable<TData, TValue>({
                     {enableColumnVisibility && <DataTableViewOptions table={table} />}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="ml-auto hidden h-10 lg:flex items-center gap-1"
-                                disabled={noDataToExport}
-                            >
+                            <Button variant="outline" size="sm" className="ml-auto hidden h-10 items-center gap-1 lg:flex" disabled={noDataToExport}>
                                 <Download className="h-4 w-4" />
                                 <span>Export</span>
                             </Button>
@@ -347,7 +319,11 @@ export function DataTable<TData, TValue>({
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <TableHead key={header.id} style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }} colSpan={header.colSpan}>
+                                        <TableHead
+                                            key={header.id}
+                                            style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
+                                            colSpan={header.colSpan}
+                                        >
                                             {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                         </TableHead>
                                     ))}
@@ -357,14 +333,9 @@ export function DataTable<TData, TValue>({
                         <TableBody>
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && 'selected'}
-                                    >
+                                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id}>
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </TableCell>
+                                            <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                         ))}
                                     </TableRow>
                                 ))

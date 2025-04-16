@@ -35,7 +35,6 @@ export type Medicine = {
     updated_at: string;
 };
 
-
 export const medicineColumns: ColumnDef<Medicine>[] = [
     createSelectionColumn<Medicine>(),
     createTextColumn<Medicine>('name', 'Name'),
@@ -79,7 +78,6 @@ export const medicineColumns: ColumnDef<Medicine>[] = [
         },
     },
 ];
-
 
 // Default visibility for responsive design
 export const medicineColumnVisibility = {

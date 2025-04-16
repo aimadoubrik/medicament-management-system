@@ -61,7 +61,8 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
         roles: string[]; // Assuming roles are passed if needed
     };
     ziggy: Ziggy; // Assuming ziggy setup
-    flash: { // Standard Laravel flash messages
+    flash: {
+        // Standard Laravel flash messages
         success?: string;
         error?: string;
         // Add other flash types if used
