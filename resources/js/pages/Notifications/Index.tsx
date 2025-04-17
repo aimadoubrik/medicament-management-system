@@ -1,18 +1,12 @@
-import AppLayout from '@/layouts/app-layout'; // Adjust path as needed
-import { Head, Link, router } from '@inertiajs/react';
-import { PageProps, PaginatedResponse } from '@/types'; // Removed NotificationData import if not used elsewhere directly
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, BellRing, CheckCheck, Inbox, Package, ChevronLeft, ChevronRight } from 'lucide-react'; // Added more icons
-import { toast } from 'sonner';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import AppLayout from '@/layouts/app-layout'; // Adjust path as needed
 import { cn } from '@/lib/utils'; // Assuming you have this utility from Shadcn
+import { PageProps, PaginatedResponse } from '@/types'; // Removed NotificationData import if not used elsewhere directly
+import { Head, Link, router } from '@inertiajs/react';
+import { AlertTriangle, BellRing, CheckCheck, Inbox, Package } from 'lucide-react'; // Added more icons
+import { toast } from 'sonner';
 
 // Define NotificationData structure based on your backend 'toArray' output
 // This local interface reflects the structure passed from NotificationController
@@ -34,7 +28,7 @@ function Pagination({ links }: { links: PaginatedResponse<any>['links'] }) {
     if (!links || links.length <= 3) return null; // Hide if only prev/next/current or less
 
     return (
-        <nav className="mt-6 flex justify-center items-center gap-1">
+        <nav className="mt-6 flex items-center justify-center gap-1">
             {links.map((link, index) => (
                 <Button
                     key={index}
@@ -42,10 +36,7 @@ function Pagination({ links }: { links: PaginatedResponse<any>['links'] }) {
                     variant={link.active ? 'default' : 'outline'}
                     size="sm"
                     disabled={!link.url}
-                    className={cn(
-                        !link.url && 'text-muted-foreground cursor-not-allowed',
-                        link.active && 'font-bold'
-                    )}
+                    className={cn(!link.url && 'text-muted-foreground cursor-not-allowed', link.active && 'font-bold')}
                 >
                     {link.url ? (
                         <Link
@@ -65,36 +56,42 @@ function Pagination({ links }: { links: PaginatedResponse<any>['links'] }) {
 }
 // --- End Pagination ---
 
-
 export default function NotificationsIndex({ auth, notifications }: NotificationsPageProps) {
-
     const handleMarkAsRead = (notificationId: string) => {
-        router.patch(route('notifications.markAsRead', notificationId), {}, {
-            onSuccess: () => {
-                toast.success('Notification marked as read.');
-                // Optionally trigger a refresh of the notifications prop
-                router.reload({ only: ['notifications'], preserveState: true, preserveScroll: true }); // Keep scroll pos
+        router.patch(
+            route('notifications.markAsRead', notificationId),
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('Notification marked as read.');
+                    // Optionally trigger a refresh of the notifications prop
+                    router.reload({ only: ['notifications'], preserveState: true, preserveScroll: true }); // Keep scroll pos
+                },
+                onError: () => {
+                    toast.error('Failed to mark notification as read.');
+                },
+                preserveState: true, // Keep component state
+                preserveScroll: true,
             },
-            onError: () => {
-                toast.error('Failed to mark notification as read.');
-            },
-            preserveState: true, // Keep component state
-            preserveScroll: true,
-        });
+        );
     };
 
     const handleMarkAllRead = () => {
-        router.post(route('notifications.markAllRead'), {}, {
-            onSuccess: () => {
-                toast.success('All notifications marked as read.');
-                router.reload({ only: ['notifications'], preserveState: true, preserveScroll: true });
+        router.post(
+            route('notifications.markAllRead'),
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('All notifications marked as read.');
+                    router.reload({ only: ['notifications'], preserveState: true, preserveScroll: true });
+                },
+                onError: (errors) => {
+                    toast.error('Failed to mark all notifications as read.');
+                },
+                preserveState: true,
+                preserveScroll: true,
             },
-            onError: (errors) => {
-                toast.error('Failed to mark all notifications as read.');
-            },
-            preserveState: true,
-            preserveScroll: true,
-        });
+        );
     };
 
     // Improved icon getter
@@ -105,27 +102,21 @@ export default function NotificationsIndex({ auth, notifications }: Notification
         return <Package className="h-5 w-5 text-gray-500" />; // Default icon
     };
 
-    const hasUnread = notifications.data.some(n => !n.read_at);
+    const hasUnread = notifications.data.some((n) => !n.read_at);
 
     return (
         <AppLayout breadcrumbs={[{ title: 'Notifications', href: route('notifications.index') }]}>
             <Head title="Notifications" />
 
             <div className="py-6 md:py-12">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                <div className="mx-auto max-w-4xl space-y-6 sm:px-6 lg:px-8">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
                             <div>
                                 <CardTitle>Your Notifications</CardTitle>
-                                <CardDescription>
-                                    Recent alerts and updates.
-                                </CardDescription>
+                                <CardDescription>Recent alerts and updates.</CardDescription>
                             </div>
-                            <Button
-                                onClick={handleMarkAllRead}
-                                disabled={!hasUnread}
-                                size="sm"
-                            >
+                            <Button onClick={handleMarkAllRead} disabled={!hasUnread} size="sm">
                                 Mark All As Read
                             </Button>
                         </CardHeader>
@@ -137,21 +128,25 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                             key={notification.id}
                                             onClick={() => !notification.read_at && handleMarkAsRead(notification.id)} // Click row to mark as read
                                             className={cn(
-                                                'flex items-start gap-4 p-4 rounded-lg border transition-colors',
+                                                'flex items-start gap-4 rounded-lg border p-4 transition-colors',
                                                 !notification.read_at
-                                                    ? 'bg-primary/5 dark:bg-primary/10 border-primary/20 cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/15' // Highlight unread & add hover
-                                                    : 'bg-card'
+                                                    ? 'bg-primary/5 dark:bg-primary/10 border-primary/20 hover:bg-primary/10 dark:hover:bg-primary/15 cursor-pointer' // Highlight unread & add hover
+                                                    : 'bg-card',
                                             )}
                                         >
                                             <span className="mt-1 flex-shrink-0">{getIcon(notification.type)}</span>
                                             <div className="flex-1 space-y-1">
                                                 {/* Display more contextual title */}
-                                                <p className="text-sm font-medium leading-tight">
+                                                <p className="text-sm leading-tight font-medium">
                                                     {notification.type.includes('LowStock') && notification.data.medicine_name && (
-                                                        <span>Low Stock: <span className="font-semibold">{notification.data.medicine_name}</span></span>
+                                                        <span>
+                                                            Low Stock: <span className="font-semibold">{notification.data.medicine_name}</span>
+                                                        </span>
                                                     )}
                                                     {notification.type.includes('ExpiryWarning') && notification.data.medicine_name && (
-                                                        <span>Expiry Warning: <span className="font-semibold">{notification.data.medicine_name}</span></span>
+                                                        <span>
+                                                            Expiry Warning: <span className="font-semibold">{notification.data.medicine_name}</span>
+                                                        </span>
                                                     )}
                                                     {/* Fallback title */}
                                                     {!notification.type.includes('LowStock') && !notification.type.includes('ExpiryWarning') && (
@@ -159,29 +154,34 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                                     )}
                                                 </p>
                                                 {/* Display main message */}
-                                                <p className="text-sm text-muted-foreground">
+                                                <p className="text-muted-foreground text-sm">
                                                     {notification.data.message || 'No details available.'}
                                                 </p>
                                                 {/* Display extra context like batch/dates */}
                                                 {notification.type.includes('ExpiryWarning') && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Batch: {notification.data.batch_number ?? 'N/A'} | Expires: {notification.data.expiry_date ? new Date(notification.data.expiry_date).toLocaleDateString() : 'N/A'} | Qty: {notification.data.quantity ?? 'N/A'}
+                                                    <p className="text-muted-foreground text-xs">
+                                                        Batch: {notification.data.batch_number ?? 'N/A'} | Expires:{' '}
+                                                        {notification.data.expiry_date
+                                                            ? new Date(notification.data.expiry_date).toLocaleDateString()
+                                                            : 'N/A'}{' '}
+                                                        | Qty: {notification.data.quantity ?? 'N/A'}
                                                     </p>
                                                 )}
                                                 {notification.type.includes('LowStock') && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Current Stock: {notification.data.current_stock ?? 'N/A'} | Threshold: {notification.data.threshold ?? 'N/A'}
+                                                    <p className="text-muted-foreground text-xs">
+                                                        Current Stock: {notification.data.current_stock ?? 'N/A'} | Threshold:{' '}
+                                                        {notification.data.threshold ?? 'N/A'}
                                                     </p>
                                                 )}
                                                 {/* Timestamps and Action URL */}
                                                 <div className="flex items-center gap-2 pt-1">
-                                                    <p className="text-xs text-muted-foreground/80">
+                                                    <p className="text-muted-foreground/80 text-xs">
                                                         {notification.created_at}
                                                         {notification.read_at && ` (Read ${notification.read_at})`}
                                                     </p>
                                                     {notification.data.action_url && (
                                                         <>
-                                                            <span className="text-xs text-muted-foreground/50">|</span>
+                                                            <span className="text-muted-foreground/50 text-xs">|</span>
                                                             <Link
                                                                 href={notification.data.action_url}
                                                                 className="text-xs text-blue-600 hover:underline dark:text-blue-400"
@@ -219,7 +219,7 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                     ))}
                                 </ul>
                             ) : (
-                                <div className="text-center text-muted-foreground py-12 space-y-2">
+                                <div className="text-muted-foreground space-y-2 py-12 text-center">
                                     <Inbox className="mx-auto h-12 w-12 text-gray-400" />
                                     <p className="font-medium">You have no notifications.</p>
                                     <p className="text-sm">Check back later for updates.</p>
@@ -228,7 +228,6 @@ export default function NotificationsIndex({ auth, notifications }: Notification
 
                             {/* Render Pagination */}
                             <Pagination links={notifications.links} />
-
                         </CardContent>
                     </Card>
                 </div>

@@ -1,9 +1,9 @@
+import NotificationHandler from '@/components/notification-handler';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { SharedData, type BreadcrumbItem } from '@/types';
+import { usePage } from '@inertiajs/react';
 import { type ReactNode } from 'react';
 import { Toaster } from 'sonner';
-import NotificationHandler from '@/components/notification-handler';
-import { usePage } from '@inertiajs/react';
 
 interface AppLayoutProps {
     children: ReactNode;

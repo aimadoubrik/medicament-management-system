@@ -1,24 +1,20 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Pill, Package2, Calendar, TrendingUp } from 'lucide-react';
-// Consider BarChart for categorical data visualization
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { cn } from '@/lib/utils'; // Assuming shadcn/ui setup includes this utility
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
+import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
+import { AlertTriangle, Calendar, Package2, Pill } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-// Define the props interface based on data from the *improved* DashboardController
-interface MedicineBatch { // Renamed for clarity - represents a batch row
-    id: number; // Added for unique key prop
+interface MedicineBatch {
+    id: number;
     medicine: {
         name: string;
     };
     batch_number: string;
     current_quantity: number;
     expiry_date: string;
-    // The controller adds these flags, useful if needed directly, though status is derived below
     is_low_stock: 0 | 1;
     is_expiring_soon: 0 | 1;
     is_expired: 0 | 1;
@@ -26,25 +22,20 @@ interface MedicineBatch { // Renamed for clarity - represents a batch row
 
 interface DashboardProps {
     summaryData: {
-        lowStockCount: number;         // Fixed key
-        expiringSoonCount: number;     // Fixed key
-        expiredCount: number;          // Fixed key
-        totalBatches: number;          // Fixed key (represents total batches)
+        lowStockCount: number;
+        expiringSoonCount: number;
+        expiredCount: number;
+        totalBatches: number;
     };
     lowStockMedicines: MedicineBatch[];
     expiringSoonMedicines: MedicineBatch[];
     expiredMedicines: MedicineBatch[];
 }
 
-// Added type for combined list items
-interface DisplayMedicine extends MedicineBatch {
-    status: 'Expired' | 'Low Stock' | 'Expiring Soon';
-}
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: route('dashboard'), // Use Ziggy route helper if available
+        href: route('dashboard'),
     },
 ];
 
@@ -56,7 +47,7 @@ const calculatePercentage = (numerator: number, denominator: number): number => 
     return Math.round((numerator / denominator) * 100);
 };
 
-export default function Dashboard({ summaryData, lowStockMedicines, expiringSoonMedicines, expiredMedicines }: DashboardProps) {
+export default function Dashboard({ summaryData, lowStockMedicines, expiredMedicines }: DashboardProps) {
     // Define statistics cards based on corrected summaryData keys
     const stats = [
         { title: 'Low Stock Batches', value: summaryData.lowStockCount.toString(), alert: 'warning', icon: AlertTriangle },
@@ -70,62 +61,57 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiringSoon
         { name: 'Low Stock', value: summaryData.lowStockCount },
         { name: 'Expiring Soon', value: summaryData.expiringSoonCount },
         { name: 'Expired', value: summaryData.expiredCount },
-        // Calculate 'Healthy' (Not low stock, not expired)
-        { name: 'Healthy', value: Math.max(0, summaryData.totalBatches - (summaryData.lowStockCount + summaryData.expiredCount)) }
+        { name: 'Healthy', value: Math.max(0, summaryData.totalBatches - (summaryData.lowStockCount + summaryData.expiredCount)) },
     ];
-
-    // Combine the medicines array for display, prioritizing expired, then low stock, then expiring soon
-    // Ensure we don't duplicate items if they are both low stock AND expiring soon
-    // We can use a Map to ensure uniqueness based on ID if needed, but simple concat is likely fine here
-    // as the backend queries are distinct states (though low stock can overlap with expiring/expired)
-    // Let's stick to the original priority logic:
-    const medicationsToDisplay: DisplayMedicine[] = [
-        ...expiredMedicines.map(med => ({ ...med, status: 'Expired' as const })),
-        ...lowStockMedicines.map(med => ({ ...med, status: 'Low Stock' as const })),
-        ...expiringSoonMedicines.map(med => ({ ...med, status: 'Expiring Soon' as const }))
-    ]
-        // Simple filtering for duplicates if an item could be in multiple lists (e.g. low AND expiring)
-        .filter((med, index, self) =>
-            index === self.findIndex((t) => t.id === med.id)
-        )
-        .slice(0, 5); // Display at most 5 items
 
     // Calculate percentages safely
     const expiredPercent = calculatePercentage(summaryData.expiredCount, summaryData.totalBatches);
     const lowStockPercent = calculatePercentage(summaryData.lowStockCount, summaryData.totalBatches);
     const healthyPercent = calculatePercentage(
-        summaryData.totalBatches - summaryData.expiredCount - summaryData.lowStockCount, // Simplified Healthy calc
-        summaryData.totalBatches
+        summaryData.totalBatches - summaryData.expiredCount - summaryData.lowStockCount,
+        summaryData.totalBatches,
     );
-
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Medication Stock Dashboard" /> {/* Simplified Title */}
-            <div className="flex h-full flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8"> {/* Added responsive padding/gap */}
+            <Head title="Dashboard" /> {/* Simplified Title */}
+            <div className="flex h-full flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
                 {/* Stats Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"> {/* Adjusted grid cols */}
-                    {stats.map((stat) => ( // Use item ID or title for key if stable
-                        <Card key={stat.title}> {/* Use title as key */}
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"> {/* Adjusted spacing */}
-                                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                                <stat.icon className={cn("h-4 w-4 text-muted-foreground", {
-                                    'text-red-500': stat.alert === 'error',
-                                    'text-yellow-500': stat.alert === 'warning',
-                                    'text-blue-500': stat.alert === 'info', // Assuming info maps to blue
-                                })} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stat.value}</div> {/* Slightly smaller font */}
-                                {/* <p className="text-xs text-muted-foreground">+20.1% from last month</p> */} {/* Example change indicator */}
-                            </CardContent>
-                        </Card>
-                    ))}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {' '}
+                    {/* Adjusted grid cols */}
+                    {stats.map(
+                        (
+                            stat, // Use item ID or title for key if stable
+                        ) => (
+                            <Card key={stat.title}>
+                                {' '}
+                                {/* Use title as key */}
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    {' '}
+                                    {/* Adjusted spacing */}
+                                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                                    <stat.icon
+                                        className={cn('text-muted-foreground h-4 w-4', {
+                                            'text-red-500': stat.alert === 'error',
+                                            'text-yellow-500': stat.alert === 'warning',
+                                            'text-blue-500': stat.alert === 'info', // Assuming info maps to blue
+                                        })}
+                                    />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{stat.value}</div> {/* Slightly smaller font */}
+                                    {/* <p className="text-xs text-muted-foreground">+20.1% from last month</p> */} {/* Example change indicator */}
+                                </CardContent>
+                            </Card>
+                        ),
+                    )}
                 </div>
 
                 {/* Main Content Area */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3"> {/* Flexible grid */}
-
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-3">
+                    {' '}
+                    {/* Flexible grid */}
                     {/* Stock Chart - Using BarChart suggestion */}
                     <Card className="md:col-span-2 lg:col-span-3 xl:col-span-2">
                         <CardHeader>
@@ -136,108 +122,79 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiringSoon
                             <ResponsiveContainer width="100%" height={300}>
                                 {/* Using BarChart suggestion */}
                                 <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                                    <CartesianGrid
-                                        strokeDasharray="3 3"
-                                        vertical={false}
-                                        stroke="var(--border)" // Use var() directly
-                                    />
-                                    <XAxis
-                                        dataKey="name"
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        stroke="var(--muted-foreground)" // Use var() directly
-                                    />
-                                    <YAxis
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        allowDecimals={false}
-                                        stroke="var(--muted-foreground)" // Use var() directly
-                                    />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} stroke="var(--muted-foreground)" />
+                                    <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} stroke="var(--muted-foreground)" />
                                     <Tooltip
-                                        cursor={{ fill: 'var(--muted)', opacity: 0.5 }} // Use var() directly
+                                        cursor={{ fill: 'var(--muted)', opacity: 0.5 }}
                                         contentStyle={{
-                                            backgroundColor: 'var(--popover)',        // Use var() directly
-                                            borderColor: 'var(--border)',            // Use var() directly
-                                            color: 'var(--popover-foreground)',   // Use var() directly
+                                            backgroundColor: 'var(--popover)',
+                                            borderColor: 'var(--border)',
+                                            color: 'var(--popover-foreground)',
                                             fontSize: '12px',
-                                            borderRadius: '0.5rem'
+                                            borderRadius: '0.5rem',
                                         }}
                                     />
                                     <Legend
                                         iconSize={10}
                                         wrapperStyle={{ fontSize: '12px', color: 'var(--muted-foreground)' }} // Use var() directly
                                     />
-                                    <Bar
-                                        dataKey="value"
-                                        fill="var(--primary)" // *** THE FIX *** Use var() directly
-                                        radius={[4, 4, 0, 0]}
-                                    />
+                                    <Bar dataKey="value" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                                 </BarChart>
-                                {/* Original LineChart kept for reference if needed
-                                 <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                                     <CartesianGrid strokeDasharray="3 3" />
-                                     <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false}/>
-                                     <YAxis fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
-                                     <Tooltip contentStyle={{ fontSize: '12px', borderRadius: '0.5rem' }}/>
-                                     <Legend iconSize={10} wrapperStyle={{fontSize: '12px'}}/>
-                                     <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" activeDot={{ r: 8 }} strokeWidth={2}/>
-                                 </LineChart>
-                                */}
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
-
                     {/* Stock Alerts */}
                     <Card className="md:col-span-1 lg:col-span-2 xl:col-span-1">
                         <CardHeader>
                             <CardTitle>Critical Alerts</CardTitle>
                             <CardDescription>Top batches requiring attention.</CardDescription>
                         </CardHeader>
-                        <CardContent className="grid gap-4"> {/* Use grid for consistent spacing */}
+                        <CardContent className="grid gap-4">
+                            {' '}
+                            {/* Use grid for consistent spacing */}
                             {expiredMedicines.length === 0 && lowStockMedicines.length === 0 && (
-                                <p className="text-sm text-muted-foreground">No critical alerts.</p>
+                                <p className="text-muted-foreground text-sm">No critical alerts.</p>
                             )}
                             {/* Combine alerts and limit total */}
                             {[
-                                ...expiredMedicines.map(med => ({ ...med, alertType: 'Expired' as const })),
-                                ...lowStockMedicines.map(med => ({ ...med, alertType: 'Low Stock' as const }))
+                                ...expiredMedicines.map((med) => ({ ...med, alertType: 'Expired' as const })),
+                                ...lowStockMedicines.map((med) => ({ ...med, alertType: 'Low Stock' as const })),
                             ]
                                 .filter((med, index, self) => index === self.findIndex((t) => t.id === med.id)) // Ensure uniqueness
                                 .slice(0, 4) // Limit total alerts shown
                                 .map((medicine) => (
                                     <div key={medicine.id} className="flex items-center gap-4">
-                                        <Avatar className={cn("h-9 w-9", {
-                                            "bg-red-100": medicine.alertType === 'Expired',
-                                            "bg-yellow-100": medicine.alertType === 'Low Stock',
-                                        })}>
-                                            <AvatarFallback className={cn("font-semibold", {
-                                                "text-red-600": medicine.alertType === 'Expired',
-                                                "text-yellow-600": medicine.alertType === 'Low Stock',
-                                            })}>
+                                        <Avatar
+                                            className={cn('h-9 w-9', {
+                                                'bg-red-100': medicine.alertType === 'Expired',
+                                                'bg-yellow-100': medicine.alertType === 'Low Stock',
+                                            })}
+                                        >
+                                            <AvatarFallback
+                                                className={cn('font-semibold', {
+                                                    'text-red-600': medicine.alertType === 'Expired',
+                                                    'text-yellow-600': medicine.alertType === 'Low Stock',
+                                                })}
+                                            >
                                                 {medicine.alertType === 'Expired' ? 'EX' : 'LS'}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="grid gap-1">
-                                            <p className="text-sm font-medium leading-none">
+                                            <p className="text-sm leading-none font-medium">
                                                 {medicine.medicine.name}
-                                                <span className='text-xs text-muted-foreground ml-1'>(#{medicine.batch_number})</span>
+                                                <span className="text-muted-foreground ml-1 text-xs">(#{medicine.batch_number})</span>
                                             </p>
-                                            <p className="text-sm text-muted-foreground">
+                                            <p className="text-muted-foreground text-sm">
                                                 {medicine.alertType === 'Expired'
                                                     ? `Expired on ${new Date(medicine.expiry_date).toLocaleDateString()}`
-                                                    : `Qty: ${medicine.current_quantity}`
-                                                }
+                                                    : `Qty: ${medicine.current_quantity}`}
                                             </p>
                                         </div>
                                     </div>
                                 ))}
                         </CardContent>
                     </Card>
-
-
-
                     {/* Inventory Health Metrics */}
                     <Card className="lg:col-span-1">
                         <CardHeader>
@@ -248,40 +205,31 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiringSoon
                             {/* Expired ratio */}
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-muted-foreground">Expired Batches</span>
+                                    <span className="text-muted-foreground text-sm font-medium">Expired Batches</span>
                                     <span className="text-sm font-semibold">{expiredPercent}%</span>
                                 </div>
-                                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full bg-red-500"
-                                        style={{ width: `${expiredPercent}%` }}
-                                    />
+                                <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                                    <div className="h-full rounded-full bg-red-500" style={{ width: `${expiredPercent}%` }} />
                                 </div>
                             </div>
                             {/* Low stock ratio */}
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-muted-foreground">Low Stock Batches</span>
+                                    <span className="text-muted-foreground text-sm font-medium">Low Stock Batches</span>
                                     <span className="text-sm font-semibold">{lowStockPercent}%</span>
                                 </div>
-                                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full bg-yellow-500"
-                                        style={{ width: `${lowStockPercent}%` }}
-                                    />
+                                <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                                    <div className="h-full rounded-full bg-yellow-500" style={{ width: `${lowStockPercent}%` }} />
                                 </div>
                             </div>
                             {/* Healthy stock ratio */}
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium text-muted-foreground">Healthy Batches</span>
+                                    <span className="text-muted-foreground text-sm font-medium">Healthy Batches</span>
                                     <span className="text-sm font-semibold">{healthyPercent}%</span>
                                 </div>
-                                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full bg-green-500"
-                                        style={{ width: `${healthyPercent}%` }}
-                                    />
+                                <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                                    <div className="h-full rounded-full bg-green-500" style={{ width: `${healthyPercent}%` }} />
                                 </div>
                             </div>
                         </CardContent>

@@ -29,7 +29,7 @@ export function createTextColumn<TData>(accessorKey: keyof TData & string, heade
         cell: ({ row }) => <span>{row.getValue(accessorKey)}</span>,
         meta: {
             exportHeader: header,
-        }
+        },
     };
 }
 
@@ -41,7 +41,7 @@ export function createNumberColumn<TData>(accessorKey: keyof TData & string, hea
         cell: ({ row }) => <span>{row.getValue(accessorKey)}</span>,
         meta: {
             exportHeader: header,
-        }
+        },
     };
 }
 
@@ -53,7 +53,7 @@ export function createBooleanColumn<TData>(accessorKey: keyof TData & string, he
         cell: ({ row }) => <span>{row.getValue(accessorKey) ? 'Yes' : 'No'}</span>,
         meta: {
             exportHeader: header,
-        }
+        },
     };
 }
 
@@ -69,7 +69,7 @@ export function createDateColumn<TData>(accessorKey: keyof TData & string, heade
         },
         meta: {
             exportHeader: header,
-        }
+        },
     };
 }
 

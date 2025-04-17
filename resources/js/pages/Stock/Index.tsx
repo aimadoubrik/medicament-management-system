@@ -1,11 +1,10 @@
 import { DataTable } from '@/components/data-table';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { PaginatedResponse } from '@/types';
 import { Head } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
 import { Batch, batchColumns, batchColumnVisibility } from './table-definition';
-import { PaginatedResponse } from '@/types';
-
 
 interface Props {
     batches: PaginatedResponse<Batch>;
@@ -26,13 +25,14 @@ const StockPage = ({ batches }: Props) => {
 
                 <DataTable
                     columns={batchColumns}
-                    data={batches.data}
+                    paginatedData={batches}
                     searchKey="batch_number"
                     searchPlaceholder="Search stock..."
                     initialVisibility={batchColumnVisibility}
-                    pageSize={20}
                     pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`stock-${new Date().toISOString().split('T')[0]}`}
+                    inertiaVisitUrl={route('stock.index')}
+                    inertiaDataPropName="batches"
                 />
             </div>
         </AppLayout>

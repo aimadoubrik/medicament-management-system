@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { toast } from 'sonner'; // Import sonner
 import { AppEcho } from '@/app'; // Import your configured Echo instance
-import type { PageProps, NewNotificationEventPayload } from '@/types'; // Import types
+import type { NewNotificationEventPayload, PageProps } from '@/types'; // Import types
+import { usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { toast } from 'sonner'; // Import sonner
 
 // If creating a separate component, it doesn't need props if using usePage hook
 // If integrating into a Layout, ensure the Layout receives `auth` prop
@@ -18,7 +18,7 @@ export default function NotificationHandler() {
                 console.log('NotificationHandler: User not logged in, cannot subscribe to private channel.');
             }
             if (!AppEcho) {
-                console.error("NotificationHandler: Echo instance not found.");
+                console.error('NotificationHandler: Echo instance not found.');
             }
             return; // Don't proceed if Echo isn't ready or user isn't logged in
         }
@@ -59,7 +59,6 @@ export default function NotificationHandler() {
             // *** Dispatch a custom event to trigger refetch in NotificationBell ***
             window.dispatchEvent(new CustomEvent('refetch-notification-count'));
         });
-        
 
         // Cleanup function: Leave the channel when the component unmounts or userId changes
         return () => {
@@ -68,7 +67,6 @@ export default function NotificationHandler() {
                 AppEcho.leaveChannel(channelName); // Use leaveChannel for private channels too
             }
         };
-
     }, [userId]); // Re-run effect if userId changes (login/logout)
 
     // This component doesn't render anything itself, it just handles side effects

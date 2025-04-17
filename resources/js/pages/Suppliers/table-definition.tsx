@@ -1,4 +1,15 @@
 import { createDateColumn, createSelectionColumn, createTextColumn } from '@/components/data-table/column-def';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -8,8 +19,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { toast } from 'sonner';
 
 export type Supplier = {
     id: number;
@@ -46,11 +59,45 @@ export const supplierColumns: ColumnDef<Supplier>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(supplier.id.toString())}>Copy supplier ID</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View supplier</DropdownMenuItem>
-                        <DropdownMenuItem>Edit supplier</DropdownMenuItem>
-                        <DropdownMenuItem>Delete supplier</DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Eye className="h-4 w-4" />
+                            <span>View</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Pencil className="h-4 w-4" />
+                            <span>Edit</span>
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+                                    <Trash className="h-4 w-4" />
+                                    <span>Delete</span>
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the supplier.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() => {
+                                            router.delete(`suppliers/${supplier.id}`, {
+                                                onSuccess: () => {
+                                                    toast.success('Supplier deleted successfully');
+                                                },
+                                            });
+                                        }}
+                                    >
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );

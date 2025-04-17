@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('strength')->nullable();
             $table->string('form')->nullable();
             $table->text('description')->nullable();
-            $table->foreignId('category_id')->constrained('categories');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->boolean('requires_prescription')->default(false);
             $table->integer('low_stock_threshold')->nullable()->default(10);
             $table->timestamps();

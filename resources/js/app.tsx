@@ -43,7 +43,6 @@ export const AppEcho = echoInstance;
 
 const appName = import.meta.env.VITE_APP_NAME || 'MediTrack';
 
-
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),

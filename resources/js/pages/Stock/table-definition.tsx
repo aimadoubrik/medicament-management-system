@@ -1,4 +1,15 @@
-import { createDateColumn, createSelectionColumn, createTextColumn, createNumberColumn } from '@/components/data-table/column-def';
+import { createDateColumn, createNumberColumn, createSelectionColumn, createTextColumn } from '@/components/data-table/column-def';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -8,8 +19,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { toast } from 'sonner';
 
 export type Batch = {
     id: number;
@@ -79,11 +92,45 @@ export const batchColumns: ColumnDef<Batch>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(batch.id.toString())}>Copy batch ID</DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View batch</DropdownMenuItem>
-                        <DropdownMenuItem>Edit batch</DropdownMenuItem>
-                        <DropdownMenuItem>Delete batch</DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Eye className="h-4 w-4" />
+                            <span>View</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Pencil className="h-4 w-4" />
+                            <span>Edit</span>
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+                                    <Trash className="h-4 w-4" />
+                                    <span>Delete</span>
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the batch.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() => {
+                                            router.delete(`/stock/${batch.id}`, {
+                                                onSuccess: () => {
+                                                    toast.success('Batch deleted successfully');
+                                                },
+                                            });
+                                        }}
+                                    >
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );
@@ -98,8 +145,8 @@ export const batchColumnVisibility = {
     current_quantity: true,
     manufacture_date: false,
     expiry_date: true,
-    "medicine.name": false,
-    "supplier.name": false,
+    'medicine.name': false,
+    'supplier.name': false,
     created_at: false,
     updated_at: false,
 };
