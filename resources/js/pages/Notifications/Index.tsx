@@ -119,6 +119,9 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                             <Button onClick={handleMarkAllRead} disabled={!hasUnread} size="sm">
                                 Mark All As Read
                             </Button>
+                            <Button >
+                                Clear All
+                            </Button>
                         </CardHeader>
                         <CardContent className="pt-6">
                             {notifications.data.length > 0 ? (
