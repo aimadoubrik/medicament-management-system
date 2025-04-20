@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 @plugin 'tailwindcss-animate';
 
@@ -7,6 +7,10 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+
+* {
+    font-family: 'Outfit', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
 
 @theme {
     --font-sans: 'Poppins', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -67,6 +71,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -74,9 +79,10 @@
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
-  body {
-    letter-spacing:
-        var(--tracking-normal);
+
+    body {
+        letter-spacing:
+            var(--tracking-normal);
     }
 }
 
@@ -247,9 +253,9 @@
     --sidebar-primary-foreground:
         oklch(1.00 0 0);
     --sidebar-accent:
-        oklch(0.68 0.15 237.32);
+        oklch(0.55 0.12 66.44);
     --sidebar-accent-foreground:
-        oklch(0.28 0.07 254.54);
+        oklch(1.00 0 0);
     --sidebar-border:
         oklch(0.37 0.01 67.56);
     --sidebar-ring:
@@ -442,10 +448,11 @@
 */
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+
+    body {
+        @apply bg-background text-foreground;
     }
 }

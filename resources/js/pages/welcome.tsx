@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BarChart2, ChevronRight, HandHeart, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
+import { BarChart2, Hospital, PlusCircle, ChevronRight, HandHeart, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
 
 function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -21,8 +21,7 @@ function Welcome() {
                             <div className="flex items-center">
                                 <Link href="/">
                                     <h1 className="text-primary flex items-center text-xl font-bold sm:text-2xl">
-                                        <AppLogoIcon className="text-primary size-8 fill-current" />
-                                        <span className="px-2">MediTrack</span>
+                                        <AppLogoIcon className="text-primary size-16 fill-current" />
                                     </h1>
                                 </Link>
                             </div>
@@ -56,6 +55,8 @@ function Welcome() {
                     </div>
                 </header>
 
+                {/* Hero Section */}
+                {/* Hero Section */}
                 <div
                     className="absolute"
                     style={{
@@ -64,48 +65,49 @@ function Welcome() {
                         top: '-30px',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        width: 'min(600px, 100vw)',
-                        height: 'min(700px, 100vh)',
-                        background: 'radial-gradient(circle, rgba(56, 139, 253, 0.15) 30%, rgba(13, 17, 23, 0) 70%)',
+                        width: 'min(700px, 100vw)',
+                        height: 'min(800px, 100vh)',
+                        background: 'radial-gradient(circle, rgba(248, 112, 6, 0.2) 20%, rgba(13, 17, 23, 0) 70%)',
                         pointerEvents: 'none',
                         zIndex: 1000,
                     }}
                 ></div>
+                <section className="flex flex-grow items-center justify-center pt-16 sm:pt-24 relative overflow-hidden">
+                    {/* Decorative elements */}
+                    <div className="absolute top-32 left-8 w-24 h-24 bg-orange-500/10 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-16 right-8 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl"></div>
 
-                {/* Hero Section */}
-                <section className="flex flex-grow items-center justify-center pt-16 sm:pt-24">
-                    <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 md:py-24">
+                    <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 md:py-24 relative z-10">
                         <div className="mx-auto max-w-4xl text-center">
                             <Badge
                                 variant="outline"
-                                className="mb-4 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 sm:text-sm dark:bg-blue-900/30 dark:text-blue-300"
+                                className="mb-4 rounded-full bg-orange-100 px-4 py-1.5 text-xs font-medium text-orange-700 sm:text-sm dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800/50"
                             >
                                 <Stethoscope className="mr-2 inline h-4 w-4 sm:h-5 sm:w-5" />
-                                Solutions de santé
+                                Solutions de santé innovantes
                             </Badge>
-
                             <h1 className="mb-4 text-3xl leading-tight font-bold text-gray-900 sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white">
-                                Rationalisez votre gestion d'inventaire de <span className="text-blue-600 dark:text-blue-400">médicaments</span>
+                                Rationalisez votre gestion d'inventaire de{" "}
+                                <span className="relative">
+                                    <span className="relative z-10 text-orange-600 dark:text-orange-400 font-extrabold px-1">médicaments</span>
+                                    <span className="absolute -bottom-1 left-0 w-full h-3 bg-orange-200/50 dark:bg-orange-700/30 -rotate-1 rounded-sm z-0"></span>
+                                </span>
                             </h1>
-
                             <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 sm:mb-10 sm:text-lg md:text-xl dark:text-gray-300">
                                 Une solution complète conçue pour les pharmacies et les établissements de santé afin de suivre, gérer et optimiser
-                                efficacement l'inventaire des médicaments.
+                                efficacement l'inventaire des médicaments avec précision et fiabilité.
                             </p>
-
                             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                                <Button size="lg" variant="default" className="w-full shadow-lg sm:w-auto" asChild>
-                                    <Link href={route('login')} className="flex items-center justify-center px-6 py-4 sm:px-8 sm:py-6">
+                                <Button
+                                    size="lg"
+                                    variant="default"
+                                    className="w-full shadow-lg sm:w-auto bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-600 transition-all duration-300"
+                                    asChild
+                                >
+                                    <Link href={route('login')} className="flex items-center justify-center px-6 py-4 sm:px-8 sm:py-5">
                                         <UserPlus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                        Commencer
+                                        Commencer maintenant
                                         <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1 sm:h-5 sm:w-5" />
-                                    </Link>
-                                </Button>
-
-                                <Button size="lg" variant="outline" className="w-full shadow-md sm:w-auto" asChild>
-                                    <Link href="#" className="flex items-center justify-center px-6 py-4 sm:px-8 sm:py-6">
-                                        <HandHeart className="mr-2 h-4 w-4 text-blue-600 sm:h-5 sm:w-5 dark:text-blue-400" />
-                                        Soutenez-nous
                                     </Link>
                                 </Button>
                             </div>
@@ -250,12 +252,6 @@ function Welcome() {
                                             Créer un compte
                                         </Link>
                                     </Button>
-                                    <Button size="lg" variant="outline" className="w-full shadow-md sm:w-auto" asChild>
-                                        <Link href="#" className="flex items-center justify-center px-6 py-4 sm:px-8 sm:py-5">
-                                            <Stethoscope className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                            Soutenir MediTrack
-                                        </Link>
-                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -265,7 +261,7 @@ function Welcome() {
                 {/* Footer */}
                 <footer className="py-8">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="text-muted-foreground text-center text-xs sm:text-sm">© {new Date().getFullYear()} MediTrack.</div>
+                        <div className="text-muted-foreground text-center text-xs sm:text-sm">© {new Date().getFullYear()} Tazzanine Association.</div>
                     </div>
                 </footer>
             </div>
