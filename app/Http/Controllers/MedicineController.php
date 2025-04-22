@@ -62,9 +62,12 @@ class MedicineController extends Controller
         $medicines = $query->paginate($perPage)
             // Important: Append the query string parameters to pagination links
             ->withQueryString();
+        
+        $categories = Category::all();
 
         return Inertia::render('Medicines/Index', [
             'medicines' => $medicines,
+            'categories' => $categories,
         ]);
     }
 

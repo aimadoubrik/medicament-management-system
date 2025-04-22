@@ -91,9 +91,85 @@ export interface PaginatedResponse<T> {
     total: number;
 }
 
+export type Category = {
+    id: number;
+    name: string;
+    description: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
 export interface NewNotificationEventPayload {
     message: string;
     type: 'info' | 'success' | 'error' | 'warning'; // Use specific types if possible
     userId: number; // Included in the event, though not directly used by sonner here
     // Add any other properties you might broadcast
 }
+export type Medicine = {
+    id: number;
+    name: string;
+    generic_name: string | null;
+    manufacturer: string | null;
+    strength: string | null;
+    form: string | null;
+    description: string | null;
+    category_id: number;
+    category: {
+        id: number;
+        name: string;
+        description: string;
+        created_at: string;
+        updated_at: string;
+    };
+    requires_prescription: boolean;
+    low_stock_threshold: number | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Supplier = {
+    id: number;
+    name: string;
+    contact_person: string | null;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
+export type Batch = {
+    id: number;
+    medicine: {
+        id: number;
+        name: string;
+        generic_name: string | null;
+        manufacturer: string | null;
+        strength: string | null;
+        form: string | null;
+        description: string | null;
+        category_id: number;
+        requires_prescription: boolean;
+        low_stock_threshold: number;
+        created_at: string;
+        updated_at: string;
+    };
+    supplier: {
+        id: number;
+        name: string;
+        contact_person: string | null;
+        email: string | null;
+        phone: string | null;
+        address: string | null;
+        created_at: string;
+        updated_at: string;
+    };
+    supplier_id: number;
+    batch_number: string | null;
+    quantity_received: number;
+    current_quantity: number;
+    manufacture_date: string | null;
+    expiry_date: string;
+    created_at: string;
+    updated_at: string;
+};

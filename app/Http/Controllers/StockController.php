@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateBatchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class StockController extends Controller
 {
@@ -96,6 +97,7 @@ class StockController extends Controller
         $batches = $query->paginate($perPage)
             ->withQueryString(); // Append query string parameters
 
+
         // 6. Return Inertia response
         return Inertia::render('Stock/Index', [
             // *** Return the paginator object directly ***
@@ -103,18 +105,8 @@ class StockController extends Controller
             // Pass back validated filters to potentially populate filter inputs
             'filters' => $request->only(['filter', 'filterBy', 'expiry_from', 'expiry_to', 'sort', 'direction', 'page', 'perPage']),
             // Pass medicines for dropdowns if needed for filtering UI
-            // 'medicines' => Medicine::select('id', 'name')->get(),
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return Inertia::render('Stock/Create', [
-            // *** USE Medicine model ***
-            'medicines' => Medicine::select('id', 'name')->get(),
+            'medicines' => Medicine::select('id', 'name', 'strength')->get(),
+            // Pass suppliers for dropdowns if needed for filtering UI
             'suppliers' => Supplier::select('id', 'name')->get(),
         ]);
     }
@@ -138,29 +130,31 @@ class StockController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Batch $batch) // Route model binding
-    {
-        return Inertia::render('Stock/Edit', [
-            // *** USE 'medicine' relationship ***
-            'batch' => $batch->load(['medicine', 'supplier']),
-            // *** USE Medicine model ***
-            'medicines' => Medicine::select('id', 'name')->get(),
-            'suppliers' => Supplier::select('id', 'name')->get(),
-        ]);
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBatchRequest $request, Batch $batch) // Route model binding
+    public function update(UpdateBatchRequest $request, string $stockId)
     {
-        // *** Ensure UpdateBatchRequest validates 'medicine_id' if it can be updated ***
-        $batch->update($request->validated());
 
-        return redirect()->route('stock.index')
-            ->with('success', 'Batch updated successfully.');
+        $batch = Batch::findOrFail($stockId);
+
+        $validatedData = $request->validated();
+
+        if (empty($validatedData)) {
+            return redirect()->route('stock.index')->with('warning', 'No changes detected or data provided.');
+        }
+
+        $updated = false;
+        try {
+            $updated = $batch->update($validatedData);
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'An error occurred while updating the batch.');
+        }
+
+        if ($updated) {
+            return redirect()->route('stock.index')->with('success', 'Batch updated successfully.');
+        } else {
+            return redirect()->route('stock.index')->with('info', 'Batch update processed, but no changes were saved.');
+        }
     }
 
     /**

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BarChart2, Hospital, PlusCircle, ChevronRight, HandHeart, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
+import { BarChart2, ChevronRight, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
 
 function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -72,25 +72,25 @@ function Welcome() {
                         zIndex: 1000,
                     }}
                 ></div>
-                <section className="flex flex-grow items-center justify-center pt-16 sm:pt-24 relative overflow-hidden">
+                <section className="relative flex flex-grow items-center justify-center overflow-hidden pt-16 sm:pt-24">
                     {/* Decorative elements */}
-                    <div className="absolute top-32 left-8 w-24 h-24 bg-orange-500/10 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-16 right-8 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl"></div>
+                    <div className="absolute top-32 left-8 h-24 w-24 rounded-full bg-orange-500/10 blur-3xl"></div>
+                    <div className="absolute right-8 bottom-16 h-32 w-32 rounded-full bg-orange-500/10 blur-3xl"></div>
 
-                    <div className="container mx-auto max-w-7xl px-4 py-12 sm:py-16 md:py-24 relative z-10">
+                    <div className="relative z-10 container mx-auto max-w-7xl px-4 py-12 sm:py-16 md:py-24">
                         <div className="mx-auto max-w-4xl text-center">
                             <Badge
                                 variant="outline"
-                                className="mb-4 rounded-full bg-orange-100 px-4 py-1.5 text-xs font-medium text-orange-700 sm:text-sm dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800/50"
+                                className="mb-4 rounded-full border-orange-200 bg-orange-100 px-4 py-1.5 text-xs font-medium text-orange-700 sm:text-sm dark:border-orange-800/50 dark:bg-orange-900/30 dark:text-orange-300"
                             >
                                 <Stethoscope className="mr-2 inline h-4 w-4 sm:h-5 sm:w-5" />
                                 Solutions de santé innovantes
                             </Badge>
                             <h1 className="mb-4 text-3xl leading-tight font-bold text-gray-900 sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl dark:text-white">
-                                Rationalisez votre gestion d'inventaire de{" "}
+                                Rationalisez votre gestion d'inventaire de{' '}
                                 <span className="relative">
-                                    <span className="relative z-10 text-orange-600 dark:text-orange-400 font-extrabold px-1">médicaments</span>
-                                    <span className="absolute -bottom-1 left-0 w-full h-3 bg-orange-200/50 dark:bg-orange-700/30 -rotate-1 rounded-sm z-0"></span>
+                                    <span className="relative z-10 px-1 font-extrabold text-orange-600 dark:text-orange-400">médicaments</span>
+                                    <span className="absolute -bottom-1 left-0 z-0 h-3 w-full -rotate-1 rounded-sm bg-orange-200/50 dark:bg-orange-700/30"></span>
                                 </span>
                             </h1>
                             <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 sm:mb-10 sm:text-lg md:text-xl dark:text-gray-300">
@@ -101,7 +101,7 @@ function Welcome() {
                                 <Button
                                     size="lg"
                                     variant="default"
-                                    className="w-full shadow-lg sm:w-auto bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-600 transition-all duration-300"
+                                    className="w-full bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg transition-all duration-300 hover:from-orange-500 hover:to-orange-600 sm:w-auto"
                                     asChild
                                 >
                                     <Link href={route('login')} className="flex items-center justify-center px-6 py-4 sm:px-8 sm:py-5">
@@ -261,7 +261,9 @@ function Welcome() {
                 {/* Footer */}
                 <footer className="py-8">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="text-muted-foreground text-center text-xs sm:text-sm">© {new Date().getFullYear()} Tazzanine Association.</div>
+                        <div className="text-muted-foreground text-center text-xs sm:text-sm">
+                            © {new Date().getFullYear()} Tazzanine Association.
+                        </div>
                     </div>
                 </footer>
             </div>

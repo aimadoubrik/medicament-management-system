@@ -8,6 +8,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Medicine } from '@/types';
 
 import {
     AlertDialog,
@@ -24,29 +25,6 @@ import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { toast } from 'sonner';
-
-// This type is used to define the structure of a medicine object.
-export type Medicine = {
-    id: number;
-    name: string;
-    generic_name: string | null;
-    manufacturer: string | null;
-    strength: string | null;
-    form: string | null;
-    description: string | null;
-    category_id: number;
-    category: {
-        id: number;
-        name: string;
-        description: string;
-        created_at: string;
-        updated_at: string;
-    };
-    requires_prescription: boolean;
-    low_stock_threshold: number | null;
-    created_at: string;
-    updated_at: string;
-};
 
 export const medicineColumns: ColumnDef<Medicine>[] = [
     createSelectionColumn<Medicine>(),

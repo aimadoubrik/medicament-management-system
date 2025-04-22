@@ -1,12 +1,12 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout'; // Adjust path as needed
 import { cn } from '@/lib/utils'; // Assuming you have this utility from Shadcn
 import { PageProps, PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, BellRing, Inbox, Package, Trash, CheckCheck, ListCheck } from 'lucide-react';
+import { AlertTriangle, BellRing, CheckCheck, Inbox, ListCheck, Package, Trash } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 
 // Define NotificationData structure
@@ -169,44 +169,42 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                 <CardTitle>Your Notifications</CardTitle>
                             </div>
                             <div className="flex items-center gap-2">
-                                {
-                                    (hasUnread) ? (
-                                        <TooltipProvider delayDuration={100}>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        disabled={!hasUnread}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleMarkAllRead();
-                                                        }}
-                                                    >
-                                                        <ListCheck className="h-4 w-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Mark all notifications as read</TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    ) : (
-                                        <TooltipProvider delayDuration={100}>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        onClick={handleDeleteAll}
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        disabled={notifications.data.length === 0}
-                                                    >
-                                                        <Trash className="h-4 w-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>Delete all notifications</TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    )
-                                }
+                                {hasUnread ? (
+                                    <TooltipProvider delayDuration={100}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={!hasUnread}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleMarkAllRead();
+                                                    }}
+                                                >
+                                                    <ListCheck className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Mark all notifications as read</TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ) : (
+                                    <TooltipProvider delayDuration={100}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    onClick={handleDeleteAll}
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    disabled={notifications.data.length === 0}
+                                                >
+                                                    <Trash className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete all notifications</TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                )}
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6">
@@ -266,7 +264,8 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                                 <div className="flex items-center gap-2 pt-1">
                                                     <p className="text-muted-foreground/80 text-xs">
                                                         {formatDate(notification.created_at) || notification.created_at}
-                                                        {notification.read_at && ` (Read ${formatDate(notification.read_at) || notification.read_at})`}
+                                                        {notification.read_at &&
+                                                            ` (Read ${formatDate(notification.read_at) || notification.read_at})`}
                                                     </p>
                                                     {notification.data.action_url && (
                                                         <>

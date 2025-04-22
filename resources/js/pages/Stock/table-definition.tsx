@@ -19,46 +19,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Batch } from '@/types';
 import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { toast } from 'sonner';
-
-export type Batch = {
-    id: number;
-    medicine: {
-        id: number;
-        name: string;
-        generic_name: string | null;
-        manufacturer: string | null;
-        strength: string | null;
-        form: string | null;
-        description: string | null;
-        category_id: number;
-        requires_prescription: boolean;
-        low_stock_threshold: number;
-        created_at: string;
-        updated_at: string;
-    };
-    supplier: {
-        id: number;
-        name: string;
-        contact_person: string | null;
-        email: string | null;
-        phone: string | null;
-        address: string | null;
-        created_at: string;
-        updated_at: string;
-    };
-    supplier_id: number;
-    batch_number: string | null;
-    quantity_received: number;
-    current_quantity: number;
-    manufacture_date: string | null;
-    expiry_date: string;
-    created_at: string;
-    updated_at: string;
-};
 
 export const batchColumns: ColumnDef<Batch>[] = [
     createSelectionColumn<Batch>(),

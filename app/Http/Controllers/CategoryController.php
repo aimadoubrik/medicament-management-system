@@ -63,21 +63,13 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return Inertia::render('Categories/Create');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|text',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         Category::create($validatedData);
@@ -98,25 +90,13 @@ class CategoryController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $category = Category::findOrFail($id);
-
-        return Inertia::render('Categories/Edit', [
-            'category' => $category,
-        ]);
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|text',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         $category = Category::findOrFail($id);

@@ -65,15 +65,6 @@ class SupplierController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        // Return the create supplier form
-        return Inertia::render('Suppliers/Create');
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -104,19 +95,6 @@ class SupplierController extends Controller
 
         // Return the supplier details to the view
         return Inertia::render('Suppliers/Show', [
-            'supplier' => $supplier,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        // Fetch the supplier by ID
-        $supplier = Supplier::findOrFail($id);
-        // Return the edit supplier form
-        return Inertia::render('Suppliers/Edit', [
             'supplier' => $supplier,
         ]);
     }

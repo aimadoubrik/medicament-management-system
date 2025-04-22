@@ -19,21 +19,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Supplier } from '@/types';
 import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { toast } from 'sonner';
-
-export type Supplier = {
-    id: number;
-    name: string;
-    contact_person: string | null;
-    email: string | null;
-    phone: string | null;
-    address: string | null;
-    created_at: string;
-    updated_at: string;
-};
 
 export const supplierColumns: ColumnDef<Supplier>[] = [
     createSelectionColumn<Supplier>(),

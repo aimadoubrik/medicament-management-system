@@ -25,9 +25,9 @@ class UpdateBatchRequest extends FormRequest
             'batch_number' => 'sometimes|string|max:255',
             'medicine_id' => 'sometimes|exists:medicines,id',
             'supplier_id' => 'sometimes|exists:suppliers,id',
-            'quantity_received' => 'sometimes|numeric|min:0',
-            'current_quantity' => 'sometimes|numeric|min:0',
-            'manufacture_date' => 'sometimes|date',
+            'quantity_received' => 'sometimes|integer|min:0',
+            'current_quantity' => 'sometimes|integer|min:0',
+            'manufacture_date' => 'sometimes|date|before_or_equal:today',
             'expiry_date' => 'sometimes|date|after:manufacture_date',
         ];
     }
