@@ -19,18 +19,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Category } from '@/types';
 import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { toast } from 'sonner';
-
-export type Category = {
-    id: number;
-    name: string;
-    description: string | null;
-    created_at: string;
-    updated_at: string;
-};
 
 export const categoryColumns: ColumnDef<Category>[] = [
     createSelectionColumn<Category>(),

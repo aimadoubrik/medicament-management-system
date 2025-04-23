@@ -87,4 +87,14 @@ class NotificationController extends Controller
 
         return back()->with('success', 'Notification deleted successfully.');
     }
+
+    /**
+     * Optionally, you can add a method to delete all notifications.
+     */
+    public function destroyAll(Request $request)
+    {
+        $request->user()->notifications()->delete();
+
+        return back()->with('success', 'All notifications deleted successfully.');
+    }
 }

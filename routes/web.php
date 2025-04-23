@@ -33,6 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead'); // Use PATCH for update
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead'); // Use POST or PATCH
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unreadCount'); // For AJAX calls
+    Route::post('/notifications/destroy-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroyAll'); // For AJAX calls
+    Route::delete('/notifications/destroy/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy'); // For AJAX calls
 
     // Optional: Add custom medicine routes if needed
     // Route::get('medicines/export', [MedicineController::class, 'export'])->name('medicines.export');

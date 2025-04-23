@@ -1,30 +1,43 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout'; // Adjust path as needed
 import { cn } from '@/lib/utils'; // Assuming you have this utility from Shadcn
-import { PageProps, PaginatedResponse } from '@/types'; // Removed NotificationData import if not used elsewhere directly
+import { PageProps, PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, BellRing, CheckCheck, Inbox, Package } from 'lucide-react'; // Added more icons
+import { AlertTriangle, BellRing, CheckCheck, Inbox, ListCheck, Package, Trash } from 'lucide-react';
+import React from 'react';
 import { toast } from 'sonner';
 
-// Define NotificationData structure based on your backend 'toArray' output
-// This local interface reflects the structure passed from NotificationController
+// Define NotificationData structure
 interface NotificationItem {
     id: string;
-    type: string; // e.g., 'LowStockNotification', 'ExpiryWarningNotification'
-    // Data payload can vary, use Record or a more specific Discriminated Union if needed
+    type: string;
     data: Record<string, any>;
-    read_at: string | null; // Formatted string or null
-    created_at: string; // Formatted string
+    read_at: string | null;
+    created_at: string;
 }
 
 interface NotificationsPageProps extends PageProps {
     notifications: PaginatedResponse<NotificationItem>;
 }
 
+// Define expected shape of pagination links
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+// Define a custom interface for the reload options
+interface CustomReloadOptions {
+    only: string[];
+    preserveState?: boolean;
+    preserveScroll?: boolean;
+}
+
 // --- Pagination Sub-Component ---
-function Pagination({ links }: { links: PaginatedResponse<any>['links'] }) {
+function Pagination({ links }: { links: PaginationLink[] }) {
     if (!links || links.length <= 3) return null; // Hide if only prev/next/current or less
 
     return (
@@ -57,20 +70,31 @@ function Pagination({ links }: { links: PaginatedResponse<any>['links'] }) {
 // --- End Pagination ---
 
 export default function NotificationsIndex({ auth, notifications }: NotificationsPageProps) {
-    const handleMarkAsRead = (notificationId: string) => {
+    // Type-safe reload function
+    const safeReload = (options: CustomReloadOptions) => {
+        // TypeScript ignores this specific assignment - more type-safe than 'any'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return router.reload(options as any);
+    };
+
+    const handleMarkAsRead = (notificationId: string, e?: React.MouseEvent) => {
+        // If event is provided, prevent propagation
+        if (e) {
+            e.stopPropagation();
+        }
+
         router.patch(
             route('notifications.markAsRead', notificationId),
             {},
             {
                 onSuccess: () => {
                     toast.success('Notification marked as read.');
-                    // Optionally trigger a refresh of the notifications prop
-                    router.reload({ only: ['notifications'], preserveState: true, preserveScroll: true }); // Keep scroll pos
+                    safeReload({ only: ['notifications'], preserveState: true, preserveScroll: true });
                 },
                 onError: () => {
                     toast.error('Failed to mark notification as read.');
                 },
-                preserveState: true, // Keep component state
+                preserveState: true,
                 preserveScroll: true,
             },
         );
@@ -83,9 +107,9 @@ export default function NotificationsIndex({ auth, notifications }: Notification
             {
                 onSuccess: () => {
                     toast.success('All notifications marked as read.');
-                    router.reload({ only: ['notifications'], preserveState: true, preserveScroll: true });
+                    safeReload({ only: ['notifications'], preserveState: true, preserveScroll: true });
                 },
-                onError: (errors) => {
+                onError: () => {
                     toast.error('Failed to mark all notifications as read.');
                 },
                 preserveState: true,
@@ -94,12 +118,41 @@ export default function NotificationsIndex({ auth, notifications }: Notification
         );
     };
 
-    // Improved icon getter
-    const getIcon = (type: string): JSX.Element => {
+    const handleDeleteAll = () => {
+        router.post(
+            route('notifications.destroyAll'),
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('All notifications deleted.');
+                    safeReload({ only: ['notifications'], preserveState: true, preserveScroll: true });
+                },
+                onError: () => {
+                    toast.error('Failed to delete all notifications.');
+                },
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    };
+
+    // Improved icon getter with more comprehensive type handling
+    const getIcon = (type: string) => {
         if (type.includes('LowStock')) return <AlertTriangle className="h-5 w-5 text-orange-500" />;
         if (type.includes('ExpiryWarning')) return <BellRing className="h-5 w-5 text-yellow-500" />;
-        // Add more icons based on specific notification class basenames
+        // Add more notification types as needed
         return <Package className="h-5 w-5 text-gray-500" />; // Default icon
+    };
+
+    // Format date string to be more user-friendly
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return null;
+
+        try {
+            return new Date(dateString).toLocaleString();
+        } catch (error) {
+            return dateString; // Fallback to original string if parsing fails
+        }
     };
 
     const hasUnread = notifications.data.some((n) => !n.read_at);
@@ -114,14 +167,45 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
                             <div>
                                 <CardTitle>Your Notifications</CardTitle>
-                                <CardDescription>Recent alerts and updates.</CardDescription>
                             </div>
-                            <Button onClick={handleMarkAllRead} disabled={!hasUnread} size="sm">
-                                Mark All As Read
-                            </Button>
-                            <Button >
-                                Clear All
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                {hasUnread ? (
+                                    <TooltipProvider delayDuration={100}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={!hasUnread}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleMarkAllRead();
+                                                    }}
+                                                >
+                                                    <ListCheck className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Mark all notifications as read</TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ) : (
+                                    <TooltipProvider delayDuration={100}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    onClick={handleDeleteAll}
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    disabled={notifications.data.length === 0}
+                                                >
+                                                    <Trash className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete all notifications</TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent className="pt-6">
                             {notifications.data.length > 0 ? (
@@ -133,7 +217,7 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                             className={cn(
                                                 'flex items-start gap-4 rounded-lg border p-4 transition-colors',
                                                 !notification.read_at
-                                                    ? 'bg-primary/5 dark:bg-primary/10 border-primary/20 hover:bg-primary/10 dark:hover:bg-primary/15 cursor-pointer' // Highlight unread & add hover
+                                                    ? 'bg-primary/5 dark:bg-primary/10 border-primary/20 hover:bg-primary/10 dark:hover:bg-primary/15 cursor-pointer'
                                                     : 'bg-card',
                                             )}
                                         >
@@ -179,8 +263,9 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                                 {/* Timestamps and Action URL */}
                                                 <div className="flex items-center gap-2 pt-1">
                                                     <p className="text-muted-foreground/80 text-xs">
-                                                        {notification.created_at}
-                                                        {notification.read_at && ` (Read ${notification.read_at})`}
+                                                        {formatDate(notification.created_at) || notification.created_at}
+                                                        {notification.read_at &&
+                                                            ` (Read ${formatDate(notification.read_at) || notification.read_at})`}
                                                     </p>
                                                     {notification.data.action_url && (
                                                         <>
@@ -202,14 +287,11 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button
-                                                                variant="ghost" // Use ghost variant for less emphasis now row is clickable
-                                                                size="icon" // Make it icon-only
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation(); // Prevent row click handler
-                                                                    handleMarkAsRead(notification.id);
-                                                                }}
-                                                                className="ml-auto h-7 w-7 flex-shrink-0" // Adjust size/spacing
-                                                                aria-label="Mark as read" // Use aria-label for icon buttons
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={(e) => handleMarkAsRead(notification.id, e)}
+                                                                className="ml-auto h-7 w-7 flex-shrink-0"
+                                                                aria-label="Mark as read"
                                                             >
                                                                 <CheckCheck className="h-4 w-4" />
                                                             </Button>
@@ -230,7 +312,7 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                             )}
 
                             {/* Render Pagination */}
-                            <Pagination links={notifications.links} />
+                            {notifications.links && <Pagination links={notifications.links} />}
                         </CardContent>
                     </Card>
                 </div>
