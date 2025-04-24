@@ -7,14 +7,62 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role')->get();
-        $roles = Role::all(); // Fetch roles for the dropdown
-        return Inertia::render('Users/Index', ['users' => $users, 'roles' => $roles]);
+        $request->validate([
+            'page' => 'integer|min:1',
+            'perPage' => 'integer|min:1|max:100', // Add max limit
+            'sort' => 'nullable|string|max:50',
+            'direction' => 'nullable|in:asc,desc',
+            'filter' => 'nullable|string|max:100',
+            'filterBy' => 'nullable|string|max:50',
+        ]);
+
+        $query = User::query()
+            ->with('role');
+
+
+        // --- Filtering ---
+        $filterValue = $request->input('filter');
+        $filterColumn = $request->input('filterBy', 'name'); // Default filter column
+
+        // Basic global filter (adjust as needed for complexity)
+        // Ensure the filter column exists to prevent errors
+        if ($filterValue && $filterColumn && Schema::hasColumn('users', $filterColumn)) {
+            // Use 'where' for exact match or 'like' for partial match
+            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+        }
+
+        // --- Sorting ---
+        $sortColumn = $request->input('sort', 'name'); // Default sort column
+        $sortDirection = $request->input('direction', 'desc'); // Default direction
+
+        // Ensure the sort column exists
+        if ($sortColumn && Schema::hasColumn('users', $sortColumn)) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            // Fallback sorting if provided column is invalid
+            $query->orderBy('name', 'desc');
+        }
+
+        // --- Pagination ---
+        $perPage = $request->input('perPage', 10); // Default page size
+
+        // Use paginate() which includes total counts needed for React Table
+        $users = $query->paginate($perPage)
+            // Important: Append the query string parameters to pagination links
+            ->withQueryString();
+
+        $roles = Role::all();
+
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+            'roles' => $roles,
+        ]);
     }
 
     public function create()

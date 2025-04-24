@@ -35,11 +35,27 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    role_id: number;
+    role: {
+        id: number;
+        name: string;
+        description: string | null;
+        created_at: string;
+        updated_at: string;
+    };
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Role {
+    id: number;
+    name: string;
+    description: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 // Define notification data structure based on actual response
@@ -91,6 +107,13 @@ export interface PaginatedResponse<T> {
     total: number;
 }
 
+export interface NewNotificationEventPayload {
+    message: string;
+    type: 'info' | 'success' | 'error' | 'warning'; // Use specific types if possible
+    userId: number; // Included in the event, though not directly used by sonner here
+    // Add any other properties you might broadcast
+}
+
 export type Category = {
     id: number;
     name: string;
@@ -99,12 +122,6 @@ export type Category = {
     updated_at: string;
 };
 
-export interface NewNotificationEventPayload {
-    message: string;
-    type: 'info' | 'success' | 'error' | 'warning'; // Use specific types if possible
-    userId: number; // Included in the event, though not directly used by sonner here
-    // Add any other properties you might broadcast
-}
 export type Medicine = {
     id: number;
     name: string;

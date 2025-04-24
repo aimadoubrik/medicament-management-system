@@ -1,16 +1,18 @@
 import { FieldConfig } from '@/components/forms/ResourceForm';
-import { Category, Medicine, Supplier } from '@/types';
+import { Category, Medicine, Supplier, Role } from '@/types';
 
 // --- Import Schemas ---
 import { BatchFormData, batchSchema } from '@/schemas/batch';
 import { CategoryFormData, categorySchema } from '@/schemas/category';
 import { MedicineFormData, medicineSchema } from '@/schemas/medicine';
 import { SupplierFormData, supplierSchema } from '@/schemas/supplier';
+import { UserFormData, userSchema } from '@/schemas/user';
 
 // --- Helper for Select Options ---
 const getCategoryOptions = (categories: Category[]) => categories.map((cat) => ({ value: String(cat.id), label: cat.name }));
 const getSupplierOptions = (suppliers: Supplier[]) => suppliers.map((sup) => ({ value: String(sup.id), label: sup.name }));
 const getMedicineOptions = (medicines: Medicine[]) => medicines.map((med) => ({ value: String(med.id), label: `${med.name} (${med.strength})` }));
+const getRoleOptions = (roles: Role[]) => roles.map((role) => ({ value: String(role.id), label: role.name }));
 
 // --- Form Field Definitions ---
 
@@ -49,6 +51,12 @@ const batchFormFields: FieldConfig<BatchFormData>[] = [
     { name: 'current_quantity', label: 'Current Quantity', type: 'number', required: true },
 ];
 
+const userFormFields: FieldConfig<UserFormData>[] = [
+    { name: 'name', label: 'Name', type: 'text', required: true },
+    { name: 'email', label: 'Email', type: 'email', required: true },
+    { name: 'role_id', label: 'Role', type: 'select', required: true, options: [], placeholder: 'Select role' }, // Options populated dynamically
+];
+
 // --- Export Combined Definitions ---
 export const resourceFormDefinitions = {
     medicines: {
@@ -84,6 +92,18 @@ export const resourceFormDefinitions = {
                 }
                 if (field.name === 'supplier_id' && dependencies.suppliers) {
                     return { ...field, options: getSupplierOptions(dependencies.suppliers) };
+                }
+                return field;
+            });
+        },
+    },
+    users: {
+        schema: userSchema,
+        fields: userFormFields,
+        getFieldsWithOptions: (dependencies: { roles: Role[] }) => {
+            return userFormFields.map((field) => {
+                if (field.name === 'role_id' && dependencies.roles) {
+                    return { ...field, options: getRoleOptions(dependencies.roles) };
                 }
                 return field;
             });
