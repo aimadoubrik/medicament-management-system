@@ -1,12 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -36,6 +37,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/destroy-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroyAll'); // For AJAX calls
     Route::delete('/notifications/destroy/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy'); // For AJAX calls
 
+    Route::resource('users', UserController::class);
+    Route::post('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
     // Optional: Add custom medicine routes if needed
     // Route::get('medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
 });

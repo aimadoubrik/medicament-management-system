@@ -32,6 +32,11 @@ const mainNavItems: NavItem[] = [
         href: '/categories',
         icon: Shapes,
     },
+    {
+        title: 'Users',
+        href: '/users',
+        icon: Users,
+    }
 ];
 
 export function AppSidebar() {
