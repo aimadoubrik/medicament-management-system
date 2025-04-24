@@ -1,67 +1,258 @@
-import React from 'react';
-import { Link, router } from '@inertiajs/react';
-import { usePage } from '@inertiajs/react';
+import { DataTable } from '@/components/data-table';
+import { UserDetails } from '@/components/details/UserDetails';
+import { ResourceForm } from '@/components/forms/ResourceForm';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { DialogClose } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Modal } from '@/components/ui/Modal';
+import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
+import { UserFormData } from '@/schemas/user';
+import { Role, User as UserType, PageProps, PaginatedResponse } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
+import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { toast } from 'sonner';
+import { userColumns as baseUserColumns, userColumnVisibility } from './table-definition';
 
-export default function UserIndex({ users, roles }: { users: Array<{ id: number; name: string; email: string; role_id: number; }>; roles: Array<{ id: number; name: string; }> }) {
-    const handleRoleChange = (userId: number, roleId: number) => {
-        router.post(`/users/${userId}/role`, { role_id: roleId }, {
-            preserveState: true,
+// Define the props specific to this page
+interface UsersIndexProps extends PageProps {
+    users: PaginatedResponse<UserType>;
+    roles: Role[];
+}
+
+export default function Index({ users: paginatedUsers, roles }: UsersIndexProps) {
+    // Modal state management
+    const [modalState, setModalState] = useState<{
+        mode: 'create' | 'edit' | 'show' | null;
+        data: UserType | null;
+    }>({ mode: null, data: null });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    // sonner's toast is used directly, no hook needed
+
+    const isModalOpen = modalState.mode !== null;
+    const isEditing = modalState.mode === 'edit';
+
+    // --- Modal Control Functions ---
+    const openModal = useCallback((mode: 'create' | 'edit' | 'show', data: UserType | null = null) => {
+        setModalState({ mode, data });
+    }, []);
+
+    const closeModal = () => {
+        setModalState({ mode: null, data: null });
+        setIsSubmitting(false);
+    };
+
+    // --- Get Form Definition ---
+    const userFormDefinition = resourceFormDefinitions.users;
+    const userSchema = userFormDefinition.schema;
+    const userFieldConfig = useMemo(() => {
+        if (typeof userFormDefinition.getFieldsWithOptions === 'function') {
+            return userFormDefinition.getFieldsWithOptions({ roles }); // Pass dependencies as object
+        }
+        return userFormDefinition.fields;
+    }, [roles, userFormDefinition]);
+
+    // --- Form Submission Handler ---
+    const handleFormSubmit: SubmitHandler<UserFormData> = (formData) => {
+        setIsSubmitting(true);
+        const url = isEditing ? route('users.update', modalState.data!.id) : route('users.store');
+        const method = isEditing ? 'put' : 'post';
+
+        router[method](url, formData, {
+            preserveScroll: true,
             onSuccess: () => {
-                alert('Role updated successfully!');
+                closeModal();
+                toast.success(`User ${isEditing ? 'updated' : 'created'} successfully!`);
+            },
+            onError: (errors) => {
+                console.error('Backend validation errors:', errors);
+                const errorMessages = Object.values(errors).flat().join(' ');
+                toast.error(`Error ${isEditing ? 'updating' : 'creating'} user`, {
+                    description: errorMessages || 'An unexpected error occurred.',
+                });
+            },
+            onFinish: () => {
+                setIsSubmitting(false);
             },
         });
     };
 
-    return (
-        <AppLayout>
-            <div className="min-h-screen bg-gray-100 p-6">
-                <h1 className="text-3xl font-bold mb-6">Users</h1>
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <table className="min-w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left">Name</th>
-                                <th className="px-6 py-3 text-left">Email</th>
-                                <th className="px-6 py-3 text-left">Role</th>
-                                <th className="px-6 py-3 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((user) => (
-                                <tr key={user.id} className="border-t">
-                                    <td className="px-6 py-4">{user.name}</td>
-                                    <td className="px-6 py-4">{user.email}</td>
-                                    <td className="px-6 py-4">
-                                        <select
-                                            value={user.role_id}
-                                            onChange={(e) => handleRoleChange(user.id, parseInt(e.target.value))}
-                                            className="border rounded px-2 py-1"
-                                        >
-                                            {roles.map((role) => (
-                                                <option key={role.id} value={role.id}>
-                                                    {role.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </td>
-                                    <td className="px-6 py-4 space-x-2">
-                                        
-                                        <Link
-                                            href={`/users/${user.id}`}
-                                            method="delete"
-                                            as="button"
-                                            className="text-red-500 hover:underline"
+    // --- Define Table Columns, modifying the actions cell from table-definition ---
+    const columns: ColumnDef<UserType>[] = useMemo(() => {
+        // Find the actions column definition from the base file
+        const actionsColumnDef = baseUserColumns.find((col) => col.id === 'actions');
+        if (!actionsColumnDef || !actionsColumnDef.cell) {
+            console.warn('Actions column definition not found or is invalid in table-definition.tsx');
+            return baseUserColumns; // Return base columns if actions are missing
+        }
+
+        // Create a new actions column definition that calls openModal
+        const modifiedActionsColumn: ColumnDef<UserType> = {
+            ...actionsColumnDef, // Copy other properties like id
+            cell: ({ row }) => {
+                // Override the cell renderer
+                const user = row.original;
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {/* Modified View Item */}
+                            <DropdownMenuItem onClick={() => openModal('show', user)}>
+                                <Eye className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <span>View</span>
+                            </DropdownMenuItem>
+                            {/* Modified Edit Item */}
+                            <DropdownMenuItem onClick={() => openModal('edit', user)}>
+                                <Pencil className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <span>Edit</span>
+                            </DropdownMenuItem>
+                            {/* Delete Item with AlertDialog (Structure from your table-definition) */}
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        onSelect={(e) => e.preventDefault()} // Important to prevent auto-close
+                                    >
+                                        <Trash className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                        <span>Delete</span>
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the user "{user.name}".
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={() => {
+                                                // Keep the delete logic here
+                                                router.delete(route('users.destroy', user.id), {
+                                                    preserveScroll: true,
+                                                    onSuccess: () => toast.success('User deleted successfully'),
+                                                    onError: (errors) =>
+                                                        toast.error('Error deleting user', {
+                                                            description: Object.values(errors).flat().join(' '),
+                                                        }),
+                                                });
+                                            }}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                         >
                                             Delete
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                );
+            },
+        };
+
+        // Return all columns except the original actions column, plus the modified one
+        return [...baseUserColumns.filter((col) => col.id !== 'actions'), modifiedActionsColumn];
+    }, [openModal]); // Dependency on openModal
+
+    // --- Modal Title Logic ---
+    const getModalTitle = () => {
+        switch (modalState.mode) {
+            case 'create':
+                return 'Add New User';
+            case 'edit':
+                return `Edit User: ${modalState.data?.name ?? ''}`;
+            case 'show':
+                return `User Details: ${modalState.data?.name ?? ''}`;
+            default:
+                return '';
+        }
+    };
+
+    return (
+        <AppLayout breadcrumbs={[{ title: 'Users', href: '/users' }]}>
+            <Head title="Users" />
+            <div className="container mx-auto p-4">
+                <div className="mb-6 flex items-center justify-between">
+                    <h1 className="text-2xl font-bold">Users</h1>
+                    <Button onClick={() => openModal('create')}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add User
+                    </Button>
                 </div>
+
+                {/* Data Table */}
+                <DataTable
+                    columns={columns}
+                    paginatedData={paginatedUsers}
+                    searchKey="name"
+                    searchPlaceholder="Search users..."
+                    inertiaVisitUrl={route('users.index')}
+                    inertiaDataPropName="users"
+                    initialVisibility={userColumnVisibility}
+                    pageSizeOptions={[10, 20, 50, 100]}
+                    exportFileName={`users-${new Date().toISOString().split('T')[0]}`}
+                />
             </div>
+
+            {/* Reusable Modal */}
+            <Modal
+                title={getModalTitle()}
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                footerContent={
+                    modalState.mode === 'show' ? (
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary" onClick={closeModal}>
+                                Close
+                            </Button>
+                        </DialogClose>
+                    ) : null
+                }
+            >
+                {/* Conditionally Render Form or Details View */}
+                {(modalState.mode === 'create' || modalState.mode === 'edit') && (
+                    <ResourceForm
+                        schema={userSchema}
+                        fieldConfig={userFieldConfig}
+                        initialData={modalState.mode === 'edit' ? modalState.data : null}
+                        onSubmit={handleFormSubmit}
+                        onCancel={closeModal}
+                        isLoading={isSubmitting}
+                        submitButtonText={isEditing ? 'Update User' : 'Create User'}
+                    />
+                )}
+
+                {modalState.mode === 'show' && modalState.data && <UserDetails user={modalState.data} />}
+            </Modal>
         </AppLayout>
     );
 }

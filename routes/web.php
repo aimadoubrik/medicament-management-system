@@ -1,13 +1,16 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckSuperAdmin;
+
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -24,10 +27,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('stock', StockController::class);
 
     // Supplier routes
-    Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
+    Route::resource('suppliers', SupplierController::class);
 
     // Category routes
-    Route::resource('categories', \App\Http\Controllers\CategoryController::class);
+    Route::resource('categories', CategoryController::class);
 
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -37,10 +40,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/destroy-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroyAll'); // For AJAX calls
     Route::delete('/notifications/destroy/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy'); // For AJAX calls
 
-    Route::resource('users', UserController::class);
+    Route::resource('users', UserController::class)->middleware(CheckSuperAdmin::class);
     Route::post('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
-    // Optional: Add custom medicine routes if needed
-    // Route::get('medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
 });
 
 require __DIR__ . '/settings.php';
