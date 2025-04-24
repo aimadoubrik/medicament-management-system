@@ -9,6 +9,13 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User } from '@/types';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 import {
     AlertDialog,
@@ -33,9 +40,34 @@ export const userColumns: ColumnDef<User>[] = [
     createDateColumn<User>('created_at', 'Created'),
     createDateColumn<User>('updated_at', 'Updated'),
     {
-        accessorFn: (row) => row.role.name,
         id: 'role',
         header: 'Role',
+        cell: ({ row }) => {
+            const user = row.original;
+            return (
+                <Select
+                    defaultValue={user.role.name}
+                    onValueChange={(value) => {
+                        router.post(`/users/${user.id}/role`, {
+                            role: value
+                        }, {
+                            onSuccess: () => {
+                                toast.success('Role updated successfully');
+                            },
+                        });
+                    }}
+                >
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="superadmin">Super Admin</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="user">User</SelectItem>
+                    </SelectContent>
+                </Select>
+            );
+        },
     },
     {
         id: 'actions',
