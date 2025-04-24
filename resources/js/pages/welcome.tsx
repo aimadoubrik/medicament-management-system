@@ -5,24 +5,27 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BarChart2, ChevronRight, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
+import {
+    BarChart2, ChevronRight, Heart, LogInIcon, Pill, ShieldCheck,
+    Stethoscope, Syringe, Thermometer, UserPlus, Clock, CheckCircle,
+    Zap, PhoneCall, Calendar, RefreshCw
+} from 'lucide-react';
 
 function Welcome() {
     const { auth } = usePage<SharedData>().props;
+    const currentYear = new Date().getFullYear();
 
     return (
         <>
-            <Head title="MediTrack - Gestion d'inventaire pharmaceutique" />
+            <Head title="MediTrack - Solution intelligente de gestion pharmaceutique" />
             <div className="bg-background flex min-h-screen flex-col">
                 {/* Navigation Bar */}
                 <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 right-0 left-0 z-50 w-full backdrop-blur">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="flex h-16 items-center justify-between">
                             <div className="flex items-center">
-                                <Link href="/">
-                                    <h1 className="text-primary flex items-center text-xl font-bold sm:text-2xl">
-                                        <AppLogoIcon className="text-primary size-16 fill-current" />
-                                    </h1>
+                                <Link href="/" className="flex items-center">
+                                    <AppLogoIcon className="text-primary size-14 fill-current mr-2" />
                                 </Link>
                             </div>
                             {/* Navigation Buttons */}
@@ -55,7 +58,6 @@ function Welcome() {
                     </div>
                 </header>
 
-                {/* Hero Section */}
                 {/* Hero Section */}
                 <div
                     className="absolute"
@@ -94,7 +96,7 @@ function Welcome() {
                                 </span>
                             </h1>
                             <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 sm:mb-10 sm:text-lg md:text-xl dark:text-gray-300">
-                                Une solution complète conçue pour les pharmacies et les établissements de santé afin de suivre, gérer et optimiser
+                                Une solution complète conçue pour les établissements de santé afin de suivre, gérer et optimiser
                                 efficacement l'inventaire des médicaments avec précision et fiabilité.
                             </p>
                             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -121,154 +123,135 @@ function Welcome() {
                 <section id="features" className="py-16 sm:py-20">
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="mb-12 text-center sm:mb-16">
-                            <h2 className="text-2xl font-bold sm:text-3xl">Fonctionnalités puissantes</h2>
-                            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-base sm:text-lg">
-                                Tout ce dont vous avez besoin pour gérer efficacement votre inventaire de médicaments et améliorer le service à votre
-                                clientèle
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 md:grid-cols-3">
-                            <Card className="shadow-md transition-shadow hover:shadow-lg">
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-primary/10 rounded-lg p-3 shadow-sm">
-                                            <ShieldCheck className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
-                                        </div>
-                                        <h3 className="text-lg font-semibold sm:text-xl">Suivi sécurisé</h3>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground text-sm sm:text-base">
-                                        Le cryptage de bout en bout et les contrôles d'accès garantissent que vos données restent sécurisées et
-                                        conformes aux normes RGPD.
-                                    </p>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="shadow-md transition-shadow hover:shadow-lg">
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-primary/10 rounded-lg p-3 shadow-sm">
-                                            <Syringe className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
-                                        </div>
-                                        <h3 className="text-lg font-semibold sm:text-xl">Gestion d'inventaire</h3>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground text-sm sm:text-base">
-                                        Suivez les niveaux de stock en temps réel, recevez des alertes pour les produits à réapprovisionner et gérez
-                                        les dates d'expiration.
-                                    </p>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="shadow-md transition-shadow hover:shadow-lg">
-                                <CardHeader className="pb-2">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-primary/10 rounded-lg p-3 shadow-sm">
-                                            <Thermometer className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
-                                        </div>
-                                        <h3 className="text-lg font-semibold sm:text-xl">Alertes automatiques</h3>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground text-sm sm:text-base">
-                                        Notifications configurables pour les stocks faibles, les médicaments périmés et les commandes en attente.
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </section>
-
-                <Separator />
-
-                {/* How It Works Section */}
-                <section id="how-it-works" className="bg-muted/50 py-12 sm:py-16 md:py-24">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="mb-8 text-center sm:mb-12 md:mb-16">
-                            <Badge variant="outline" className="bg-primary/10 text-primary mb-4 rounded-full px-3 py-1 text-xs font-medium">
-                                Processus
+                            <Badge
+                                variant="outline"
+                                className="bg-primary/10 text-primary mb-4 rounded-full px-3 py-1 text-xs font-medium"
+                            >
+                                Tout-en-un
                             </Badge>
-                            <h2 className="text-xl font-bold sm:text-2xl md:text-3xl">Comment ça marche</h2>
-                            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-sm sm:text-base md:text-lg">
-                                MediTrack s'intègre parfaitement dans votre flux de travail quotidien
+                            <h2 className="text-2xl font-bold sm:text-3xl md:text-4xl">Fonctionnalités puissantes</h2>
+                            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-base sm:text-lg">
+                                Tout ce dont vous avez besoin pour optimiser votre gestion d'inventaire et améliorer votre service client
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3 md:gap-12">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {[
                                 {
-                                    step: 1,
-                                    title: 'Configuration rapide',
-                                    description: 'Importez votre inventaire existant ou commencez à ajouter des produits en quelques clics.',
-                                    icon: <Pill className="text-primary h-6 w-6 sm:h-8 sm:w-8" />,
+                                    icon: <Thermometer className="text-primary h-5 w-5 sm:h-6 sm:w-6" />,
+                                    title: "Alertes personnalisées",
+                                    description: "Configurez des notifications pour les stocks faibles, dates d'expiration et conditions de stockage anormales."
                                 },
                                 {
-                                    step: 2,
-                                    title: 'Gestion quotidienne',
-                                    description: "Scannez simplement les produits à l'entrée et à la sortie pour maintenir un inventaire précis.",
-                                    icon: <Stethoscope className="text-primary h-6 w-6 sm:h-8 sm:w-8" />,
+                                    icon: <BarChart2 className="text-primary h-5 w-5 sm:h-6 sm:w-6" />,
+                                    title: "Analyses avancées",
+                                    description: "Tableaux de bord intuitifs pour visualiser les tendances et prendre des décisions stratégiques basées sur les données."
                                 },
                                 {
-                                    step: 3,
-                                    title: 'Analyses et optimisation',
-                                    description: 'Utilisez les rapports pour identifier les tendances et prendre des décisions éclairées.',
-                                    icon: <BarChart2 className="text-primary h-6 w-6 sm:h-8 sm:w-8" />,
+                                    icon: <Calendar className="text-primary h-5 w-5 sm:h-6 sm:w-6" />,
+                                    title: "Gestion des expiration",
+                                    description: "Minimisez les pertes avec notre système de rotation des stocks qui priorise l'utilisation des produits à date d'expiration proche."
                                 },
-                            ].map((item) => (
-                                <Card
-                                    key={item.step}
-                                    className="bg-background relative flex flex-col items-center overflow-hidden p-6 text-center shadow-md transition-shadow hover:shadow-lg"
-                                >
-                                    <div className="bg-primary/10 text-primary absolute top-0 right-0 rounded-bl p-2 text-xs font-bold">
-                                        {item.step}
-                                    </div>
-                                    <div className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full shadow-sm sm:mb-6 sm:h-16 sm:w-16">
-                                        {item.icon}
-                                    </div>
-                                    <h3 className="mb-4 text-base font-semibold sm:text-lg md:text-xl">{item.title}</h3>
-                                    <p className="text-muted-foreground text-xs sm:text-sm md:text-base">{item.description}</p>
+                            ].map((feature, idx) => (
+                                <Card key={idx} className="shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-orange-100 dark:border-orange-900/30">
+                                    <CardHeader className="pb-2">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-primary/10 rounded-lg p-3 shadow-sm">
+                                                {feature.icon}
+                                            </div>
+                                            <h3 className="text-lg font-semibold sm:text-xl">{feature.title}</h3>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-muted-foreground text-sm sm:text-base">
+                                            {feature.description}
+                                        </p>
+                                    </CardContent>
                                 </Card>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                {/* CTA Section */}
-                <section className="bg-primary/5 py-12 sm:py-16">
-                    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-                        <div className="bg-background border-primary/20 rounded-2xl border p-6 shadow-lg sm:p-8 md:p-10">
-                            <div className="text-center">
-                                <h2 className="mb-4 text-xl font-bold sm:text-2xl md:text-3xl">Prêt à transformer votre gestion d'inventaire ?</h2>
-                                <p className="text-muted-foreground mx-auto mb-6 max-w-2xl text-sm sm:text-base md:text-lg">
-                                    Rejoignez des centaines d'établissements de santé qui font confiance à MediTrack.
-                                </p>
-                                <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                                    <Button size="lg" variant="default" className="w-full shadow-lg sm:w-auto" asChild>
-                                        <Link href={route('register')} className="flex items-center justify-center px-6 py-4 sm:px-8 sm:py-5">
-                                            <Heart className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                                            Créer un compte
-                                        </Link>
-                                    </Button>
-                                </div>
+                <Separator />
+
+                {/* How It Works Section - Redesigned */}
+                <section id="how-it-works" className="bg-muted/50 py-12 sm:py-16 md:py-24">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="mb-12 text-center">
+                            <Badge variant="outline" className="bg-primary/10 text-primary mb-4 rounded-full px-3 py-1 text-xs font-medium">
+                                Simple et efficace
+                            </Badge>
+                            <h2 className="text-xl font-bold sm:text-2xl md:text-3xl lg:text-4xl">Comment ça marche</h2>
+                            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-sm sm:text-base md:text-lg">
+                                MediTrack s'intègre parfaitement dans votre flux de travail quotidien
+                            </p>
+                        </div>
+
+                        <div className="relative mt-16">
+                            {/* Connection line */}
+                            <div className="absolute top-24 left-0 w-full h-0.5 bg-orange-200 dark:bg-orange-800/30 hidden md:block"></div>
+
+                            <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+                                {[
+                                    {
+                                        step: 1,
+                                        title: 'Configuration rapide',
+                                        description: 'Importez votre inventaire existant ou commencez à ajouter des produits en quelques clics. Notre assistant vous guide à chaque étape.',
+                                        icon: <Pill className="text-primary h-6 w-6 sm:h-8 sm:w-8" />,
+                                    },
+                                    {
+                                        step: 2,
+                                        title: 'Gestion quotidienne',
+                                        description: "Scannez simplement les codes à l'entrée et à la sortie. Le système met à jour automatiquement votre inventaire en temps réel.",
+                                        icon: <Stethoscope className="text-primary h-6 w-6 sm:h-8 sm:w-8" />,
+                                    },
+                                    {
+                                        step: 3,
+                                        title: 'Analyses et optimisation',
+                                        description: 'Exploitez nos tableaux de bord et rapports détaillés pour identifier les tendances, optimiser les stocks et réduire les coûts.',
+                                        icon: <BarChart2 className="text-primary h-6 w-6 sm:h-8 sm:w-8" />,
+                                    },
+                                ].map((item) => (
+                                    <div key={item.step} className="relative flex flex-col items-center">
+                                        <div className="bg-primary text-white relative z-10 flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold shadow-lg md:h-16 md:w-16 md:text-xl">
+                                            {item.step}
+                                        </div>
+                                        <div className="bg-background mt-4 rounded-xl p-6 shadow-lg border border-orange-100 dark:border-orange-900/30 w-full">
+                                            <div className="mb-4 flex justify-center">
+                                                <div className="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-full">
+                                                    {item.icon}
+                                                </div>
+                                            </div>
+                                            <h3 className="mb-4 text-center text-lg font-semibold md:text-xl">{item.title}</h3>
+                                            <p className="text-muted-foreground text-center text-sm md:text-base">{item.description}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Footer */}
-                <footer className="py-8">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="text-muted-foreground text-center text-xs sm:text-sm">
-                            © {new Date().getFullYear()} Tazzanine Association.
+
+                {/* Footer - Enhanced */}
+                <footer className="bg-gray-50 dark:bg-gray-900/50 py-6 flex justify-center">
+                    <Link href="/" className="flex items-center justify-center space-x-3 hover:opacity-80 transition-opacity">
+                        <AppLogoIcon className="text-primary size-8 fill-current" />
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-900 dark:text-white border-r border-gray-300 dark:border-gray-700 pr-2">
+                                Tazzanine Association
+                            </span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400 pl-1">
+                                © {currentYear}
+                            </span>
                         </div>
-                    </div>
+                    </Link>
                 </footer>
+
             </div>
         </>
+
     );
 }
-
 export default Welcome;
