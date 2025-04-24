@@ -8,9 +8,12 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index(Request $request)
     {
         $request->validate([
@@ -62,17 +65,24 @@ class UserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => $users,
             'roles' => $roles,
+            'can' => [
+                'createUser' => $request->user()->can('create', User::class),
+            ]
         ]);
     }
 
     public function create()
     {
+        $this->authorize('create', User::class);
+        
         $roles = Role::all();
         return Inertia::render('Users/Create', ['roles' => $roles]);
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -92,12 +102,16 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorize('update', $user);
+
         $roles = Role::all();
         return Inertia::render('Users/Edit', ['user' => $user, 'roles' => $roles]);
     }
 
     public function update(Request $request, User $user)
     {
+        $this->authorize('update', $user);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
@@ -117,6 +131,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
+        
         $user->delete();
         return redirect()->route('users.index');
     }

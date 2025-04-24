@@ -9,7 +9,6 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Middleware\CheckSuperAdmin;
 
 
 Route::get('/', function () {
@@ -40,7 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/destroy-all', [NotificationController::class, 'destroyAll'])->name('notifications.destroyAll'); // For AJAX calls
     Route::delete('/notifications/destroy/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy'); // For AJAX calls
 
-    Route::resource('users', UserController::class)->middleware(CheckSuperAdmin::class);
+    Route::resource('users', UserController::class)->middleware(['auth', 'can:accessAdminArea,App\Models\User']);
     Route::post('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
 
