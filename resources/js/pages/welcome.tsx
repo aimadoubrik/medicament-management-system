@@ -28,9 +28,11 @@ declare global {
     function route(name?: string, params?: any, absolute?: boolean, customZiggy?: any): string;
 }
 
+
 function Welcome() {
     // Get auth data from Inertia props
     const { auth } = usePage<SharedData>().props;
+    const currentYear = new Date().getFullYear();
 
     // Feature data array for cleaner mapping
     const features = [
@@ -124,6 +126,7 @@ function Welcome() {
                                     </Button>
                                     <Button variant="default" size="sm" asChild>
                                         <Link href={route('login')}>
+
                                             <LogInIcon className="mr-2 h-4 w-4" />
                                             Login
                                         </Link>
@@ -133,7 +136,7 @@ function Welcome() {
                         </div>
                     </div>
                 </header>
-
+              
                 {/* Main Content Area */}
                 <main className="flex-grow">
                     {/* Hero Section (remains the same) */}
@@ -156,6 +159,7 @@ function Welcome() {
                             className="absolute left-1/2 top-0 -z-20 h-[min(500px,60vh)] w-[min(600px,80vw)] -translate-x-1/2 pointer-events-none bg-[radial-gradient(circle,hsla(var(--primary),0.1)_20%,transparent_75%)]"
                             aria-hidden="true"
                          ></div>
+
 
                         {/* Content */}
                         <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
@@ -183,10 +187,10 @@ function Welcome() {
                                 </span>{' '}
                                 Management
                             </h1>
-                            <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
-                                A comprehensive solution designed for pharmacies and healthcare
-                                facilities to efficiently track, manage, and optimize medication
-                                inventory with precision and reliability.
+
+                            <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 sm:mb-10 sm:text-lg md:text-xl dark:text-gray-300">
+                                Une solution complète conçue pour les établissements de santé afin de suivre, gérer et optimiser
+                                efficacement l'inventaire des médicaments avec précision et fiabilité.
                             </p>
                             <div className="mt-10 flex items-center justify-center gap-x-6">
                                 <Button size="lg" asChild className="group shadow-lg hover:shadow-primary/30 transition-shadow duration-300">
@@ -267,7 +271,6 @@ function Welcome() {
                                     Integrating MediTrack into your daily workflow is straightforward and quick.
                                 </p>
                             </div>
-
                             {/* Grid for How It Works Cards */}
                             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                                 {howItWorksSteps.map((item) => (
@@ -294,6 +297,7 @@ function Welcome() {
                                     </Card>
                                 ))}
                             </div>
+
                         </div>
                     </section>
 
@@ -350,9 +354,10 @@ function Welcome() {
                         </p>
                     </div>
                 </footer>
+
             </div>
         </>
+
     );
 }
-
 export default Welcome;

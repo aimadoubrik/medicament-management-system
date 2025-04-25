@@ -33,9 +33,14 @@ export const userColumns: ColumnDef<User>[] = [
     createDateColumn<User>('created_at', 'Created'),
     createDateColumn<User>('updated_at', 'Updated'),
     {
-        accessorFn: (row) => row.role.name,
         id: 'role',
         header: 'Role',
+        cell: ({ row }) => {
+            const user = row.original;
+            return (
+                <span className="capitalize">{user.role.name}</span>
+            );
+        },
     },
     {
         id: 'actions',
