@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMedicineRequest;
+use App\Http\Requests\UpdateMedicineRequest;
+use App\Models\Category;
+use App\Models\Medicine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
-
-use App\Models\Medicine;
-use App\Models\Category;
-
-use App\Http\Requests\StoreMedicineRequest;
-use App\Http\Requests\UpdateMedicineRequest;
 
 class MedicineController extends Controller
 {
@@ -31,7 +29,6 @@ class MedicineController extends Controller
         $query = Medicine::query()
             ->with('category');
 
-
         // --- Filtering ---
         $filterValue = $request->input('filter');
         $filterColumn = $request->input('filterBy', 'name'); // Default filter column
@@ -40,7 +37,7 @@ class MedicineController extends Controller
         // Ensure the filter column exists to prevent errors
         if ($filterValue && $filterColumn && Schema::hasColumn('medicines', $filterColumn)) {
             // Use 'where' for exact match or 'like' for partial match
-            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+            $query->where($filterColumn, 'like', '%'.$filterValue.'%');
         }
 
         // --- Sorting ---
@@ -62,7 +59,7 @@ class MedicineController extends Controller
         $medicines = $query->paginate($perPage)
             // Important: Append the query string parameters to pagination links
             ->withQueryString();
-        
+
         $categories = Category::all();
 
         return Inertia::render('Medicines/Index', [

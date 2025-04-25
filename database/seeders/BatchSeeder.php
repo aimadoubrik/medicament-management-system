@@ -12,8 +12,6 @@ class BatchSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -23,7 +21,7 @@ class BatchSeeder extends Seeder
             [
                 'medicine_id' => Medicine::where('name', 'Paracetamol')->first()->id,
                 'supplier_id' => Supplier::where('name', 'PharmaStar')->first()->id,
-                'batch_number' => 'PCM-' . date('Ymd') . '-001',
+                'batch_number' => 'PCM-'.date('Ymd').'-001',
                 'quantity_received' => 100,
                 'current_quantity' => 98,
                 'manufacture_date' => $now->copy()->subMonths(1),
@@ -32,7 +30,7 @@ class BatchSeeder extends Seeder
             [
                 'medicine_id' => Medicine::where('name', 'Amoxicillin')->first()->id,
                 'supplier_id' => Supplier::where('name', 'MediSource')->first()->id,
-                'batch_number' => 'AMX-' . date('Ymd') . '-001',
+                'batch_number' => 'AMX-'.date('Ymd').'-001',
                 'quantity_received' => 50,
                 'current_quantity' => 49,
                 'manufacture_date' => $now->copy()->subMonths(2),
@@ -41,7 +39,7 @@ class BatchSeeder extends Seeder
             [
                 'medicine_id' => Medicine::where('name', 'Loratadine')->first()->id,
                 'supplier_id' => Supplier::where('name', 'PharmaStar')->first()->id,
-                'batch_number' => 'LRT-' . date('Ymd') . '-001',
+                'batch_number' => 'LRT-'.date('Ymd').'-001',
                 'quantity_received' => 75,
                 'current_quantity' => 75,
                 'manufacture_date' => $now->copy()->subMonths(1),

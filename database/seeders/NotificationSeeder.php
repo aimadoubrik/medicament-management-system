@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Medicine;
-use App\Notifications\LowStockNotification as LowStockAlert;
+use App\Models\User;
 use App\Notifications\ExpiryWarningNotification as ExpiryAlert;
+use App\Notifications\LowStockNotification as LowStockAlert;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -14,13 +14,11 @@ class NotificationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run(): void
     {
         // Only seed notifications in development environment
-        if (!app()->environment('local', 'development')) {
+        if (! app()->environment('local', 'development')) {
             return;
         }
 
@@ -49,7 +47,7 @@ class NotificationSeeder extends Seeder
                 'message' => 'Expiry alert for Amoxicillin',
                 'medicine_id' => $amoxicillin->id,
                 'medicine_name' => $amoxicillin->name,
-                'batch_number' => 'AMX-' . date('Ymd') . '-001',
+                'batch_number' => 'AMX-'.date('Ymd').'-001',
                 'expiry_date' => Carbon::now()->addDays(30)->format('Y-m-d'),
             ],
         ]);

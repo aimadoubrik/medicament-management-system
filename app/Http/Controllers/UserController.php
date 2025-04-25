@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
@@ -28,7 +28,6 @@ class UserController extends Controller
         $query = User::query()
             ->with('role');
 
-
         // --- Filtering ---
         $filterValue = $request->input('filter');
         $filterColumn = $request->input('filterBy', 'name'); // Default filter column
@@ -37,7 +36,7 @@ class UserController extends Controller
         // Ensure the filter column exists to prevent errors
         if ($filterValue && $filterColumn && Schema::hasColumn('users', $filterColumn)) {
             // Use 'where' for exact match or 'like' for partial match
-            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+            $query->where($filterColumn, 'like', '%'.$filterValue.'%');
         }
 
         // --- Sorting ---
@@ -67,15 +66,16 @@ class UserController extends Controller
             'roles' => $roles,
             'can' => [
                 'createUser' => $request->user()->can('create', User::class),
-            ]
+            ],
         ]);
     }
 
     public function create()
     {
         $this->authorize('create', User::class);
-        
+
         $roles = Role::all();
+
         return Inertia::render('Users/Create', ['roles' => $roles]);
     }
 
@@ -105,6 +105,7 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         $roles = Role::all();
+
         return Inertia::render('Users/Edit', ['user' => $user, 'roles' => $roles]);
     }
 
@@ -114,7 +115,7 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'role_id' => 'required|exists:roles,id',
             'password' => 'nullable|string|min:8',
         ]);
@@ -132,8 +133,9 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $this->authorize('delete', $user);
-        
+
         $user->delete();
+
         return redirect()->route('users.index');
     }
 

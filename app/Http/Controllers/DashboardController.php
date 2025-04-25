@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request; // Added Request type hint
-use Illuminate\Support\Facades\DB; // Added DB Facade
+use App\Models\Batch; // Added Request type hint
+use Carbon\Carbon; // Added DB Facade
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // Added Inertia Response type hint
 use Inertia\Inertia;
-use Inertia\Response as InertiaResponse; // Added Inertia Response type hint
-use App\Models\Batch;
-use Carbon\Carbon; // Explicitly use Carbon for clarity
+use Inertia\Response as InertiaResponse; // Explicitly use Carbon for clarity
 
 class DashboardController extends Controller
 {
     /**
      * Display the dashboard with inventory summaries.
-     *
-     * @param Request $request
-     * @return InertiaResponse
      */
     public function index(Request $request): InertiaResponse // Added type hints
     {
@@ -34,9 +31,9 @@ class DashboardController extends Controller
         $batches = Batch::with('medicine') // Eager load medicine relationship
             ->select(
                 'batches.*', // Select all columns from the batches table explicitly
-                DB::raw("CASE WHEN current_quantity <= ? THEN 1 ELSE 0 END as is_low_stock"),
-                DB::raw("CASE WHEN expiry_date <= ? AND expiry_date > ? THEN 1 ELSE 0 END as is_expiring_soon"),
-                DB::raw("CASE WHEN expiry_date < ? THEN 1 ELSE 0 END as is_expired")
+                DB::raw('CASE WHEN current_quantity <= ? THEN 1 ELSE 0 END as is_low_stock'),
+                DB::raw('CASE WHEN expiry_date <= ? AND expiry_date > ? THEN 1 ELSE 0 END as is_expiring_soon'),
+                DB::raw('CASE WHEN expiry_date < ? THEN 1 ELSE 0 END as is_expired')
             )
             ->addBinding($lowStockThreshold, 'select') // Bind parameters for CASE statements
             ->addBinding($expiryThresholdDate, 'select')

@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy
@@ -16,8 +15,7 @@ class UserPolicy
      * This check depends only on the properties of the user performing the action ($currentUser),
      * not on any specific target user resource.
      *
-     * @param \App\Models\User $currentUser The currently authenticated user.
-     * @return bool
+     * @param  \App\Models\User  $currentUser  The currently authenticated user.
      */
     public function accessAdminArea(User $currentUser): bool
     {

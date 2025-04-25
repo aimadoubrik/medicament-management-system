@@ -2,19 +2,19 @@
 
 namespace App\Console\Commands;
 
+use App\Events\NewNotificationEvent;
 use App\Models\Batch;
 use App\Models\Medicine;
 use App\Models\Role;
-use App\Models\User;
 // Remove direct Notification imports if they are only handled by listeners now
 // use App\Notifications\ExpiryWarningNotification;
 // use App\Notifications\LowStockNotification;
+use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 // Remove direct Notification facade import if not used here anymore
 // use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Carbon;
-use App\Events\NewNotificationEvent; // <-- Keep this for broadcasting
+use Illuminate\Support\Facades\Log; // <-- Keep this for broadcasting
 
 class CheckInventoryNotifications extends Command
 {
@@ -34,7 +34,6 @@ class CheckInventoryNotifications extends Command
 
     /**
      * Execute the console command.
-     * @return int
      */
     public function handle(): int
     {
@@ -48,6 +47,7 @@ class CheckInventoryNotifications extends Command
         if ($admins->isEmpty()) {
             $this->warn('No Admin or Superadmin users found. Skipping notification checks.');
             Log::warning('CheckInventoryNotifications: No Admin/Superadmin users found.');
+
             return self::SUCCESS; // Use Command constants
         }
 
@@ -67,9 +67,9 @@ class CheckInventoryNotifications extends Command
         $lowStockMedicines = $potentiallyLowStock->filter(function ($medicine) use ($lowStockThreshold) {
             // Use the actual threshold from the medicine if available, otherwise the default
             $threshold = $medicine->low_stock_threshold ?? $lowStockThreshold;
+
             return $medicine->current_total_stock !== null && $medicine->current_total_stock <= $threshold;
         });
-
 
         if ($lowStockMedicines->isNotEmpty()) {
             $this->info("Found {$lowStockMedicines->count()} low stock medicines. Notifying admins...");
@@ -95,7 +95,6 @@ class CheckInventoryNotifications extends Command
             $this->info('No low stock medicines found.');
         }
 
-
         // --- Check for Expiring Batches ---
         $this->info('Checking for expiring batches...');
         $warningDays = config('inventory.expiry_warning_days', 30);
@@ -111,7 +110,7 @@ class CheckInventoryNotifications extends Command
             $this->info("Found {$expiringBatches->count()} expiring batches. Notifying admins...");
             foreach ($expiringBatches as $batch) {
                 // Ensure medicine relationship is loaded
-                if (!$batch->relationLoaded('medicine')) {
+                if (! $batch->relationLoaded('medicine')) {
                     $batch->load('medicine');
                 }
                 $medicineName = $batch->medicine->name ?? 'N/A'; // Handle potential missing medicine relation
@@ -134,9 +133,9 @@ class CheckInventoryNotifications extends Command
             $this->info('No expiring batches found within the warning period.');
         }
 
-
         $this->info('Inventory notification check completed.');
         Log::info('CheckInventoryNotifications command finished.');
+
         return self::SUCCESS;
     }
 }

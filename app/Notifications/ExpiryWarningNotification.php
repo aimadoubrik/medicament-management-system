@@ -46,7 +46,7 @@ class ExpiryWarningNotification extends Notification implements ShouldQueue // I
         $medicineName = $this->batch->medicine->name ?? 'N/A'; // Handle potential missing medicine relation
 
         return (new MailMessage)
-            ->subject('Medicine Expiry Warning: ' . $medicineName)
+            ->subject('Medicine Expiry Warning: '.$medicineName)
             ->line("Warning: A batch of medicine '{$medicineName}' (Batch number: {$this->batch->batch_number}) is expiring soon.")
             ->line("Expiry Date: {$expiryDate}")
             ->line("Quantity in Batch: {$this->batch->current_quantity}")

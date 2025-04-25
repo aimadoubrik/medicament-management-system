@@ -15,6 +15,7 @@ class LowStockNotification extends Notification implements ShouldQueue // Implem
     use Queueable;
 
     public Medicine $medicine;
+
     public int $currentStock;
 
     /**
@@ -48,7 +49,7 @@ class LowStockNotification extends Notification implements ShouldQueue // Implem
         $threshold = $this->medicine->stock_alert_threshold ?? config('inventory.default_stock_alert_threshold', 5); // Use medicine specific or default threshold
 
         return (new MailMessage)
-            ->subject('Low Stock Alert: ' . $this->medicine->name)
+            ->subject('Low Stock Alert: '.$this->medicine->name)
             ->line("Warning: The stock for medicine '{$this->medicine->name}' (ID: {$this->medicine->id}) is low.")
             ->line("Current Stock: {$this->currentStock}")
             ->line("Alert Threshold: {$threshold}")

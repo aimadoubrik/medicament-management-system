@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreBatchRequest;
+use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
 use App\Models\Medicine;
 use App\Models\Supplier;
-use App\Http\Requests\StoreBatchRequest;
-use App\Http\Requests\UpdateBatchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 class StockController extends Controller
 {
@@ -46,11 +45,11 @@ class StockController extends Controller
                 // Search by related medicine name
                 // *** USE 'medicine' relationship ***
                 $query->whereHas('medicine', function ($q) use ($filterValue) {
-                    $q->where('name', 'like', '%' . $filterValue . '%');
+                    $q->where('name', 'like', '%'.$filterValue.'%');
                 });
             } elseif (Schema::hasColumn('batches', $filterColumn)) {
                 // Search directly on batches table if column exists
-                $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+                $query->where($filterColumn, 'like', '%'.$filterValue.'%');
             }
             // Add more specific filterBy conditions if needed (e.g., supplier name)
             // elseif ($filterColumn === 'supplier_name') {
@@ -97,7 +96,6 @@ class StockController extends Controller
         $batches = $query->paginate($perPage)
             ->withQueryString(); // Append query string parameters
 
-
         // 6. Return Inertia response
         return Inertia::render('Stock/Index', [
             // *** Return the paginator object directly ***
@@ -119,7 +117,7 @@ class StockController extends Controller
         // Ensure current_quantity is set correctly, often same as quantity_received on store
         $validatedData = $request->validated();
         // *** Ensure StoreBatchRequest validates 'medicine_id' instead of 'product_id' ***
-        if (!isset($validatedData['current_quantity'])) {
+        if (! isset($validatedData['current_quantity'])) {
             $validatedData['current_quantity'] = $validatedData['quantity_received'];
         }
 
@@ -176,7 +174,7 @@ class StockController extends Controller
 
         $batch->update([
             // *** USE current_quantity ***
-            'current_quantity' => $newQuantity
+            'current_quantity' => $newQuantity,
         ]);
 
         // TODO: Consider logging the adjustment

@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Medicine extends Model
 {
-
     use HasFactory;
 
     protected $fillable = [
@@ -44,6 +43,7 @@ class Medicine extends Model
     {
         return $this->batches()->sum('current_quantity');
     }
+
     public function lowStock($query, $threshold = null)
     {
         $threshold = $threshold ?? $this->low_stock_threshold;

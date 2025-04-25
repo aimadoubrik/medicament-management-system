@@ -22,7 +22,7 @@ class UpdateMedicineRequest extends FormRequest
             'description' => 'nullable|string',
             'requires_prescription' => 'boolean',
             'low_stock_threshold' => 'integer|min:0',
-            'category_id' => 'exists:categories,id'
+            'category_id' => 'exists:categories,id',
         ];
     }
 }

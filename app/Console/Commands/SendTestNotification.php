@@ -10,6 +10,7 @@ use App\Notifications\ExpiryWarningNotification; // Notification for DB/Mail
 use App\Notifications\LowStockNotification;    // Notification for DB/Mail
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+
 // Add Notification facade back if preferred, or use $user->notify()
 // use Illuminate\Support\Facades\Notification;
 
@@ -45,14 +46,16 @@ class SendTestNotification extends Command
         $medicineId = $this->option('medicine');
         $batchId = $this->option('batch');
 
-        if (!$userId) {
+        if (! $userId) {
             $this->error('User ID (--user) is required.');
+
             return self::FAILURE;
         }
 
         $user = User::find($userId);
-        if (!$user) {
+        if (! $user) {
             $this->error("User with ID {$userId} not found.");
+
             return self::FAILURE;
         }
 
@@ -64,13 +67,15 @@ class SendTestNotification extends Command
 
         try {
             if ($type === 'low-stock') {
-                if (!$medicineId) {
+                if (! $medicineId) {
                     $this->error('Medicine ID (--medicine) is required for low-stock type.');
+
                     return self::FAILURE;
                 }
                 $medicine = Medicine::find($medicineId);
-                if (!$medicine) {
+                if (! $medicine) {
                     $this->error("Medicine with ID {$medicineId} not found.");
+
                     return self::FAILURE;
                 }
                 // Prepare data for both event and notification
@@ -80,15 +85,17 @@ class SendTestNotification extends Command
                 $messageType = 'warning';
                 $databaseNotification = new LowStockNotification($medicine); // Prepare DB notification
 
-                $this->info("Dispatching Event and sending DB Notification (Low Stock)...");
+                $this->info('Dispatching Event and sending DB Notification (Low Stock)...');
             } elseif ($type === 'expiry') {
-                if (!$batchId) {
+                if (! $batchId) {
                     $this->error('Batch ID (--batch) is required for expiry type.');
+
                     return self::FAILURE;
                 }
                 $batch = Batch::with('medicine')->find($batchId);
-                if (!$batch) {
+                if (! $batch) {
                     $this->error("Batch with ID {$batchId} not found.");
+
                     return self::FAILURE;
                 }
                 // Prepare data for both event and notification
@@ -98,9 +105,10 @@ class SendTestNotification extends Command
                 $messageType = 'warning';
                 $databaseNotification = new ExpiryWarningNotification($batch); // Prepare DB notification
 
-                $this->info("Dispatching Event and sending DB Notification (Expiry Warning)...");
+                $this->info('Dispatching Event and sending DB Notification (Expiry Warning)...');
             } else {
                 $this->error("Invalid notification type '{$type}'. Use 'low-stock' or 'expiry'.");
+
                 return self::FAILURE;
             }
 
@@ -109,23 +117,25 @@ class SendTestNotification extends Command
             // 1. Dispatch the real-time event via Reverb
             Log::info("Dispatching NewNotificationEvent: UserID={$user->id}, Type='{$messageType}', Msg='{$message}'");
             NewNotificationEvent::dispatch($message, $messageType, $user->id);
-            $this->info("-> NewNotificationEvent dispatched.");
+            $this->info('-> NewNotificationEvent dispatched.');
 
             // 2. Send the database notification
             if ($databaseNotification) {
-                Log::info("Sending Database Notification: UserID={$user->id}, NotificationClass=" . get_class($databaseNotification));
+                Log::info("Sending Database Notification: UserID={$user->id}, NotificationClass=".get_class($databaseNotification));
                 $user->notify($databaseNotification->onQueue('notifications')); // Ensure it uses the queue if desired
-                $this->info("-> Database notification sent.");
+                $this->info('-> Database notification sent.');
             }
             // --- ---
 
         } catch (\Exception $e) {
-            $this->error("Failed processing notification: " . $e->getMessage());
-            Log::error("Error in SendTestNotification command: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->error('Failed processing notification: '.$e->getMessage());
+            Log::error('Error in SendTestNotification command: '.$e->getMessage()."\n".$e->getTraceAsString());
+
             return self::FAILURE;
         }
 
         $this->info("Test notification processing complete for User ID: {$user->id}.");
+
         return self::SUCCESS;
     }
 }

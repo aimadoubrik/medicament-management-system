@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Batch extends Model
 {
-
     use HasFactory;
 
     protected $fillable = [
@@ -16,7 +15,7 @@ class Batch extends Model
         'supplier_id',
         'quantity_received',
         'current_quantity',
-        'manufacture_date',	
+        'manufacture_date',
         'expiry_date',
     ];
 
@@ -38,7 +37,7 @@ class Batch extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function expiringSoon($query,$days = 30)
+    public function expiringSoon($query, $days = 30)
     {
         return $query->where('expiry_date', '<=', now()->addDays($days));
     }

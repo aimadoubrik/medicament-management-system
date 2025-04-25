@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth; // Import Auth facade
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia; // Import Auth facade
 
 class NotificationController extends Controller
 {
@@ -17,7 +17,7 @@ class NotificationController extends Controller
         $notifications = $request->user()->notifications()->latest()->paginate(15); // Paginate results
 
         return Inertia::render('Notifications/Index', [ // Assuming you have a Notifications/Index.tsx page
-            'notifications' => $notifications->through(fn($notification) => [ // Format data for frontend
+            'notifications' => $notifications->through(fn ($notification) => [ // Format data for frontend
                 'id' => $notification->id,
                 'type' => class_basename($notification->type), // e.g., 'LowStockNotification'
                 'data' => $notification->data,
@@ -35,7 +35,7 @@ class NotificationController extends Controller
         $user = Auth::user();
         $notification = $request->user()->notifications()->findOrFail($id);
 
-        if (!$notification->read_at) { // Only mark if unread
+        if (! $notification->read_at) { // Only mark if unread
             $notification->markAsRead();
         }
 
@@ -69,9 +69,10 @@ class NotificationController extends Controller
      */
     public function getUnreadCount(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (!$request->expectsJson()) {
+        if (! $request->expectsJson()) {
             abort(404);
         }
+
         return response()->json([
             'count' => $request->user()->unreadNotifications()->count(),
         ]);
