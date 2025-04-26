@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BarChart2, Hospital, PlusCircle, ChevronRight, HandHeart, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
+import { BarChart2, ChevronRight, Heart, LogInIcon, Pill, ShieldCheck, Stethoscope, Syringe, Thermometer, UserPlus } from 'lucide-react';
 
 function Welcome() {
     const { auth } = usePage<SharedData>().props;

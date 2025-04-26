@@ -50,7 +50,7 @@ export interface FieldConfig<TFormValues extends FieldValues> {
     autoFocus?: boolean;
     dependsOn?: {
         field: Path<TFormValues>;
-        value: any;
+        value: unknown;
         condition?: 'equals' | 'notEquals' | 'contains' | 'notContains';
     };
 }
@@ -118,7 +118,7 @@ export function ResourceForm<TFormValues extends FieldValues>({
                 return parsed.data as DefaultValues<TFormValues>;
             } else {
                 console.warn('Could not generate defaults directly from schema, using basic fallback.', parsed.error.flatten());
-                const basicDefaults: Record<string, any> = {};
+                const basicDefaults: Record<string, unknown> = {};
                 flattenedFields.forEach((field) => {
                     switch (field.type) {
                         case 'text':
@@ -161,7 +161,7 @@ export function ResourceForm<TFormValues extends FieldValues>({
         control,
         reset,
         watch,
-        formState: { errors, isSubmitting, isValid, isDirty, dirtyFields },
+        formState: { errors, isSubmitting, isDirty, dirtyFields },
     } = form;
 
     // Handle focus on first error after submission attempt

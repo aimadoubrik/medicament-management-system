@@ -1,4 +1,4 @@
-import { AppEcho } from '@/app'; // Import your configured Echo instance
+import { AppEcho } from '@/echo'; // Import your configured Echo instance
 import type { NewNotificationEventPayload, PageProps } from '@/types'; // Import types
 import { usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
@@ -30,7 +30,7 @@ export default function NotificationHandler() {
         const privateChannel = AppEcho.private(channelName);
 
         // Add error handling for the subscription itself
-        privateChannel.error((error: any) => {
+        privateChannel.error((error: unknown) => {
             console.error(`NotificationHandler: Echo channel subscription error on ${channelName}:`, error);
             // Potentially show an error to the user or retry logic
         });

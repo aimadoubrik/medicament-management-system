@@ -103,7 +103,7 @@ export function DataTable<TData, TValue>({
         }
 
         // Prepare parameters for the Inertia request
-        const params: Record<string, any> = {
+        const params: Record<string, number | string> = {
             page: pagination.pageIndex + 1, // Send 1-based index to Laravel
             perPage: pagination.pageSize,
         };
@@ -211,7 +211,7 @@ export function DataTable<TData, TValue>({
         setSearchValue(newValue); // Update input display immediately
         debouncedSetGlobalFilter(newValue); // Trigger debounced state update for API call
     };
-    const currentSearchValue = globalFilter;
+    // const currentSearchValue = globalFilter;
 
     // --- Export Logic ---
     // CAVEAT: Exports only the currently displayed page data.

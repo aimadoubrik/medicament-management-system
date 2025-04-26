@@ -13,7 +13,18 @@ import { toast } from 'sonner';
 interface NotificationItem {
     id: string;
     type: string;
-    data: Record<string, any>;
+    data: {
+        message: string;
+        medicine_id: number;
+        medicine_name: string;
+        current_quantity?: number;
+        threshold?: number;
+        expiry_date?: string;
+        current_stock?: number;
+        batch_number?: string;
+        action_url?: string;
+        title?: string;
+    };
     read_at: string | null;
     created_at: string;
 }
@@ -69,7 +80,7 @@ function Pagination({ links }: { links: PaginationLink[] }) {
 }
 // --- End Pagination ---
 
-export default function NotificationsIndex({ auth, notifications }: NotificationsPageProps) {
+export default function NotificationsIndex({ notifications }: NotificationsPageProps) {
     // Type-safe reload function
     const safeReload = (options: CustomReloadOptions) => {
         // TypeScript ignores this specific assignment - more type-safe than 'any'
@@ -150,7 +161,7 @@ export default function NotificationsIndex({ auth, notifications }: Notification
 
         try {
             return new Date(dateString).toLocaleString();
-        } catch (error) {
+        } catch {
             return dateString; // Fallback to original string if parsing fails
         }
     };
@@ -251,7 +262,7 @@ export default function NotificationsIndex({ auth, notifications }: Notification
                                                         {notification.data.expiry_date
                                                             ? new Date(notification.data.expiry_date).toLocaleDateString()
                                                             : 'N/A'}{' '}
-                                                        | Qty: {notification.data.quantity ?? 'N/A'}
+                                                        | Qty: {notification.data.current_quantity ?? 'N/A'}
                                                     </p>
                                                 )}
                                                 {notification.type.includes('LowStock') && (
