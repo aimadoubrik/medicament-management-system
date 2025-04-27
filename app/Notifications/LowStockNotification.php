@@ -3,30 +3,25 @@
 namespace App\Notifications;
 
 use App\Models\Medicine;
-use App\Models\User; // Import User model
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log; // Import Log facade
 
-class LowStockNotification extends Notification implements ShouldQueue // Implement ShouldQueue for background processing
+class LowStockNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public Medicine $medicine;
-    public int $currentStock;
+    public int $lowStockThreshold;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Medicine $medicine)
+    public function __construct(Medicine $medicine, int $lowStockThreshold)
     {
         $this->medicine = $medicine;
-        // Eager load batches to calculate total stock efficiently if not already loaded
-        $this->medicine->loadMissing('batches');
-        $this->currentStock = $this->medicine->totalStock; // Use the accessor
-        Log::info("LowStockNotification created for Medicine ID: {$medicine->id} with stock: {$this->currentStock}"); // Add logging
+        $this->lowStockThreshold = $lowStockThreshold;
     }
 
     /**
@@ -36,43 +31,58 @@ class LowStockNotification extends Notification implements ShouldQueue // Implem
      */
     public function via(object $notifiable): array
     {
-        // Send via email and store in the database
-        return ['mail', 'database'];
+        // Add 'broadcast' to the channels
+        return ['database', 'broadcast'];
     }
 
     /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        $threshold = $this->medicine->stock_alert_threshold ?? config('inventory.default_stock_alert_threshold', 5); // Use medicine specific or default threshold
-
-        return (new MailMessage)
-            ->subject('Low Stock Alert: ' . $this->medicine->name)
-            ->line("Warning: The stock for medicine '{$this->medicine->name}' (ID: {$this->medicine->id}) is low.")
-            ->line("Current Stock: {$this->currentStock}")
-            ->line("Alert Threshold: {$threshold}")
-            ->action('View Medicine', route('medicines.show', $this->medicine)) // Link to the medicine page
-            ->line('Please restock soon.');
-    }
-
-    /**
-     * Get the array representation of the notification.
+     * Get the array representation for database storage.
      *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
-        $threshold = $this->medicine->stock_alert_threshold ?? config('inventory.default_stock_alert_threshold', 5);
-
-        // Data to be stored in the notifications table
+        // This data goes into the 'data' column in the database
         return [
             'medicine_id' => $this->medicine->id,
             'medicine_name' => $this->medicine->name,
-            'current_stock' => $this->currentStock,
-            'stock_threshold' => $threshold,
-            'message' => "Stock for '{$this->medicine->name}' is low ({$this->currentStock}/{$threshold}). Please restock.",
-            'action_url' => route('medicines.show', $this->medicine), // Include relevant URL
+            'current_stock' => $this->medicine->current_total_stock,
+            'threshold' => $this->lowStockThreshold,
+            'message' => "Low stock alert: '{$this->medicine->name}' is at {$this->medicine->current_total_stock} units (threshold: {$this->lowStockThreshold})."
         ];
+    }
+
+    /**
+     * Get the broadcast representation of the notification.
+     * This data is sent via Pusher/Echo.
+     *
+     * @param  object  $notifiable
+     * @return \Illuminate\Notifications\Messages\BroadcastMessage
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        // Structure the data specifically for your frontend toast
+        // The 'toArray' data is automatically included by default,
+        // but defining it explicitly gives more control.
+        return new BroadcastMessage([
+            'type' => 'low_stock', // Add a type identifier for frontend logic
+            'medicine_name' => $this->medicine->name,
+            'current_stock' => $this->medicine->current_total_stock,
+            'threshold' => $this->lowStockThreshold,
+            'message' => "Low stock: '{$this->medicine->name}' ({$this->medicine->current_total_stock}/{$this->lowStockThreshold}).",
+            // Include any other data your frontend needs for the toast
+        ]);
+    }
+
+    /**
+     * Define the event name for broadcasting.
+     * Optional: If not defined, Laravel uses BroadcastNotificationCreated.
+     * You might want a custom event name for easier frontend listening.
+     *
+     * @return string
+     */
+    public function broadcastType(): string
+    {
+        return 'inventory.low_stock';
     }
 }

@@ -19,8 +19,6 @@ class BatchFactory extends Factory
 
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
     public function definition(): array
     {
@@ -32,7 +30,7 @@ class BatchFactory extends Factory
 
         // Create a batch number with medicine name prefix and date
         $namePrefix = strtoupper(substr($medicine->name, 0, 3));
-        $batchNumber = $namePrefix . '-' . date('Ymd') . '-' . $this->faker->unique()->numberBetween(100, 999);
+        $batchNumber = $namePrefix.'-'.date('Ymd').'-'.$this->faker->unique()->numberBetween(100, 999);
 
         return [
             'medicine_id' => $medicine->id,
@@ -68,6 +66,7 @@ class BatchFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $medicine = Medicine::find($attributes['medicine_id']);
+
             return [
                 'current_quantity' => $medicine ? $this->faker->numberBetween(1, $medicine->low_stock_threshold) : 5,
             ];

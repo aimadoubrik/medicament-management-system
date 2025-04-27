@@ -1,0 +1,107 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main, master ] # Adjust branch names if needed
+  pull_request:
+    branches: [ main, master ] # Adjust branch names if needed
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest # Use GitHub-hosted runner
+
+    # Service containers to run dependencies like MySQL
+    services:
+      mysql:
+        image: mysql:8.0 # Use desired MySQL version
+        env:
+          MYSQL_DATABASE: testing_db # Define DB name for tests
+          MYSQL_ROOT_PASSWORD: root_password # Set root password (used below)
+        ports:
+          # Maps port 3306 in the service container to port 3306 on the runner host
+          - 3306:3306
+        options: >- # Health check to wait until MySQL is ready
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    # 1. Check out repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Setup PHP environment
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4' # Specify your project's PHP version
+        extensions: pdo_mysql, bcmath, gd, intl, zip # Add extensions needed by your app
+        coverage: none # Set to pcov or xdebug if you need code coverage reports
+
+    # 3. Setup Node.js environment (for Inertia/React assets)
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '23' # Specify your project's Node.js version
+        cache: 'npm' # Cache npm dependencies based on package-lock.json
+
+    # 4. Cache Composer dependencies
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    # 5. Install Composer Dependencies
+    - name: Install Composer dependencies
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+    # 6. Install NPM Dependencies
+    - name: Install NPM dependencies
+      run: npm ci # 'ci' is generally preferred over 'install' in CI for speed and reliability
+
+    # (Optional but recommended) Build assets if your tests rely on them
+    # - name: Build frontend assets
+    #   run: npm run build
+
+    # 7. Prepare Environment File for Testing
+    - name: Copy .env file
+      # Create a .env.ci file in your repo root specifically for GitHub Actions
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      # Or better: copy a dedicated CI environment file if it exists
+      # run: cp .env.ci .env
+
+    # 8. Generate Application Key
+    - name: Generate app key
+      run: php artisan key:generate
+
+    # 9. Run Database Migrations
+    - name: Run migrations
+      env: # Set environment variables for the database connection
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1 # Use localhost/127.0.0.1 to connect to the service container
+        DB_PORT: 3306 # Port defined in the service block
+        DB_DATABASE: testing_db # Database name defined in the service block
+        DB_USERNAME: root # User defined in the service block (using root for simplicity here)
+        DB_PASSWORD: root_password # Password defined in the service block
+        APP_ENV: testing # Ensure Laravel uses the testing environment
+      run: php artisan migrate --force # Use --force to run migrations in non-interactive mode
+
+    # 10. Run PHPUnit Tests
+    - name: Execute tests (PHPUnit)
+      env: # Pass the same DB environment variables to the test execution step
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: testing_db
+        DB_USERNAME: root
+        DB_PASSWORD: root_password
+        APP_ENV: testing
+      run: php artisan test
+      # Or if you run phpunit directly: vendor/bin/phpunit

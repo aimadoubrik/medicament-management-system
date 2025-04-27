@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Medicine;
 use App\Models\Category;
+use App\Models\Medicine;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MedicineFactory extends Factory
@@ -17,8 +17,6 @@ class MedicineFactory extends Factory
 
     /**
      * Define the model's default state.
-     *
-     * @return array
      */
     public function definition(): array
     {
@@ -28,7 +26,7 @@ class MedicineFactory extends Factory
         $medicineName = $this->faker->unique()->word();
 
         return [
-            'name' => ucfirst($medicineName) . ' ' . $this->faker->randomElement($strengths),
+            'name' => ucfirst($medicineName).' '.$this->faker->randomElement($strengths),
             'generic_name' => ucfirst($this->faker->word()),
             'manufacturer' => $this->faker->company(),
             'strength' => $this->faker->randomElement($strengths),

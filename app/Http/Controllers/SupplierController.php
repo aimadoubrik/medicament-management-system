@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Schema;
-
 use App\Models\Supplier;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Inertia\Inertia;
 
 class SupplierController extends Controller
 {
@@ -27,7 +26,6 @@ class SupplierController extends Controller
 
         $query = Supplier::query();
 
-
         // --- Filtering ---
         $filterValue = $request->input('filter');
         $filterColumn = $request->input('filterBy', 'name'); // Default filter column
@@ -36,7 +34,7 @@ class SupplierController extends Controller
         // Ensure the filter column exists to prevent errors
         if ($filterValue && $filterColumn && Schema::hasColumn('suppliers', $filterColumn)) {
             // Use 'where' for exact match or 'like' for partial match
-            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+            $query->where($filterColumn, 'like', '%'.$filterValue.'%');
         }
 
         // --- Sorting ---

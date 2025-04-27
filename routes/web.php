@@ -1,15 +1,14 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicineController;
-use App\Http\Controllers\StockController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -43,5 +42,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

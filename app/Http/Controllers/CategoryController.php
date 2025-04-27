@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
@@ -25,7 +25,6 @@ class CategoryController extends Controller
 
         $query = Category::query();
 
-
         // --- Filtering ---
         $filterValue = $request->input('filter');
         $filterColumn = $request->input('filterBy', 'name'); // Default filter column
@@ -34,7 +33,7 @@ class CategoryController extends Controller
         // Ensure the filter column exists to prevent errors
         if ($filterValue && $filterColumn && Schema::hasColumn('categories', $filterColumn)) {
             // Use 'where' for exact match or 'like' for partial match
-            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+            $query->where($filterColumn, 'like', '%'.$filterValue.'%');
         }
 
         // --- Sorting ---
