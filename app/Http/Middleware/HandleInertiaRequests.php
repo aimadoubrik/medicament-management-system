@@ -5,8 +5,8 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -71,7 +71,7 @@ class HandleInertiaRequests extends Middleware
                 $jsonTranslations = json_decode(File::get($jsonLangPath), true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     // Handle potential JSON decoding error
-                    report(new \Exception("Error decoding JSON language file: {$jsonLangPath}. Error: " . json_last_error_msg()));
+                    report(new \Exception("Error decoding JSON language file: {$jsonLangPath}. Error: ".json_last_error_msg()));
                     $jsonTranslations = [];
                 }
             }
@@ -87,7 +87,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'ziggy' => fn(): array => [
+            'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],

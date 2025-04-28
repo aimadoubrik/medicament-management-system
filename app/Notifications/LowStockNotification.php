@@ -13,6 +13,7 @@ class LowStockNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public Medicine $medicine;
+
     public int $lowStockThreshold;
 
     /**
@@ -48,16 +49,13 @@ class LowStockNotification extends Notification implements ShouldQueue
             'medicine_name' => $this->medicine->name,
             'current_stock' => $this->medicine->current_total_stock,
             'threshold' => $this->lowStockThreshold,
-            'message' => "Low stock alert: '{$this->medicine->name}' is at {$this->medicine->current_total_stock} units (threshold: {$this->lowStockThreshold})."
+            'message' => "Low stock alert: '{$this->medicine->name}' is at {$this->medicine->current_total_stock} units (threshold: {$this->lowStockThreshold}).",
         ];
     }
 
     /**
      * Get the broadcast representation of the notification.
      * This data is sent via Pusher/Echo.
-     *
-     * @param  object  $notifiable
-     * @return \Illuminate\Notifications\Messages\BroadcastMessage
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
@@ -78,8 +76,6 @@ class LowStockNotification extends Notification implements ShouldQueue
      * Define the event name for broadcasting.
      * Optional: If not defined, Laravel uses BroadcastNotificationCreated.
      * You might want a custom event name for easier frontend listening.
-     *
-     * @return string
      */
     public function broadcastType(): string
     {

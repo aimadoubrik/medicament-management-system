@@ -7,11 +7,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             abort(400);
         }
         Session::put('locale', $locale);
+
         // Clear cached translations for the new locale if necessary,
         // although the middleware cache key includes locale, so it might reload automatically.
         // Cache::forget("translations_{$locale}");
@@ -57,5 +58,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('locale.set');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

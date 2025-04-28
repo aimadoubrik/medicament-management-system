@@ -51,16 +51,13 @@ class ExpiryWarningNotification extends Notification implements ShouldQueue
             'medicine_name' => $medicineName,
             'expiry_date' => $expiryDateFormatted,
             'current_quantity' => $this->batch->current_quantity,
-            'message' => "Expiry warning: Batch #{$this->batch->batch_number} of '{$medicineName}' expires on {$expiryDateFormatted}."
+            'message' => "Expiry warning: Batch #{$this->batch->batch_number} of '{$medicineName}' expires on {$expiryDateFormatted}.",
         ];
     }
 
     /**
      * Get the broadcast representation of the notification.
      * This data is sent via Pusher/Echo.
-     *
-     * @param  object  $notifiable
-     * @return \Illuminate\Notifications\Messages\BroadcastMessage
      */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
@@ -78,12 +75,10 @@ class ExpiryWarningNotification extends Notification implements ShouldQueue
         ]);
     }
 
-     /**
-      * Define the event name for broadcasting.
-      * Optional: If not defined, Laravel uses BroadcastNotificationCreated.
-      *
-      * @return string
-      */
+    /**
+     * Define the event name for broadcasting.
+     * Optional: If not defined, Laravel uses BroadcastNotificationCreated.
+     */
     public function broadcastType(): string
     {
         return 'inventory.expiry_warning';

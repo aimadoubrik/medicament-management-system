@@ -45,6 +45,7 @@ class CheckInventoryNotifications extends Command
         if ($admins->isEmpty()) {
             $this->warn('No Admin or Superadmin users found. Skipping notification checks.');
             Log::warning('CheckInventoryNotifications: No Admin/Superadmin users found.');
+
             return self::SUCCESS;
         }
 
@@ -56,12 +57,13 @@ class CheckInventoryNotifications extends Command
         $potentiallyLowStock = Medicine::whereHas('batches', function ($q) {
             $q->where('current_quantity', '>', 0); // Only consider batches with stock
         })
-        ->withSum('batches as current_total_stock', 'current_quantity')
-        ->get();
+            ->withSum('batches as current_total_stock', 'current_quantity')
+            ->get();
 
         // Filter medicines whose total stock is at or below their threshold
         $lowStockMedicines = $potentiallyLowStock->filter(function ($medicine) use ($lowStockThreshold) {
             $threshold = $medicine->low_stock_threshold ?? $lowStockThreshold; // Use specific or default threshold
+
             return $medicine->current_total_stock !== null && $medicine->current_total_stock <= $threshold;
         });
 
@@ -96,7 +98,7 @@ class CheckInventoryNotifications extends Command
             $this->info("Found {$expiringBatches->count()} expiring batches. Notifying admins...");
             foreach ($expiringBatches as $batch) {
                 // Ensure medicine relationship is loaded (though `with` should handle this)
-                if (!$batch->relationLoaded('medicine') && $batch->medicine_id) {
+                if (! $batch->relationLoaded('medicine') && $batch->medicine_id) {
                     $batch->load('medicine');
                 }
 
