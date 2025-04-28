@@ -1,0 +1,130 @@
+{
+    "common": {
+        "title": "Titre",
+        "loading": "Chargement...",
+        "error": "Une erreur s'est produite",
+        "success": "Succès",
+        "warning": "Avertissement",
+        "info": "Info",
+        "open_menu": "Ouvrir le menu",
+        "actions": "Actions",
+        "yes": "Oui",
+        "no": "Non",
+        "ok": "D'accord",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "save": "Enregistrer",
+        "saved": "Enregistré",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "view": "Voir",
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "sort": "Trier",
+        "select": "Sélectionner",
+        "add": "Ajouter",
+        "create": "Créer",
+        "update": "Mettre à jour",
+        "reset": "Réinitialiser",
+        "submit": "Soumettre",
+        "password": "Mot de passe",
+        "password_placeholder": "Mot de passe",
+        "confirm": "Confirmer",
+        "confirm_delete": "Confirmer la suppression",
+        "delete_success": "Suppression effectuée avec succесс",
+        "delete_error": "Une erreur s'est produite lors de la suppression",
+        "language": {
+            "english": "Anglais",
+            "french": "Français"
+        },
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système"
+    },
+    "categories": {
+        "table": {
+            "headers": {
+                "id": "ID",
+                "name": "Nom",
+                "description": "Déscription",
+                "created_at": "Crée le",
+                "updated_at": "Mis à jour le"
+            }
+        },
+        "form": {
+            "name": "Nom",
+            "description": "Description",
+            "submit": "Soumettre",
+            "cancel": "Annuler",
+            "reset": "Réinitialiser"
+        },
+        "modal": {
+            "title": "Formulaire de Catégorie",
+            "add": "Ajouter une Catégorie",
+            "edit": "Modifier la Catégorie",
+            "show": "Voir la Catégorie",
+            "delete": "Supprimer la Catégorie",
+            "delete_confirmation": "Etes-vous sur de vouloir supprimer cette catégorie?",
+            "delete_success": "Catégorie supprimée avec succесс",
+            "delete_error": "Une erreur s'est produite lors de la suppression de la catégorie"
+        }
+    },
+    "pages": {
+        "settings": {
+            "title": "Paramètres",
+            "description": "Gérer votre profil et les paramètres du compte",
+            "profile": {
+                "head_title": "Paramètres du profil",
+                "nav_title": "Profil",
+                "title": "Informations du profil",
+                "description": "Mettre à jour votre nom et adresse email",
+                "name": "Nom",
+                "name_placeholder": "Nom complet",
+                "email": "Adresse email",
+                "email_placeholder": "Adresse email",
+                "unverified_email": "Votre adresse email n'est pas encore verifiée.",
+                "unverified_email_resend": "Cliquez ici pour renvoyer l'email de verification.",
+                "unverified_email_success": "Un nouveau lien de verification a été envoyé à votre adresse email.",
+                "delete_account": "Supprimer le compte",
+                "delete_description": "Supprimer votre compte et toutes ses ressources",
+                "delete_button": "Supprimer le compte",
+                "warning_label": "Avertissement",
+                "warning_message": "Veuillez procéder avec prudence, cette action est irréversible.",
+                "confirm_delete": "Êtes-vous sûr de vouloir supprimer votre compte ?",
+                "delete_warning": "Une fois votre compte supprimé, toutes ses ressources et données seront définitivement supprimées. Veuillez saisir votre mot de passe pour confirmer que vous souhaitez supprimer définitivement votre compte."
+            },
+            "password": {
+                "head_title": "Paramètres du mot de passe",
+                "nav_title": "Mot de passe",
+                "title": "Mettre à jour le mot de passe",
+                "description": "Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester sécurisé",
+                "current_password": "Mot de passe actuel",
+                "current_password_placeholder": "Mot de passe actuel",
+                "new_password": "Nouveau mot de passe",
+                "new_password_placeholder": "Nouveau mot de passe",
+                "confirm_password": "Confirmer le nouveau mot de passe",
+                "confirm_password_placeholder": "Confirmer le nouveau mot de passe",
+                "save_password": "Enregistrer le mot de passe",
+                "update_success": "Mot de passe changé avec succès",
+                "update_error": "Une erreur s'est produite lors du changement de mot de passe"
+            },
+            "appearance": {
+                "nav_title": "Apparence",
+                "head_title": "Paramètres d'apparence",
+                "title": "Personnaliser l'apparence",
+                "description": "Mettre à jour les paramètres d'apparence de votre compte",
+                "theme": "Thème",
+                "save_success": "Paramètres d'apparence enregistrés avec succès",
+                "save_error": "Une erreur s'est produite lors de l'enregistrement des paramètres d'apparence"
+            },
+            "preferences": {
+                "nav_title": "Préférences",
+                "title": "Préférences de l'application",
+                "description": "Gérer vos préférences d'application",
+                "languages": "Langues",
+                "save_success": "Préférences enregistrées avec succès",
+                "save_error": "Une erreur s'est produite lors de l'enregistrement des préférences"
+            }
+        }
+    }
+}

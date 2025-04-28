@@ -5,26 +5,63 @@ import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
+import { useIntl } from 'react-intl';
 
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: '/settings/profile',
-        icon: null,
-    },
-    {
-        title: 'Password',
-        href: '/settings/password',
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: '/settings/appearance',
-        icon: null,
-    },
-];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+
+    // --- Internationalization (i18n) Setup ---
+    const intl = useIntl();
+
+    const settingsTitle = intl.formatMessage({
+        id: 'pages.settings.title',
+        defaultMessage: 'Settings',
+    });
+    const settingsDescription = intl.formatMessage({
+        id: 'pages.settings.description',
+        defaultMessage: 'Manage your profile and account settings',
+    });
+    const profileTitle = intl.formatMessage({
+        id: 'pages.settings.profile.nav_title',
+        defaultMessage: 'Profile',
+    });
+    const passwordTitle = intl.formatMessage({
+        id: 'pages.settings.password.nav_title',
+        defaultMessage: 'Password',
+    });
+    const appearanceTitle = intl.formatMessage({
+        id: 'pages.settings.appearance.nav_title',
+        defaultMessage: 'Appearance',
+    });
+    const preferencesTitle = intl.formatMessage({
+        id: 'pages.settings.preferences.nav_title',
+        defaultMessage: 'Preferences',
+    });
+
+
+    const sidebarNavItems: NavItem[] = [
+        {
+            title: profileTitle,
+            href: '/settings/profile',
+            icon: null,
+        },
+        {
+            title: passwordTitle,
+            href: '/settings/password',
+            icon: null,
+        },
+        {
+            title: appearanceTitle,
+            href: '/settings/appearance',
+            icon: null,
+        },
+        {
+            title: preferencesTitle,
+            href: '/settings/preferences',
+            icon: null,
+        },
+    ];
+
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
         return null;
@@ -34,7 +71,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="px-4 py-6">
-            <Heading title="Settings" description="Manage your profile and account settings" />
+            <Heading title={settingsTitle} description={settingsDescription} />
 
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">

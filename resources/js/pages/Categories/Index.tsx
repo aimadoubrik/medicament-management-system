@@ -1,39 +1,21 @@
 import { DataTable } from '@/components/data-table';
 import { CategoryDetails } from '@/components/details/CategoryDetails';
 import { ResourceForm } from '@/components/forms/ResourceForm';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DialogClose } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Modal } from '@/components/ui/Modal';
 import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { CategoryFormData } from '@/schemas/category';
 import { Category as CategoryType, PageProps, PaginatedResponse } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { ColumnDef } from '@tanstack/react-table';
-import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
-import { categoryColumns as baseCategoryColumns, categoryColumnVisibility } from './table-definition';
+import { getCategoryColumns, categoryColumnVisibility } from './table-definition';
+import { FormattedMessage, useIntl } from 'react-intl';
+import { route } from 'ziggy-js';
 
 // Define the props specific to this page
 interface CategoriesIndexProps extends PageProps {
@@ -41,18 +23,36 @@ interface CategoriesIndexProps extends PageProps {
 }
 
 export default function Index({ categories: paginatedCategories }: CategoriesIndexProps) {
-    // Modal state management
+
+
+    // --- Internationalization (i18n) Setup ---
+    const intl = useIntl();
+
+    const updateButtonText = intl.formatMessage({
+        id: 'common.update',
+        defaultMessage: 'Update Category'
+    });
+    const createButtonText = intl.formatMessage({
+        id: 'common.create',
+        defaultMessage: 'Create Category',
+    });
+    const cancelButtonText = intl.formatMessage({
+        id: 'common.cancel',
+        defaultMessage: 'Cancel',
+    });
+
+    
+
+
+    // --- State and Modal Logic (remains the same) ---
     const [modalState, setModalState] = useState<{
         mode: 'create' | 'edit' | 'show' | null;
         data: CategoryType | null;
     }>({ mode: null, data: null });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // sonner's toast is used directly, no hook needed
-
     const isModalOpen = modalState.mode !== null;
     const isEditing = modalState.mode === 'edit';
 
-    // --- Modal Control Functions ---
     const openModal = useCallback((mode: 'create' | 'edit' | 'show', data: CategoryType | null = null) => {
         setModalState({ mode, data });
     }, []);
@@ -62,15 +62,16 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
         setIsSubmitting(false);
     };
 
-    // --- Get Form Definition ---
+    // --- Form Definition Logic (remains the same) ---
     const categoryFormDefinition = resourceFormDefinitions.categories;
     const categorySchema = categoryFormDefinition.schema;
     const categoryFieldConfig = useMemo(() => {
         return categoryFormDefinition.fields;
     }, [categoryFormDefinition]);
 
-    // --- Form Submission Handler ---
+    // --- Form Submission Handler (remains the same) ---
     const handleFormSubmit: SubmitHandler<CategoryFormData> = (formData) => {
+        // ... (submission logic)
         setIsSubmitting(true);
         const url = isEditing ? route('categories.update', modalState.data!.id) : route('categories.store');
         const method = isEditing ? 'put' : 'post';
@@ -94,132 +95,59 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
         });
     };
 
-    // --- Define Table Columns, modifying the actions cell from table-definition ---
-    const columns: ColumnDef<CategoryType>[] = useMemo(() => {
-        // Find the actions column definition from the base file
-        const actionsColumnDef = baseCategoryColumns.find((col) => col.id === 'actions');
-        if (!actionsColumnDef || !actionsColumnDef.cell) {
-            console.warn('Actions column definition not found or is invalid in table-definition.tsx');
-            return baseCategoryColumns; // Return base columns if actions are missing
-        }
+    // --- Generate Table Columns by CALLING the imported function ---
+    // Pass the necessary functions (openModal, router, route) from this component's scope
+    const columns = useMemo(() => getCategoryColumns({
+        openModal,
+        router, // Pass the imported router instance
+        route,  // Pass the imported route function
+    }), [openModal]); // Recalculate only if openModal changes (stable due to useCallback)
 
-        // Create a new actions column definition that calls openModal
-        const modifiedActionsColumn: ColumnDef<CategoryType> = {
-            ...actionsColumnDef, // Copy other properties like id
-            cell: ({ row }) => {
-                // Override the cell renderer
-                const category = row.original;
-                return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {/* Modified View Item */}
-                            <DropdownMenuItem onClick={() => openModal('show', category)}>
-                                <Eye className="mr-2 h-4 w-4" /> {/* Add margin */}
-                                <span>View</span>
-                            </DropdownMenuItem>
-                            {/* Modified Edit Item */}
-                            <DropdownMenuItem onClick={() => openModal('edit', category)}>
-                                <Pencil className="mr-2 h-4 w-4" /> {/* Add margin */}
-                                <span>Edit</span>
-                            </DropdownMenuItem>
-                            {/* Delete Item with AlertDialog (Structure from your table-definition) */}
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onSelect={(e) => e.preventDefault()} // Important to prevent auto-close
-                                    >
-                                        <Trash className="mr-2 h-4 w-4" /> {/* Add margin */}
-                                        <span>Delete</span>
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the category "{category.name}".
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => {
-                                                // Keep the delete logic here
-                                                router.delete(route('categories.destroy', category.id), {
-                                                    preserveScroll: true,
-                                                    onSuccess: () => toast.success('Category deleted successfully'),
-                                                    onError: (errors) =>
-                                                        toast.error('Error deleting category', {
-                                                            description: Object.values(errors).flat().join(' '),
-                                                        }),
-                                                });
-                                            }}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                            Delete
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                );
-            },
-        };
-
-        // Return all columns except the original actions column, plus the modified one
-        return [...baseCategoryColumns.filter((col) => col.id !== 'actions'), modifiedActionsColumn];
-    }, [openModal]); // Dependency on openModal
-
-    // --- Modal Title Logic ---
+    // --- Modal Title Logic (remains the same) ---
     const getModalTitle = () => {
+        // ... (modal title logic)
         switch (modalState.mode) {
             case 'create':
-                return 'Add New Category';
+                return <FormattedMessage id="categories.modal.create" defaultMessage="Add New Category" />;
             case 'edit':
-                return `Edit Category: ${modalState.data?.name ?? ''}`;
+                return <FormattedMessage id="categories.modal.edit" defaultMessage="Edit Category: {categoryName}" values={{ categoryName: modalState.data?.name ?? '' }} />;
             case 'show':
-                return `Category Details: ${modalState.data?.name ?? ''}`;
+                return <FormattedMessage id="categories.modal.show" defaultMessage="Category Details: {categoryName}" values={{ categoryName: modalState.data?.name ?? '' }} />;
             default:
                 return '';
         }
     };
 
+    // --- JSX Rendering ---
     return (
-        <AppLayout breadcrumbs={[{ title: 'Categories', href: '/categories' }]}>
+        <AppLayout breadcrumbs={[{ title: 'Categories', href: route('categories.index') }]}>
             <Head title="Categories" />
             <div className="container mx-auto p-4">
                 <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Categories</h1>
+                    <h1 className="text-2xl font-bold">
+                        <FormattedMessage id="categories.index.title" defaultMessage="Categories" />
+                    </h1>
                     <Button onClick={() => openModal('create')}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Category
+                        <FormattedMessage id="categories.button.add" defaultMessage="Add Category" />
                     </Button>
                 </div>
 
-                {/* Data Table */}
+                {/* Data Table - Pass the generated columns */}
                 <DataTable
-                    columns={columns}
+                    columns={columns} // Use the columns generated by getCategoryColumns
                     paginatedData={paginatedCategories}
                     searchKey="name"
                     searchPlaceholder="Search categories..."
                     inertiaVisitUrl={route('categories.index')}
                     inertiaDataPropName="categories"
-                    initialVisibility={categoryColumnVisibility}
+                    initialVisibility={categoryColumnVisibility} // Use imported visibility
                     pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`categories-${new Date().toISOString().split('T')[0]}`}
                 />
             </div>
 
-            {/* Reusable Modal */}
+            {/* Reusable Modal (remains the same) */}
             <Modal
                 title={getModalTitle()}
                 isOpen={isModalOpen}
@@ -228,13 +156,12 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
                     modalState.mode === 'show' ? (
                         <DialogClose asChild>
                             <Button type="button" variant="secondary" onClick={closeModal}>
-                                Close
+                                <FormattedMessage id="common.close" defaultMessage="Close" />
                             </Button>
                         </DialogClose>
                     ) : null
                 }
             >
-                {/* Conditionally Render Form or Details View */}
                 {(modalState.mode === 'create' || modalState.mode === 'edit') && (
                     <ResourceForm
                         schema={categorySchema}
@@ -243,10 +170,10 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
                         onSubmit={handleFormSubmit}
                         onCancel={closeModal}
                         isLoading={isSubmitting}
-                        submitButtonText={isEditing ? 'Update Category' : 'Create Category'}
+                        submitButtonText={isEditing ? createButtonText : updateButtonText}
+                        cancelButtonText={cancelButtonText}
                     />
                 )}
-
                 {modalState.mode === 'show' && modalState.data && <CategoryDetails category={modalState.data} />}
             </Modal>
         </AppLayout>

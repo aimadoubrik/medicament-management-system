@@ -4,6 +4,9 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -39,6 +42,44 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // 1. Determine Locale (Example: from session, fallback to config)
+        $locale = $request->session()->get('locale', config('app.locale', 'en'));
+        App::setLocale($locale); // Set Laravel's locale
+
+        // 2. Load Translation Messages
+        $messages = Cache::rememberForever("translations_{$locale}", function () use ($locale) {
+            $phpTranslations = [];
+            $jsonTranslations = [];
+
+            // Load PHP language files (optional, if you use them)
+            // Example: lang/en/validation.php -> validation.key = value
+            $phpLangPath = lang_path($locale);
+            if (File::isDirectory($phpLangPath)) {
+                // Adjust based on how deep your PHP files go
+                // This example loads top-level php files in the locale directory
+                foreach (File::files($phpLangPath) as $file) {
+                    if ($file->getExtension() === 'php') {
+                        $key = $file->getFilenameWithoutExtension();
+                        $phpTranslations[$key] = require $file->getPathname();
+                    }
+                }
+            }
+
+            // Load JSON language file (lang/en.json -> key = value)
+            $jsonLangPath = lang_path("{$locale}.json");
+            if (File::exists($jsonLangPath)) {
+                $jsonTranslations = json_decode(File::get($jsonLangPath), true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    // Handle potential JSON decoding error
+                    report(new \Exception("Error decoding JSON language file: {$jsonLangPath}. Error: " . json_last_error_msg()));
+                    $jsonTranslations = [];
+                }
+            }
+
+            // Merge PHP and JSON translations (JSON takes precedence for duplicate keys)
+            return array_merge($phpTranslations, $jsonTranslations);
+        });
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -46,11 +87,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'ziggy' => fn (): array => [
+            'ziggy' => fn(): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'sidebarOpen' => $request->cookie('sidebar_state') === 'true',
+            'locale' => $locale,
+            'messages' => $messages,
         ];
     }
 }
