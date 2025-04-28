@@ -20,7 +20,6 @@ interface BroadcastNotificationPayload {
     // ... any other data you send
 }
 
-
 export default function NotificationHandler() {
     const { auth } = usePage<PageProps>().props;
     const userId = auth.user?.id;
@@ -56,20 +55,21 @@ export default function NotificationHandler() {
             // The 'type' property here comes directly from the payload you defined
             // in toBroadcast (e.g., 'low_stock', 'expiry_warning')
             if (notification.message) {
-                 // Determine toast type based on the custom 'type' field from payload
-                 switch (notification.type) {
+                // Determine toast type based on the custom 'type' field from payload
+                switch (notification.type) {
                     case 'low_stock':
-                    case 'expiry_warning':
-                        // You could add more specific details to the toast description
-                        { let description = `Medicine: ${notification.medicine_name || 'N/A'}`;
-                        if(notification.batch_number) {
+                    case 'expiry_warning': // You could add more specific details to the toast description
+                    {
+                        let description = `Medicine: ${notification.medicine_name || 'N/A'}`;
+                        if (notification.batch_number) {
                             description += `, Batch: ${notification.batch_number}`;
                         }
                         toast.warning(notification.message, {
                             description: description,
                             duration: 10000, // Example duration
                         });
-                        break; }
+                        break;
+                    }
                     // Add cases for other custom notification types you might have
                     // case 'some_other_type':
                     //     toast.info(notification.message);
@@ -85,7 +85,6 @@ export default function NotificationHandler() {
                 // Optionally show a generic toast if message is missing but payload exists
                 toast.info('You have a new notification.');
             }
-
 
             // Dispatch event to update UI elements like notification count
             window.dispatchEvent(new CustomEvent('refetch-notification-count'));

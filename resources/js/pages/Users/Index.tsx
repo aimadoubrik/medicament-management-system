@@ -26,7 +26,7 @@ import { Modal } from '@/components/ui/Modal';
 import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { UserFormData } from '@/schemas/user';
-import { Role, User as UserType, PageProps, PaginatedResponse } from '@/types';
+import { PageProps, PaginatedResponse, Role, User as UserType } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';

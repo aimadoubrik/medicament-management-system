@@ -13,9 +13,36 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useIntl } from 'react-intl';
 import { toast } from 'sonner';
 
 export function NotificationBell() {
+    // --- Internationalization (i18n) Setup ---
+    // --- Internationalization (i18n) Setup ---
+    const intl = useIntl();
+
+    const notificationsText = intl.formatMessage({
+        id: 'notifications_bell.notifications',
+        defaultMessage: 'Notifications',
+    });
+    const markAllAsReadText = intl.formatMessage({
+        id: 'notifications_bell.mark_all_as_read',
+        defaultMessage: 'Mark all as read',
+    });
+    const viewAllNotificationsText = intl.formatMessage({
+        id: 'notifications_bell.view_all_notifications',
+        defaultMessage: 'View all notifications',
+    });
+    const markAllReadSuccessText = intl.formatMessage({
+        id: 'notifications_bell.all_marked_as_read_success',
+        defaultMessage: 'All notifications marked as read.',
+    });
+    const markAllReadErrorText = intl.formatMessage({
+        id: 'notifications_bell.all_marked_as_read_error',
+        defaultMessage: 'Failed to mark all notifications as read.',
+    });
+    // --- End of Internationalization (i18n) Setup ---
+
     // Use usePage hook if you need user info for *other* reasons in this component
     // const { auth } = usePage<PageProps>().props;
     // const userId = auth.user?.id;
@@ -82,13 +109,13 @@ export function NotificationBell() {
                 onSuccess: () => {
                     setUnreadCount(0); // Definite update on success
                     setIsOpen(false);
-                    toast.success('All notifications marked as read.');
+                    toast.success(markAllReadSuccessText);
                     // Reload notification list if it's part of shared props
                     router.reload({ only: ['notifications'] });
                 },
                 onError: (errors) => {
                     console.error('Failed to mark all notifications as read:', errors);
-                    toast.error('Failed to mark all notifications as read.');
+                    toast.error(markAllReadErrorText);
                     // Revert optimistic update if used
                     // setUnreadCount(previousCount);
                 },
@@ -109,19 +136,19 @@ export function NotificationBell() {
                             variant="destructive"
                             className="absolute -top-0.5 -right-1 flex min-w-[1.2rem] items-center justify-center rounded-full px-1 text-xs"
                         >
-                            {unreadCount > 9 ? '9+' : unreadCount}
+                            {unreadCount > 99 ? '9+' : unreadCount}
                         </Badge>
                     )}
-                    <span className="sr-only">Notifications</span>
+                    <span className="sr-only">{notificationsText}</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuLabel>{notificationsText}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                     {/* Ensure link closes dropdown on navigation */}
                     <Link href={route('notifications.index')} onClick={() => setIsOpen(false)} className="w-full cursor-pointer">
-                        View All Notifications
+                        {viewAllNotificationsText}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -133,7 +160,7 @@ export function NotificationBell() {
                     className="cursor-pointer" // Ensure it looks clickable
                 >
                     <CheckCheck className="mr-2 h-4 w-4" />
-                    <span>Mark all as read</span>
+                    <span>{markAllAsReadText}</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

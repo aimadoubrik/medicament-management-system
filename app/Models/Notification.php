@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 // Or use a standard Eloquent model if extending DatabaseNotification isn't desired
 use Illuminate\Database\Eloquent\Model;
 
-
 // Option 1: Extend the base DatabaseNotification model (Recommended for standard features)
 // class Notification extends \Illuminate\Notifications\DatabaseNotification
 

@@ -1,5 +1,5 @@
 import { FieldConfig } from '@/components/forms/ResourceForm';
-import { Category, Medicine, Supplier, Role } from '@/types';
+import { Category, Medicine, Role, Supplier } from '@/types';
 
 // --- Import Schemas ---
 import { BatchFormData, batchSchema } from '@/schemas/batch';

@@ -7,6 +7,7 @@ import { PageProps, PaginatedResponse } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { AlertTriangle, BellRing, CheckCheck, Inbox, ListCheck, Package, Trash } from 'lucide-react';
 import React, { useEffect } from 'react'; // Import useEffect
+import { useIntl } from 'react-intl';
 import { toast } from 'sonner';
 
 // Define NotificationData structure (ensure this matches your backend data)
@@ -86,6 +87,34 @@ function Pagination({ links }: { links: PaginationLink[] }) {
 // --- End Pagination ---
 
 export default function NotificationsIndex({ notifications }: NotificationsPageProps) {
+    // --- Internationalization (i18n) Setup ---
+    const intl = useIntl();
+    const notificationsHeadTitle = intl.formatMessage({
+        id: 'pages.notifications.head_title',
+        defaultMessage: 'Notifications',
+    });
+    const notificationsNavTitle = intl.formatMessage({
+        id: 'pages.notifications.nav_title',
+        defaultMessage: 'Notifications',
+    });
+    const notificationsTitle = intl.formatMessage({
+        id: 'pages.notifications.title',
+        defaultMessage: 'Vos Notifications',
+    });
+    const markAsReadTooltip = intl.formatMessage({
+        id: 'pages.notifications.mark_as_read',
+        defaultMessage: 'Mark as read',
+    });
+    const markAllAsReadTooltip = intl.formatMessage({
+        id: 'pages.notifications.mark_all_as_read',
+        defaultMessage: 'Mark all as read',
+    });
+    const deleteAllTooltip = intl.formatMessage({
+        id: 'pages.notifications.delete_all_notifications',
+        defaultMessage: 'Delete all notifications',
+    });
+    // --- End of Internationalization (i18n) Setup ---
+
     // Type-safe reload function
     const safeReload = (options: CustomReloadOptions) => {
         // Use router.reload with the specified options
@@ -116,7 +145,6 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
     }, []); // Empty dependency array ensures this runs only once on mount/unmount
 
     // --- End useEffect ---
-
 
     const handleMarkAsRead = (notificationId: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation(); // Prevent row click if button is clicked
@@ -166,7 +194,7 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
                     safeReload({ only: ['notifications'], preserveState: true, preserveScroll: true });
                 },
                 onError: () => toast.error('Failed to delete all notifications.'),
-                 // Don't preserve state on delete usually, as the list is now empty/different
+                // Don't preserve state on delete usually, as the list is now empty/different
                 preserveScroll: true,
             },
         );
@@ -186,7 +214,8 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
     const formatDate = (dateString: string | null) => {
         if (!dateString) return null;
         try {
-            return new Intl.DateTimeFormat(undefined, { // Use browser's default locale
+            return new Intl.DateTimeFormat(undefined, {
+                // Use browser's default locale
                 dateStyle: 'short',
                 timeStyle: 'short',
             }).format(new Date(dateString));
@@ -198,15 +227,15 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
     const hasUnread = notifications.data.some((n) => !n.read_at);
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Notifications', href: route('notifications.index') }]}>
-            <Head title="Notifications" />
+        <AppLayout breadcrumbs={[{ title: notificationsNavTitle, href: route('notifications.index') }]}>
+            <Head title={notificationsHeadTitle} />
 
             <div className="py-6 md:py-12">
                 <div className="mx-auto max-w-4xl space-y-6 sm:px-6 lg:px-8">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
                             <div>
-                                <CardTitle>Your Notifications</CardTitle>
+                                <CardTitle>{notificationsTitle}</CardTitle>
                             </div>
                             <div className="flex items-center gap-2">
                                 {/* Mark All Read Button */}
@@ -226,7 +255,7 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
                                                     <ListCheck className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Mark all as read</TooltipContent>
+                                            <TooltipContent>{markAllAsReadTooltip}</TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
                                 )}
@@ -243,7 +272,7 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
                                                 <Trash className="h-4 w-4" />
                                             </Button>
                                         </TooltipTrigger>
-                                        <TooltipContent>Delete all notifications</TooltipContent>
+                                        <TooltipContent>{deleteAllTooltip}</TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
                             </div>
@@ -271,15 +300,22 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
                                                 {/* Title (derived from type or data) */}
                                                 <p className="text-sm leading-tight font-medium">
                                                     {notification.type.includes('LowStockNotification') && notification.data.medicine_name && (
-                                                        <span>Low Stock: <span className="font-semibold">{notification.data.medicine_name}</span></span>
+                                                        <span>
+                                                            Low Stock: <span className="font-semibold">{notification.data.medicine_name}</span>
+                                                        </span>
                                                     )}
                                                     {notification.type.includes('ExpiryWarningNotification') && notification.data.medicine_name && (
-                                                        <span>Expiry Warning: <span className="font-semibold">{notification.data.medicine_name}</span></span>
+                                                        <span>
+                                                            Expiry Warning: <span className="font-semibold">{notification.data.medicine_name}</span>
+                                                        </span>
                                                     )}
                                                     {/* Fallback title */}
-                                                    {!notification.type.includes('LowStockNotification') && !notification.type.includes('ExpiryWarningNotification') && (
-                                                        <span>{notification.data.title || notification.type.split('\\').pop() || 'Notification'}</span> // Display class name as fallback
-                                                    )}
+                                                    {!notification.type.includes('LowStockNotification') &&
+                                                        !notification.type.includes('ExpiryWarningNotification') && (
+                                                            <span>
+                                                                {notification.data.title || notification.type.split('\\').pop() || 'Notification'}
+                                                            </span> // Display class name as fallback
+                                                        )}
                                                 </p>
 
                                                 {/* Message */}
@@ -290,13 +326,16 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
                                                 {/* Contextual Details (Expiry) */}
                                                 {notification.type.includes('ExpiryWarningNotification') && (
                                                     <p className="text-muted-foreground text-xs">
-                                                        Batch: {notification.data.batch_number ?? 'N/A'} | Expires: {formatDate(notification.data.expiry_date) ?? 'N/A'} | Qty: {notification.data.current_quantity ?? 'N/A'}
+                                                        Batch: {notification.data.batch_number ?? 'N/A'} | Expires:{' '}
+                                                        {formatDate(notification.data.expiry_date) ?? 'N/A'} | Qty:{' '}
+                                                        {notification.data.current_quantity ?? 'N/A'}
                                                     </p>
                                                 )}
                                                 {/* Contextual Details (Low Stock) */}
                                                 {notification.type.includes('LowStockNotification') && (
                                                     <p className="text-muted-foreground text-xs">
-                                                        Current Stock: {notification.data.current_stock ?? 'N/A'} | Threshold: {notification.data.threshold ?? 'N/A'}
+                                                        Current Stock: {notification.data.current_stock ?? 'N/A'} | Threshold:{' '}
+                                                        {notification.data.threshold ?? 'N/A'}
                                                     </p>
                                                 )}
 
@@ -331,12 +370,12 @@ export default function NotificationsIndex({ notifications }: NotificationsPageP
                                                                 size="icon"
                                                                 onClick={(e) => handleMarkAsRead(notification.id, e)} // Pass event to stop propagation
                                                                 className="ml-auto h-7 w-7 flex-shrink-0"
-                                                                aria-label="Mark as read"
+                                                                aria-label={markAsReadTooltip}
                                                             >
                                                                 <CheckCheck className="h-4 w-4" />
                                                             </Button>
                                                         </TooltipTrigger>
-                                                        <TooltipContent>Mark as read</TooltipContent>
+                                                        <TooltipContent>{markAsReadTooltip}</TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
                                             )}

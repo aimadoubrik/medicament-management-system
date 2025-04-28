@@ -1,0 +1,163 @@
+{
+    "common": {
+        "title": "Title",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "success": "Success",
+        "warning": "Warning",
+        "info": "Info",
+        "open_menu": "Open menu",
+        "actions": "Actions",
+        "yes": "Yes",
+        "no": "No",
+        "ok": "OK",
+        "cancel": "Cancel",
+        "close": "Close",
+        "save": "Save",
+        "saved": "Saved",
+        "delete": "Delete",
+        "edit": "Edit",
+        "view": "View",
+        "search": "Search",
+        "filter": "Filter",
+        "sort": "Sort",
+        "select": "Select",
+        "add": "Add",
+        "create": "Create",
+        "update": "Update",
+        "reset": "Reset",
+        "submit": "Submit",
+        "confirm": "Confirm",
+        "password": "Password",
+        "password_placeholder": "Password",
+        "confirm_delete": "Confirm deletion",
+        "delete_success": "Successfully deleted",
+        "delete_error": "An error occurred while deleting",
+        "language": {
+            "english": "English",
+            "french": "French"
+        },
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+    },
+    "sidebar": {
+        "nav_links": {
+            "dashboard": "Dashboard",
+            "medicines": "Medicines",
+            "stock": "Stock",
+            "suppliers": "Suppliers",
+            "categories": "Categories",
+            "users": "Users"
+        },
+        "user_menu": {
+            "settings": "Settings",
+            "logout": "Logout"
+        }
+    },
+    "notifications_bell": {
+        "notifications": "Notifications",
+        "view_all_notifications": "View All Notifications",
+        "mark_all_as_read": "Mark all as read",
+        "all_marked_as_read_success": "All notifications marked as read.",
+        "all_marked_as_read_error": "Failed to mark all notifications as read.",
+        "fetch_unread_count_error": "Failed to fetch unread notification count:",
+        "load_notification_count_error": "Failed to load notification count.",
+        "notifications_aria_label": "Notifications"
+    },
+    "categories": {
+        "table": {
+            "headers": {
+                "id": "ID",
+                "name": "Name",
+                "description": "Description",
+                "created_at": "Created at",
+                "updated_at": "Updated at"
+            }
+        },
+        "form": {
+            "name": "Name",
+            "description": "Description",
+            "submit": "Submit",
+            "cancel": "Cancel",
+            "reset": "Reset"
+        },
+        "modal": {
+            "title": "Category Form",
+            "add": "Add Category",
+            "edit": "Edit Category",
+            "show": "View Category",
+            "delete": "Delete Category",
+            "delete_confirmation": "Are you sure you want to delete this category?",
+            "delete_success": "Category deleted successfully",
+            "delete_error": "An error occurred while deleting the category"
+        }
+    },
+    "pages": {
+        "settings": {
+            "title": "Settings",
+            "description": "Manage your profile and account settings",
+            "profile": {
+                "head_title": "Profile settings",
+                "nav_title": "Profile",
+                "title": "Profile information",
+                "description": "Update your name and email address",
+                "name": "Name",
+                "name_placeholder": "Full name",
+                "email": "Email address",
+                "email_placeholder": "Email address",
+                "unverified_email": "Your email address is unverified.",
+                "unverified_email_resend": "Click here to resend the verification email.",
+                "unverified_email_success": "A new verification link has been sent to your email address.",
+                "delete_account": "Delete account",
+                "delete_description": "Delete your account and all of its resources",
+                "delete_button": "Delete account",
+                "warning_label": "Warning",
+                "warning_message": "Please proceed with caution, this cannot be undone.",
+                "confirm_delete": "Are you sure you want to delete your account?",
+                "delete_warning": "Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account."
+            },
+            "password": {
+                "head_title": "Password settings",
+                "nav_title": "Password",
+                "title": "Update password",
+                "description": "Ensure your account is using a long, random password to stay secure",
+                "current_password": "Current password",
+                "current_password_placeholder": "Current password",
+                "new_password": "New password",
+                "new_password_placeholder": "New password",
+                "confirm_password": "Confirm New Password",
+                "confirm_password_placeholder": "Confirm new password",
+                "save_password": "Save password",
+                "update_success": "Password changed successfully",
+                "update_error": "An error occurred while changing the password"
+            },
+            "appearance": {
+                "nav_title": "Appearance",
+                "head_title": "Appearance settings",
+                "title": "Customize appearance",
+                "description": "Update your account's appearance settings",
+                "theme": "Theme",
+                "language": "Language",
+                "save_success": "Appearance settings saved successfully",
+                "save_error": "An error occurred while saving appearance settings"
+            },
+            "preferences": {
+                "nav_title": "Preferences",
+                "title": "Application Preferences",
+                "description": "Manage your application preferences",
+                "languages": "Languages",
+                "save_success": "Preferences saved successfully",
+                "save_error": "An error occurred while saving preferences"
+            }
+        }
+    },
+    "notifications": {
+        "head_title": "Notifications",
+        "nav_title": "Notifications",
+        "title": "Your Notifications",
+        "mark_as_read": "Mark as read",
+        "mark_all_as_read": "Mark all as read",
+        "delete_all_notifications": "Delete all notifications"
+    }
+}
