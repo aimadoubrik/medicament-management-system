@@ -41,6 +41,30 @@
         "dark": "Sombre",
         "system": "Système"
     },
+    "sidebar": {
+        "nav_links": {
+            "dashboard": "Tableau de bord",
+            "medicines": "Médicaments",
+            "stock": "Stock",
+            "suppliers": "Fournisseurs",
+            "categories": "Catégories",
+            "users": "Utilisateurs"
+        },
+        "user_menu": {
+            "settings": "Paramètres",
+            "logout": "Déconnexion"
+        }
+    },
+    "notifications_bell": {
+        "notifications": "Notifications",
+        "view_all_notifications": "Voir toutes les notifications",
+        "mark_all_as_read": "Marquer tout comme lu",
+        "all_marked_as_read_success": "Toutes les notifications ont été marquées comme lues.",
+        "all_marked_as_read_error": "Échec du marquage des notifications comme lues.",
+        "fetch_unread_count_error": "Échec de la récupération du nombre de notifications non lues :",
+        "load_notification_count_error": "Échec du chargement du nombre de notifications.",
+        "notifications_aria_label": "Notifications"
+    },
     "categories": {
         "table": {
             "headers": {
@@ -125,6 +149,14 @@
                 "save_success": "Préférences enregistrées avec succès",
                 "save_error": "Une erreur s'est produite lors de l'enregistrement des préférences"
             }
+        },
+        "notifications": {
+            "head_title": "Notifications",
+            "nav_title": "Notifications",
+            "title": "Vos notifications",
+            "mark_as_read": "Marquer comme lu",
+            "mark_all_as_read": "Marquer tout comme lu",
+            "delete_all_notifications": "Supprimer toutes les notifications"
         }
     }
 }

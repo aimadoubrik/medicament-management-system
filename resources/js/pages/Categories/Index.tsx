@@ -12,10 +12,10 @@ import { Head, router } from '@inertiajs/react';
 import { PlusCircle } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
-import { getCategoryColumns, categoryColumnVisibility } from './table-definition';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { toast } from 'sonner';
 import { route } from 'ziggy-js';
+import { categoryColumnVisibility, getCategoryColumns } from './table-definition';
 
 // Define the props specific to this page
 interface CategoriesIndexProps extends PageProps {
@@ -23,14 +23,12 @@ interface CategoriesIndexProps extends PageProps {
 }
 
 export default function Index({ categories: paginatedCategories }: CategoriesIndexProps) {
-
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
 
     const updateButtonText = intl.formatMessage({
         id: 'common.update',
-        defaultMessage: 'Update Category'
+        defaultMessage: 'Update Category',
     });
     const createButtonText = intl.formatMessage({
         id: 'common.create',
@@ -40,9 +38,6 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
         id: 'common.cancel',
         defaultMessage: 'Cancel',
     });
-
-    
-
 
     // --- State and Modal Logic (remains the same) ---
     const [modalState, setModalState] = useState<{
@@ -97,11 +92,15 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
 
     // --- Generate Table Columns by CALLING the imported function ---
     // Pass the necessary functions (openModal, router, route) from this component's scope
-    const columns = useMemo(() => getCategoryColumns({
-        openModal,
-        router, // Pass the imported router instance
-        route,  // Pass the imported route function
-    }), [openModal]); // Recalculate only if openModal changes (stable due to useCallback)
+    const columns = useMemo(
+        () =>
+            getCategoryColumns({
+                openModal,
+                router, // Pass the imported router instance
+                route, // Pass the imported route function
+            }),
+        [openModal],
+    ); // Recalculate only if openModal changes (stable due to useCallback)
 
     // --- Modal Title Logic (remains the same) ---
     const getModalTitle = () => {
@@ -110,9 +109,21 @@ export default function Index({ categories: paginatedCategories }: CategoriesInd
             case 'create':
                 return <FormattedMessage id="categories.modal.create" defaultMessage="Add New Category" />;
             case 'edit':
-                return <FormattedMessage id="categories.modal.edit" defaultMessage="Edit Category: {categoryName}" values={{ categoryName: modalState.data?.name ?? '' }} />;
+                return (
+                    <FormattedMessage
+                        id="categories.modal.edit"
+                        defaultMessage="Edit Category: {categoryName}"
+                        values={{ categoryName: modalState.data?.name ?? '' }}
+                    />
+                );
             case 'show':
-                return <FormattedMessage id="categories.modal.show" defaultMessage="Category Details: {categoryName}" values={{ categoryName: modalState.data?.name ?? '' }} />;
+                return (
+                    <FormattedMessage
+                        id="categories.modal.show"
+                        defaultMessage="Category Details: {categoryName}"
+                        values={{ categoryName: modalState.data?.name ?? '' }}
+                    />
+                );
             default:
                 return '';
         }

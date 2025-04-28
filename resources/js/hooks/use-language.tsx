@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 type Language = 'en' | 'fr';
 
@@ -23,7 +23,7 @@ export const useLanguage = () => {
     // Initialize language based on current locale
     useEffect(() => {
         const htmlLang = document.documentElement.lang as Language;
-        if (htmlLang && languages.some(lang => lang.value === htmlLang)) {
+        if (htmlLang && languages.some((lang) => lang.value === htmlLang)) {
             setLanguage(htmlLang);
         }
     }, []);

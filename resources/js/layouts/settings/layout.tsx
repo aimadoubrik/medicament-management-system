@@ -7,9 +7,7 @@ import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 import { useIntl } from 'react-intl';
 
-
 export default function SettingsLayout({ children }: PropsWithChildren) {
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
 
@@ -37,7 +35,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
         id: 'pages.settings.preferences.nav_title',
         defaultMessage: 'Preferences',
     });
-
 
     const sidebarNavItems: NavItem[] = [
         {

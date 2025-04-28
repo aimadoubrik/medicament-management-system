@@ -9,7 +9,6 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { useIntl } from 'react-intl';
 
 export default function Appearance() {
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
     const appearanceTitle = intl.formatMessage({
@@ -22,7 +21,7 @@ export default function Appearance() {
     });
     const appearanceDescription = intl.formatMessage({
         id: 'pages.settings.appearance.description',
-        defaultMessage: 'Update your account\'s appearance settingss',
+        defaultMessage: "Update your account's appearance settingss",
     });
     // --- End of Internationalization (i18n) Setup ---
 

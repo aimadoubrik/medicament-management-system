@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
 import LanguageToggleTab from '@/components/language-tabs';
+import { Head } from '@inertiajs/react';
 
 import HeadingSmall from '@/components/heading-small';
 import { type BreadcrumbItem } from '@/types';
@@ -8,9 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { useIntl } from 'react-intl';
 
-
 export default function Preferences() {
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
 

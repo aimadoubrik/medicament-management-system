@@ -56,10 +56,7 @@ export default function DeleteUser() {
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
                 <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
                     <p className="font-medium">
-                        <FormattedMessage
-                            id="pages.settings.profile.warning_label"
-                            defaultMessage="Warning"
-                        />
+                        <FormattedMessage id="pages.settings.profile.warning_label" defaultMessage="Warning" />
                     </p>
                     <p className="text-sm">
                         <FormattedMessage
@@ -72,10 +69,7 @@ export default function DeleteUser() {
                 <Dialog>
                     <DialogTrigger asChild>
                         <Button variant="destructive">
-                            <FormattedMessage
-                                id="pages.settings.profile.delete_button"
-                                defaultMessage="Delete account"
-                            />
+                            <FormattedMessage id="pages.settings.profile.delete_button" defaultMessage="Delete account" />
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
@@ -95,10 +89,7 @@ export default function DeleteUser() {
                         <form className="space-y-6" onSubmit={deleteUser}>
                             <div className="grid gap-2">
                                 <Label htmlFor="password" className="sr-only">
-                                    <FormattedMessage
-                                        id="common.password"
-                                        defaultMessage="Password"
-                                    />
+                                    <FormattedMessage id="common.password" defaultMessage="Password" />
                                 </Label>
 
                                 <Input
@@ -118,19 +109,13 @@ export default function DeleteUser() {
                             <DialogFooter className="gap-2">
                                 <DialogClose asChild>
                                     <Button variant="secondary" onClick={closeModal}>
-                                        <FormattedMessage
-                                            id="common.cancel"
-                                            defaultMessage="Cancel"
-                                        />
+                                        <FormattedMessage id="common.cancel" defaultMessage="Cancel" />
                                     </Button>
                                 </DialogClose>
 
                                 <Button variant="destructive" disabled={processing} asChild>
                                     <button type="submit">
-                                        <FormattedMessage
-                                            id="pages.settings.profile.delete_button"
-                                            defaultMessage="Delete account"
-                                        />
+                                        <FormattedMessage id="pages.settings.profile.delete_button" defaultMessage="Delete account" />
                                     </button>
                                 </Button>
                             </DialogFooter>

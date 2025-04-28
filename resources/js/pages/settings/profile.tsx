@@ -14,21 +14,19 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 import { FormattedMessage, useIntl } from 'react-intl';
 
-
 type ProfileForm = {
     name: string;
     email: string;
 };
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
 
     const headTitle = intl.formatMessage({
         id: 'pages.settings.profile.head_title',
         defaultMessage: 'Profile settings',
-    })
+    });
     const profileTitle = intl.formatMessage({
         id: 'pages.settings.profile.title',
         defaultMessage: 'Profile settings',
@@ -52,7 +50,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const emailPlaceholder = intl.formatMessage({
         id: 'pages.settings.profile.email_placeholder',
         defaultMessage: 'Email address',
-    })
+    });
     // --- End of Internationalization (i18n) Setup ---
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -122,7 +120,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         {mustVerifyEmail && auth.user.email_verified_at === null && (
                             <div>
                                 <p className="text-muted-foreground -mt-4 text-sm">
-                                    <FormattedMessage id="page.settings.profile.unverified_email" defaultMessage="Your email address is unverified." />{' '}
+                                    <FormattedMessage
+                                        id="page.settings.profile.unverified_email"
+                                        defaultMessage="Your email address is unverified."
+                                    />{' '}
                                     <Link
                                         href={route('verification.send')}
                                         method="post"
@@ -149,10 +150,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                         <div className="flex items-center gap-4">
                             <Button disabled={processing}>
-                                <FormattedMessage
-                                    id="common.save"
-                                    defaultMessage="Save"
-                                />
+                                <FormattedMessage id="common.save" defaultMessage="Save" />
                             </Button>
 
                             <Transition
@@ -163,10 +161,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 leaveTo="opacity-0"
                             >
                                 <p className="text-sm text-neutral-600">
-                                    <FormattedMessage
-                                        id="common.saved"
-                                        defaultMessage="Saved."
-                                    />
+                                    <FormattedMessage id="common.saved" defaultMessage="Saved." />
                                 </p>
                             </Transition>
                         </div>

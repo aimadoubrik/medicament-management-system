@@ -21,11 +21,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Category as CategoryType } from '@/types'; // Use the specific type alias
 import { type Router } from '@inertiajs/core'; // Import Inertia Router type
-import { type route as routeFn } from 'ziggy-js'; // Import Ziggy's route function type (adjust if needed)
 import { type ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
-import { toast } from 'sonner';
 import { FormattedMessage, useIntl } from 'react-intl'; // Import for i18n
+import { toast } from 'sonner';
+import { type route as routeFn } from 'ziggy-js'; // Import Ziggy's route function type (adjust if needed)
 
 // Define the props required by the column generator function
 interface CategoryColumnsProps {
@@ -36,7 +36,6 @@ interface CategoryColumnsProps {
 
 // Function to generate the columns, accepting dependencies
 export const getCategoryColumns = ({ openModal, router, route }: CategoryColumnsProps): ColumnDef<CategoryType>[] => {
-
     const intl = useIntl();
 
     const categoryNameHeader = intl.formatMessage({
@@ -74,10 +73,7 @@ export const getCategoryColumns = ({ openModal, router, route }: CategoryColumns
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0">
                                     <span className="sr-only">
-                                        <FormattedMessage
-                                            id="common.open_menu"
-                                            defaultMessage="Open menu"
-                                        />
+                                        <FormattedMessage id="common.open_menu" defaultMessage="Open menu" />
                                     </span>
                                     <MoreHorizontal className="h-4 w-4" />
                                 </Button>
@@ -90,12 +86,16 @@ export const getCategoryColumns = ({ openModal, router, route }: CategoryColumns
                                 {/* View Item - Uses openModal from props */}
                                 <DropdownMenuItem onClick={() => openModal('show', category)}>
                                     <Eye className="mr-2 h-4 w-4" />
-                                    <span><FormattedMessage id="common.view" defaultMessage="View" /></span>
+                                    <span>
+                                        <FormattedMessage id="common.view" defaultMessage="View" />
+                                    </span>
                                 </DropdownMenuItem>
                                 {/* Edit Item - Uses openModal from props */}
                                 <DropdownMenuItem onClick={() => openModal('edit', category)}>
                                     <Pencil className="mr-2 h-4 w-4" />
-                                    <span><FormattedMessage id="common.edit" defaultMessage="Edit" /></span>
+                                    <span>
+                                        <FormattedMessage id="common.edit" defaultMessage="Edit" />
+                                    </span>
                                 </DropdownMenuItem>
                                 {/* Delete Item - Uses router/route from props */}
                                 <AlertDialog>
@@ -105,12 +105,16 @@ export const getCategoryColumns = ({ openModal, router, route }: CategoryColumns
                                             onSelect={(e) => e.preventDefault()} // Keep dropdown open
                                         >
                                             <Trash className="mr-2 h-4 w-4" />
-                                            <span><FormattedMessage id="common.delete" defaultMessage="Delete" /></span>
+                                            <span>
+                                                <FormattedMessage id="common.delete" defaultMessage="Delete" />
+                                            </span>
                                         </DropdownMenuItem>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle><FormattedMessage id="alert.confirm_delete.title" defaultMessage="Are you absolutely sure?" /></AlertDialogTitle>
+                                            <AlertDialogTitle>
+                                                <FormattedMessage id="alert.confirm_delete.title" defaultMessage="Are you absolutely sure?" />
+                                            </AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 <FormattedMessage
                                                     id="alert.confirm_delete.description"
@@ -120,7 +124,9 @@ export const getCategoryColumns = ({ openModal, router, route }: CategoryColumns
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel><FormattedMessage id="common.cancel" defaultMessage="Cancel" /></AlertDialogCancel>
+                                            <AlertDialogCancel>
+                                                <FormattedMessage id="common.cancel" defaultMessage="Cancel" />
+                                            </AlertDialogCancel>
                                             <AlertDialogAction
                                                 onClick={() => {
                                                     router.delete(route('categories.destroy', category.id), {
@@ -144,8 +150,8 @@ export const getCategoryColumns = ({ openModal, router, route }: CategoryColumns
                     </div>
                 );
             },
-            enableSorting: false,     // Typically actions aren't sortable
-            enableHiding: false,      // Or hideable
+            enableSorting: false, // Typically actions aren't sortable
+            enableHiding: false, // Or hideable
         },
     ];
 };

@@ -18,10 +18,10 @@ export function flattenMessages(nestedMessages: Record<string, any>, prefix = ''
             // Recursively flatten nested objects
             Object.assign(messages, flattenMessages(value, prefixedKey));
         } else {
-             // Optionally handle arrays or other types if needed, or log a warning
-             console.warn(`Unsupported message format for key "${prefixedKey}":`, value);
-             // Assign as is, or stringify, or skip, depending on desired behavior
-             // messages[prefixedKey] = JSON.stringify(value); // Example: stringify non-object/non-string values
+            // Optionally handle arrays or other types if needed, or log a warning
+            console.warn(`Unsupported message format for key "${prefixedKey}":`, value);
+            // Assign as is, or stringify, or skip, depending on desired behavior
+            // messages[prefixedKey] = JSON.stringify(value); // Example: stringify non-object/non-string values
         }
 
         return messages;

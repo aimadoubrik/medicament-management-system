@@ -5,7 +5,6 @@ import { HTMLAttributes } from 'react';
 import { useIntl } from 'react-intl';
 
 export default function AppearanceToggleTab({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
     const lightLabel = intl.formatMessage({

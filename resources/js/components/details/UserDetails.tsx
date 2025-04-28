@@ -36,19 +36,10 @@ export function UserDetails({ user }: UserDetailsProps) {
             <CardContent className="space-y-6">
                 {/* Primary Details Section */}
                 <div className="grid grid-cols-1 gap-x-8 gap-y-4">
-                    <DetailItem
-                        icon={<Calendar className="text-muted-foreground h-4 w-4" />}
-                        label="Created"
-                        value={formatDate(user.created_at)}
-                    />
+                    <DetailItem icon={<Calendar className="text-muted-foreground h-4 w-4" />} label="Created" value={formatDate(user.created_at)} />
 
-                    <DetailItem
-                        icon={<Calendar className="text-muted-foreground h-4 w-4" />}
-                        label="Updated"
-                        value={formatDate(user.updated_at)}
-                    />
+                    <DetailItem icon={<Calendar className="text-muted-foreground h-4 w-4" />} label="Updated" value={formatDate(user.updated_at)} />
                 </div>
-
             </CardContent>
         </Card>
     );

@@ -41,6 +41,30 @@
         "dark": "Dark",
         "system": "System"
     },
+    "sidebar": {
+        "nav_links": {
+            "dashboard": "Dashboard",
+            "medicines": "Medicines",
+            "stock": "Stock",
+            "suppliers": "Suppliers",
+            "categories": "Categories",
+            "users": "Users"
+        },
+        "user_menu": {
+            "settings": "Settings",
+            "logout": "Logout"
+        }
+    },
+    "notifications_bell": {
+        "notifications": "Notifications",
+        "view_all_notifications": "View All Notifications",
+        "mark_all_as_read": "Mark all as read",
+        "all_marked_as_read_success": "All notifications marked as read.",
+        "all_marked_as_read_error": "Failed to mark all notifications as read.",
+        "fetch_unread_count_error": "Failed to fetch unread notification count:",
+        "load_notification_count_error": "Failed to load notification count.",
+        "notifications_aria_label": "Notifications"
+    },
     "categories": {
         "table": {
             "headers": {
@@ -127,5 +151,13 @@
                 "save_error": "An error occurred while saving preferences"
             }
         }
+    },
+    "notifications": {
+        "head_title": "Notifications",
+        "nav_title": "Notifications",
+        "title": "Your Notifications",
+        "mark_as_read": "Mark as read",
+        "mark_all_as_read": "Mark all as read",
+        "delete_all_notifications": "Delete all notifications"
     }
 }

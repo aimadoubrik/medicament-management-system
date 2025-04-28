@@ -11,11 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-import { useIntl, FormattedMessage } from 'react-intl';
-
+import { FormattedMessage, useIntl } from 'react-intl';
 
 export default function Password() {
-
     // --- Internationalization (i18n) Setup ---
     const intl = useIntl();
 
@@ -167,10 +165,7 @@ export default function Password() {
                                 leaveTo="opacity-0"
                             >
                                 <p className="text-sm text-neutral-600">
-                                    <FormattedMessage
-                                        id="common.saved"
-                                        defaultMessage="Saved."
-                                    />
+                                    <FormattedMessage id="common.saved" defaultMessage="Saved." />
                                 </p>
                             </Transition>
                         </div>

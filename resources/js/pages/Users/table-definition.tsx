@@ -37,9 +37,7 @@ export const userColumns: ColumnDef<User>[] = [
         header: 'Role',
         cell: ({ row }) => {
             const user = row.original;
-            return (
-                <span className="capitalize">{user.role.name}</span>
-            );
+            return <span className="capitalize">{user.role.name}</span>;
         },
     },
     {
