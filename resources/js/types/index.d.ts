@@ -31,18 +31,20 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+export interface Role {
+    id: number;
+    name: string;
+    description: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface User {
     id: number;
     name: string;
     email: string;
-    role_id: number;
-    role: {
-        id: number;
-        name: string;
-        description: string | null;
-        created_at: string;
-        updated_at: string;
-    };
+    role_id: Role['id'];
+    role: Role;
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
@@ -60,12 +62,12 @@ export interface Role {
 
 // Define notification data structure based on actual response
 export type NotificationData = {
-    batch_id: number;
-    batch_number: string;
-    medicine_id: number;
-    medicine_name: string;
-    expiry_date: string;
-    quantity: number | null;
+    batch_id: Batch['id'];
+    batch_number: Batch['batch_number'];
+    medicine_id: Medicine['id'];
+    medicine_name: Medicine['name'];
+    expiry_date: Batch['expiry_date'];
+    quantity: Batch['current_quantity'];
     message: string;
     action_url: string;
 };
@@ -107,6 +109,8 @@ export interface PaginatedResponse<T> {
     total: number;
 }
 
+export type StockTransactionTypeEnumMap = Record<string, string>;
+
 export interface NewNotificationEventPayload {
     message: string;
     type: 'info' | 'success' | 'error' | 'warning'; // Use specific types if possible
@@ -114,35 +118,27 @@ export interface NewNotificationEventPayload {
     // Add any other properties you might broadcast
 }
 
-export type Category = {
+export type Medicine = {
     id: number;
     name: string;
+    manufacturer_distributor: string | null;
+    dosage: string | null;
+    form: string | null;
+    unit_of_measure: string | null;
+    reorder_level?: number | null;
     description: string | null;
+    medicine_stock_summaries: MedicineStockSummary[];
     created_at: string;
     updated_at: string;
 };
 
-export type Medicine = {
+export type MedicineStockSummary = {
     id: number;
-    name: string;
-    generic_name: string | null;
-    manufacturer: string | null;
-    strength: string | null;
-    form: string | null;
-    description: string | null;
-    category_id: number;
-    category: {
-        id: number;
-        name: string;
-        description: string;
-        created_at: string;
-        updated_at: string;
-    };
-    requires_prescription: boolean;
-    low_stock_threshold: number | null;
+    medicine_id: Medicine['id'];
+    total_quantity_in_stock: number;
     created_at: string;
     updated_at: string;
-};
+}
 
 export type Supplier = {
     id: number;
@@ -157,36 +153,15 @@ export type Supplier = {
 
 export type Batch = {
     id: number;
-    medicine: {
-        id: number;
-        name: string;
-        generic_name: string | null;
-        manufacturer: string | null;
-        strength: string | null;
-        form: string | null;
-        description: string | null;
-        category_id: number;
-        requires_prescription: boolean;
-        low_stock_threshold: number;
-        created_at: string;
-        updated_at: string;
-    };
-    supplier: {
-        id: number;
-        name: string;
-        contact_person: string | null;
-        email: string | null;
-        phone: string | null;
-        address: string | null;
-        created_at: string;
-        updated_at: string;
-    };
-    supplier_id: number;
+    medicine: Medicine;
+    supplier: Supplier;
+    medicine_id: Medicine['id'];
+    supplier_id: Supplier['id'];
     batch_number: string | null;
     quantity_received: number;
     current_quantity: number;
-    manufacture_date: string | null;
-    expiry_date: string;
+    manufacture_date: Date | null;
+    expiry_date: Date;
     created_at: string;
     updated_at: string;
 };

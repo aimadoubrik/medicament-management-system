@@ -34,7 +34,7 @@ class NotificationSeeder extends Seeder
                 'medicine_id' => $paracetamol->id,
                 'medicine_name' => $paracetamol->name,
                 'current_quantity' => 5,
-                'threshold' => $paracetamol->low_stock_threshold,
+                'threshold' => $paracetamol->reorder_level,
             ],
         ]);
 
@@ -64,7 +64,7 @@ class NotificationSeeder extends Seeder
                     'medicine_id' => $medicine->id,
                     'medicine_name' => $medicine->name,
                     'current_quantity' => rand(1, 10),
-                    'threshold' => $medicine->low_stock_threshold,
+                    'threshold' => $medicine->reorder_level,
                     'expiry_date' => Carbon::now()->addDays(rand(15, 60))->format('Y-m-d'),
                 ],
             ]);

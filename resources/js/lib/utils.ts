@@ -27,3 +27,14 @@ export function flattenMessages(nestedMessages: Record<string, any>, prefix = ''
         return messages;
     }, {});
 }
+
+export function nullsToUndefined<T>(obj: T): T {
+    if (Array.isArray(obj)) {
+        return obj.map(nullsToUndefined) as unknown as T;
+    } else if (obj && typeof obj === 'object') {
+        return Object.fromEntries(
+            Object.entries(obj).map(([k, v]) => [k, v === null ? undefined : nullsToUndefined(v)])
+        ) as T;
+    }
+    return obj;
+}

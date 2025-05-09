@@ -13,7 +13,16 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { DialogClose } from '@/components/ui/dialog';
+// Import the new ResponsiveModal components
+import {
+    ResponsiveModal,
+    ResponsiveModalDescription,
+    ResponsiveModalContent,
+    ResponsiveModalHeader,
+    ResponsiveModalFooter,
+    ResponsiveModalTitle,
+    ResponsiveModalClose, // Use this for close actions
+} from '@/components/ui/responsive-modal'; // Adjusted path
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,7 +31,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Modal } from '@/components/ui/Modal';
 import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { SupplierFormData } from '@/schemas/supplier';
@@ -47,7 +55,6 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
         data: SupplierType | null;
     }>({ mode: null, data: null });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // sonner's toast is used directly, no hook needed
 
     const isModalOpen = modalState.mode !== null;
     const isEditing = modalState.mode === 'edit';
@@ -66,6 +73,7 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
     const supplierFormDefinition = resourceFormDefinitions.suppliers;
     const supplierSchema = supplierFormDefinition.schema;
     const supplierFieldConfig = useMemo(() => {
+        // Directly use fields if getFieldsWithOptions is not applicable or not needed for suppliers
         return supplierFormDefinition.fields;
     }, [supplierFormDefinition]);
 
@@ -94,20 +102,17 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
         });
     };
 
-    // --- Define Table Columns, modifying the actions cell from table-definition ---
+    // --- Define Table Columns ---
     const columns: ColumnDef<SupplierType>[] = useMemo(() => {
-        // Find the actions column definition from the base file
         const actionsColumnDef = baseSupplierColumns.find((col) => col.id === 'actions');
         if (!actionsColumnDef || !actionsColumnDef.cell) {
             console.warn('Actions column definition not found or is invalid in table-definition.tsx');
-            return baseSupplierColumns; // Return base columns if actions are missing
+            return baseSupplierColumns;
         }
 
-        // Create a new actions column definition that calls openModal
         const modifiedActionsColumn: ColumnDef<SupplierType> = {
-            ...actionsColumnDef, // Copy other properties like id
+            ...actionsColumnDef,
             cell: ({ row }) => {
-                // Override the cell renderer
                 const supplier = row.original;
                 return (
                     <DropdownMenu>
@@ -120,24 +125,21 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            {/* Modified View Item */}
                             <DropdownMenuItem onClick={() => openModal('show', supplier)}>
-                                <Eye className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <Eye className="mr-2 h-4 w-4" />
                                 <span>View</span>
                             </DropdownMenuItem>
-                            {/* Modified Edit Item */}
                             <DropdownMenuItem onClick={() => openModal('edit', supplier)}>
-                                <Pencil className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <Pencil className="mr-2 h-4 w-4" />
                                 <span>Edit</span>
                             </DropdownMenuItem>
-                            {/* Delete Item with AlertDialog (Structure from your table-definition) */}
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem
                                         variant="destructive"
-                                        onSelect={(e) => e.preventDefault()} // Important to prevent auto-close
+                                        onSelect={(e) => e.preventDefault()}
                                     >
-                                        <Trash className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                        <Trash className="mr-2 h-4 w-4" />
                                         <span>Delete</span>
                                     </DropdownMenuItem>
                                 </AlertDialogTrigger>
@@ -152,7 +154,6 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={() => {
-                                                // Keep the delete logic here
                                                 router.delete(route('suppliers.destroy', supplier.id), {
                                                     preserveScroll: true,
                                                     onSuccess: () => toast.success('Supplier deleted successfully'),
@@ -174,10 +175,8 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
                 );
             },
         };
-
-        // Return all columns except the original actions column, plus the modified one
         return [...baseSupplierColumns.filter((col) => col.id !== 'actions'), modifiedActionsColumn];
-    }, [openModal]); // Dependency on openModal
+    }, [openModal]);
 
     // --- Modal Title Logic ---
     const getModalTitle = () => {
@@ -188,6 +187,20 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
                 return `Edit Supplier: ${modalState.data?.name ?? ''}`;
             case 'show':
                 return `Supplier Details: ${modalState.data?.name ?? ''}`;
+            default:
+                return '';
+        }
+    };
+
+    // --- Modal Description Logic ---
+    const getModalDescription = () => {
+        switch (modalState.mode) {
+            case 'create':
+                return 'Create a new supplier by filling out the form below.';
+            case 'edit':
+                return 'Edit an existing supplier by making changes to the form below.';
+            case 'show':
+                return 'View details of an existing supplier.';
             default:
                 return '';
         }
@@ -205,7 +218,6 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
                     </Button>
                 </div>
 
-                {/* Data Table */}
                 <DataTable
                     columns={columns}
                     paginatedData={paginatedSuppliers}
@@ -219,36 +231,52 @@ export default function Index({ suppliers: paginatedSuppliers }: SuppliersIndexP
                 />
             </div>
 
-            {/* Reusable Modal */}
-            <Modal
-                title={getModalTitle()}
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                footerContent={
-                    modalState.mode === 'show' ? (
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary" onClick={closeModal}>
-                                Close
-                            </Button>
-                        </DialogClose>
-                    ) : null
-                }
+            {/* Updated Reusable Modal using the new ResponsiveModal components */}
+            <ResponsiveModal
+                open={isModalOpen}
+                onOpenChange={(isOpen) => {
+                    if (!isOpen) {
+                        closeModal();
+                    }
+                }}
             >
-                {/* Conditionally Render Form or Details View */}
-                {(modalState.mode === 'create' || modalState.mode === 'edit') && (
-                    <ResourceForm
-                        schema={supplierSchema}
-                        fieldConfig={supplierFieldConfig}
-                        initialData={modalState.mode === 'edit' ? modalState.data : null}
-                        onSubmit={handleFormSubmit}
-                        onCancel={closeModal}
-                        isLoading={isSubmitting}
-                        submitButtonText={isEditing ? 'Update Supplier' : 'Create Supplier'}
-                    />
-                )}
+                <ResponsiveModalContent side="bottom"> {/* Default side, adjust if needed */}
+                    <ResponsiveModalHeader>
+                        <ResponsiveModalTitle>{getModalTitle()}</ResponsiveModalTitle>
+                        <ResponsiveModalDescription>{getModalDescription()}</ResponsiveModalDescription>
+                    </ResponsiveModalHeader>
 
-                {modalState.mode === 'show' && modalState.data && <SupplierDetails supplier={modalState.data} />}
-            </Modal>
+                    {/* Content: Form or Details View */}
+                    {(modalState.mode === 'create' || modalState.mode === 'edit') && (
+                        <ResourceForm
+                            schema={supplierSchema}
+                            fieldConfig={supplierFieldConfig}
+                            initialData={modalState.mode === 'edit' ? modalState.data : null}
+                            onSubmit={handleFormSubmit}
+                            onCancel={closeModal}
+                            isLoading={isSubmitting}
+                            submitButtonText={isEditing ? 'Update Supplier' : 'Create Supplier'}
+                        />
+                    )}
+
+                    {modalState.mode === 'show' && modalState.data && (
+                        <div className="p-1"> {/* Add padding if SupplierDetails doesn't have it */}
+                            <SupplierDetails supplier={modalState.data} />
+                        </div>
+                    )}
+
+                    {/* Footer for 'show' mode (Close button) */}
+                    {modalState.mode === 'show' && (
+                        <ResponsiveModalFooter>
+                            <ResponsiveModalClose asChild>
+                                <Button type="button" variant="secondary">
+                                    Close
+                                </Button>
+                            </ResponsiveModalClose>
+                        </ResponsiveModalFooter>
+                    )}
+                </ResponsiveModalContent>
+            </ResponsiveModal>
         </AppLayout>
     );
 }

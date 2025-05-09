@@ -68,7 +68,7 @@ class BatchFactory extends Factory
             $medicine = Medicine::find($attributes['medicine_id']);
 
             return [
-                'current_quantity' => $medicine ? $this->faker->numberBetween(1, $medicine->low_stock_threshold) : 5,
+                'current_quantity' => $medicine ? $this->faker->numberBetween(1, $medicine->reorder_level) : 5,
             ];
         });
     }

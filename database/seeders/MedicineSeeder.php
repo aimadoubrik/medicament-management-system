@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
 use App\Models\Medicine;
 use Illuminate\Database\Seeder;
 
@@ -16,51 +15,43 @@ class MedicineSeeder extends Seeder
         $medicines = [
             [
                 'name' => 'Paracetamol',
-                'generic_name' => 'Acetaminophen',
-                'manufacturer' => 'Generic Pharma',
-                'strength' => '500mg',
+                'manufacturer_distributor' => 'Generic Pharma',
+                'dosage' => '500mg',
                 'form' => 'Tablet',
+                'unit_of_measure' => 'mg',
+                'reorder_level' => 20,
                 'description' => 'Pain reliever and fever reducer',
-                'category_id' => Category::where('name', 'Analgesics')->first()->id,
-                'requires_prescription' => false,
-                'low_stock_threshold' => 20,
             ],
             [
                 'name' => 'Amoxicillin',
-                'generic_name' => 'Amoxicillin',
-                'manufacturer' => 'Med Labs',
-                'strength' => '250mg',
+                'manufacturer_distributor' => 'Med Labs',
+                'dosage' => '250mg',
                 'form' => 'Capsule',
+                'unit_of_measure' => 'mg',
+                'reorder_level' => 15,
                 'description' => 'Antibiotic for bacterial infections',
-                'category_id' => Category::where('name', 'Antibiotics')->first()->id,
-                'requires_prescription' => true,
-                'low_stock_threshold' => 15,
             ],
             [
                 'name' => 'Loratadine',
-                'generic_name' => 'Loratadine',
-                'manufacturer' => 'AllerCare',
-                'strength' => '10mg',
+                'manufacturer_distributor' => 'AllerCare',
+                'dosage' => '10mg',
                 'form' => 'Tablet',
+                'unit_of_measure' => 'mg',
+                'reorder_level' => 10,
                 'description' => 'Non-drowsy antihistamine for allergies',
-                'category_id' => Category::where('name', 'Antihistamines')->first()->id,
-                'requires_prescription' => false,
-                'low_stock_threshold' => 10,
             ],
         ];
 
         foreach ($medicines as $medicine) {
             Medicine::firstOrCreate(
-                ['name' => $medicine['name'], 'strength' => $medicine['strength']],
+                ['name' => $medicine['name'], 'dosage' => $medicine['dosage']],
                 $medicine
             );
         }
 
         // Additional medicines for development
         if (app()->environment('local', 'development')) {
-            Category::all()->each(function ($category) {
-                Medicine::factory(rand(3, 5))->create(['category_id' => $category->id]);
-            });
+            Medicine::factory(10)->create();
         }
     }
 }

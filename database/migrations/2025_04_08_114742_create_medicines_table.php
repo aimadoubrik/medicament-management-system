@@ -14,18 +14,16 @@ return new class extends Migration
         Schema::create('medicines', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('generic_name')->nullable();
-            $table->string('manufacturer')->nullable();
-            $table->string('strength')->nullable();
+            $table->string('manufacturer_distributor')->nullable();
+            $table->string('dosage')->nullable();
             $table->string('form')->nullable();
+            $table->string('unit_of_measure')->nullable();
+            $table->unsignedInteger('reorder_level')->nullable()->default(10);
             $table->text('description')->nullable();
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
-            $table->boolean('requires_prescription')->default(false);
-            $table->integer('low_stock_threshold')->nullable()->default(10);
+            $table->softDeletes();
             $table->timestamps();
 
             $table->index('name');
-            $table->index('category_id');
         });
     }
 

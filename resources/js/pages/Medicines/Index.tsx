@@ -13,7 +13,16 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { DialogClose } from '@/components/ui/dialog';
+// Import the new ResponsiveModal components
+import {
+    ResponsiveModal,
+    ResponsiveModalContent,
+    ResponsiveModalHeader,
+    ResponsiveModalFooter,
+    ResponsiveModalTitle,
+    ResponsiveModalClose,
+    ResponsiveModalDescription, // Use this for close actions
+} from '@/components/ui/responsive-modal'; // Adjusted path
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,11 +31,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Modal } from '@/components/ui/Modal';
 import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { MedicineFormData } from '@/schemas/medicine';
-import { Category, Medicine as MedicineType, PageProps, PaginatedResponse } from '@/types';
+import { Medicine as MedicineType, PageProps, PaginatedResponse } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';
@@ -38,17 +46,16 @@ import { medicineColumns as baseMedicineColumns, medicineColumnVisibility } from
 // Define the props specific to this page
 interface MedicinesIndexProps extends PageProps {
     medicines: PaginatedResponse<MedicineType>;
-    categories: Category[];
 }
 
-export default function Index({ medicines: paginatedMedicines, categories }: MedicinesIndexProps) {
+export default function Index({ medicines: paginatedMedicines }: MedicinesIndexProps) {
+    
     // Modal state management
     const [modalState, setModalState] = useState<{
         mode: 'create' | 'edit' | 'show' | null;
         data: MedicineType | null;
     }>({ mode: null, data: null });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // sonner's toast is used directly, no hook needed
 
     const isModalOpen = modalState.mode !== null;
     const isEditing = modalState.mode === 'edit';
@@ -68,10 +75,12 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
     const medicineSchema = medicineFormDefinition.schema;
     const medicineFieldConfig = useMemo(() => {
         if (typeof medicineFormDefinition.getFieldsWithOptions === 'function') {
-            return medicineFormDefinition.getFieldsWithOptions({ categories }); // Pass dependencies as object
+            // Assuming if no dependencies are needed, it can be called without arguments
+            // or pass an empty object if it expects one: getFieldsWithOptions({})
+            return medicineFormDefinition.getFieldsWithOptions();
         }
         return medicineFormDefinition.fields;
-    }, [categories, medicineFormDefinition]);
+    }, [medicineFormDefinition]);
 
     // --- Form Submission Handler ---
     const handleFormSubmit: SubmitHandler<MedicineFormData> = (formData) => {
@@ -98,20 +107,17 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
         });
     };
 
-    // --- Define Table Columns, modifying the actions cell from table-definition ---
+    // --- Define Table Columns ---
     const columns: ColumnDef<MedicineType>[] = useMemo(() => {
-        // Find the actions column definition from the base file
         const actionsColumnDef = baseMedicineColumns.find((col) => col.id === 'actions');
         if (!actionsColumnDef || !actionsColumnDef.cell) {
             console.warn('Actions column definition not found or is invalid in table-definition.tsx');
-            return baseMedicineColumns; // Return base columns if actions are missing
+            return baseMedicineColumns;
         }
 
-        // Create a new actions column definition that calls openModal
         const modifiedActionsColumn: ColumnDef<MedicineType> = {
-            ...actionsColumnDef, // Copy other properties like id
+            ...actionsColumnDef,
             cell: ({ row }) => {
-                // Override the cell renderer
                 const medicine = row.original;
                 return (
                     <DropdownMenu>
@@ -124,24 +130,21 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            {/* Modified View Item */}
                             <DropdownMenuItem onClick={() => openModal('show', medicine)}>
-                                <Eye className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <Eye className="mr-2 h-4 w-4" />
                                 <span>View</span>
                             </DropdownMenuItem>
-                            {/* Modified Edit Item */}
                             <DropdownMenuItem onClick={() => openModal('edit', medicine)}>
-                                <Pencil className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <Pencil className="mr-2 h-4 w-4" />
                                 <span>Edit</span>
                             </DropdownMenuItem>
-                            {/* Delete Item with AlertDialog (Structure from your table-definition) */}
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem
                                         variant="destructive"
-                                        onSelect={(e) => e.preventDefault()} // Important to prevent auto-close
+                                        onSelect={(e) => e.preventDefault()}
                                     >
-                                        <Trash className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                        <Trash className="mr-2 h-4 w-4" />
                                         <span>Delete</span>
                                     </DropdownMenuItem>
                                 </AlertDialogTrigger>
@@ -156,7 +159,6 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={() => {
-                                                // Keep the delete logic here
                                                 router.delete(route('medicines.destroy', medicine.id), {
                                                     preserveScroll: true,
                                                     onSuccess: () => toast.success('Medicine deleted successfully'),
@@ -178,10 +180,8 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
                 );
             },
         };
-
-        // Return all columns except the original actions column, plus the modified one
         return [...baseMedicineColumns.filter((col) => col.id !== 'actions'), modifiedActionsColumn];
-    }, [openModal]); // Dependency on openModal
+    }, [openModal]);
 
     // --- Modal Title Logic ---
     const getModalTitle = () => {
@@ -197,6 +197,20 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
         }
     };
 
+    // --- Modal Description Logic ---
+    const getModalDescription = () => {
+        switch (modalState.mode) {
+            case 'create':
+                return 'Create a new medicine by filling out the form below.';
+            case 'edit':
+                return 'Edit an existing medicine by making changes to the form below.';
+            case 'show':
+                return 'View details of an existing medicine.';
+            default:
+                return '';
+        }
+    }
+
     return (
         <AppLayout breadcrumbs={[{ title: 'Medicines', href: '/medicines' }]}>
             <Head title="Medicines" />
@@ -209,7 +223,6 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
                     </Button>
                 </div>
 
-                {/* Data Table */}
                 <DataTable
                     columns={columns}
                     paginatedData={paginatedMedicines}
@@ -223,36 +236,52 @@ export default function Index({ medicines: paginatedMedicines, categories }: Med
                 />
             </div>
 
-            {/* Reusable Modal */}
-            <Modal
-                title={getModalTitle()}
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                footerContent={
-                    modalState.mode === 'show' ? (
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary" onClick={closeModal}>
-                                Close
-                            </Button>
-                        </DialogClose>
-                    ) : null
-                }
+            {/* Updated Reusable Modal using the new ResponsiveModal components */}
+            <ResponsiveModal
+                open={isModalOpen}
+                onOpenChange={(isOpen) => {
+                    if (!isOpen) {
+                        closeModal();
+                    }
+                }}
             >
-                {/* Conditionally Render Form or Details View */}
-                {(modalState.mode === 'create' || modalState.mode === 'edit') && (
-                    <ResourceForm
-                        schema={medicineSchema}
-                        fieldConfig={medicineFieldConfig}
-                        initialData={modalState.mode === 'edit' ? modalState.data : null}
-                        onSubmit={handleFormSubmit}
-                        onCancel={closeModal}
-                        isLoading={isSubmitting}
-                        submitButtonText={isEditing ? 'Update Medicine' : 'Create Medicine'}
-                    />
-                )}
+                <ResponsiveModalContent side="bottom"> {/* Default side, adjust if needed */}
+                    <ResponsiveModalHeader>
+                        <ResponsiveModalTitle>{getModalTitle()}</ResponsiveModalTitle>
+                        <ResponsiveModalDescription>{getModalDescription()}</ResponsiveModalDescription>
+                    </ResponsiveModalHeader>
 
-                {modalState.mode === 'show' && modalState.data && <MedicineDetails medicine={modalState.data} />}
-            </Modal>
+                    {/* Content: Form or Details View */}
+                    {(modalState.mode === 'create' || modalState.mode === 'edit') && (
+                        <ResourceForm
+                            schema={medicineSchema}
+                            fieldConfig={medicineFieldConfig}
+                            initialData={modalState.mode === 'edit' ? modalState.data : null}
+                            onSubmit={handleFormSubmit}
+                            onCancel={closeModal}
+                            isLoading={isSubmitting}
+                            submitButtonText={isEditing ? 'Update Medicine' : 'Create Medicine'}
+                        />
+                    )}
+
+                    {modalState.mode === 'show' && modalState.data && (
+                        <div className="p-1"> {/* Add padding if MedicineDetails doesn't have it */}
+                            <MedicineDetails medicine={modalState.data} />
+                        </div>
+                    )}
+
+                    {/* Footer for 'show' mode (Close button) */}
+                    {modalState.mode === 'show' && (
+                        <ResponsiveModalFooter>
+                            <ResponsiveModalClose asChild>
+                                <Button type="button" variant="secondary">
+                                    Close
+                                </Button>
+                            </ResponsiveModalClose>
+                        </ResponsiveModalFooter>
+                    )}
+                </ResponsiveModalContent>
+            </ResponsiveModal>
         </AppLayout>
     );
 }

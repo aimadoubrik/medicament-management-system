@@ -15,14 +15,12 @@ class UpdateMedicineRequest extends FormRequest
     {
         return [
             'name' => 'string|max:255',
-            'generic_name' => 'string|max:255',
-            'manufacturer' => 'string|max:255',
-            'strength' => 'string|max:255',
+            'manufacturer/distributor' => 'string|max:255',
+            'dosage' => 'string|max:255',
             'form' => 'string|max:255',
+            'unit_of_measure' => 'string|max:255',
             'description' => 'nullable|string',
-            'requires_prescription' => 'boolean',
-            'low_stock_threshold' => 'integer|min:0',
-            'category_id' => 'exists:categories,id',
+            'reorder_level' => 'required|numeric|min:0',
         ];
     }
 }

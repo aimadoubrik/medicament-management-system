@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Package, PillBottle, Shapes, Users } from 'lucide-react';
+import { LayoutGrid, Package, PillBottle, Users, FileSpreadsheet } from 'lucide-react';
 import { useIntl } from 'react-intl';
 import AppLogo from './app-logo';
 
@@ -26,14 +26,14 @@ export function AppSidebar() {
         id: 'sidebar.nav_links.suppliers',
         defaultMessage: 'Suppliers',
     });
-    const categoriesTitle = intl.formatMessage({
-        id: 'sidebar.nav_links.categories',
-        defaultMessage: 'Categories',
-    });
     const usersTitle = intl.formatMessage({
         id: 'sidebar.nav_links.users',
         defaultMessage: 'Users',
     });
+    const reportsTitle = intl.formatMessage({
+        id: 'sidebar.nav_links.reports',
+        defaultMessage: 'Reports',
+    })
     // --- End of Internationalization (i18n) Setup ---
 
     const mainNavItems: NavItem[] = [
@@ -58,14 +58,14 @@ export function AppSidebar() {
             icon: Users,
         },
         {
-            title: categoriesTitle,
-            href: '/categories',
-            icon: Shapes,
-        },
-        {
             title: usersTitle,
             href: '/users',
             icon: Users,
+        },
+        {
+            title: reportsTitle,
+            href: '/reports',
+            icon: FileSpreadsheet,
         },
     ];
 

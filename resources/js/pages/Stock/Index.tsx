@@ -1,259 +1,301 @@
 import { DataTable } from '@/components/data-table';
 import { BatchDetails } from '@/components/details/BatchDetails';
-import { ResourceForm } from '@/components/forms/ResourceForm';
+import { EditBatchMetadataForm } from '@/components/forms/EditBatchMetadataForm';
+import { StockTransactionForm } from '@/components/forms/StockTransactionForm';
+
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { DialogClose } from '@/components/ui/dialog';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    ResponsiveModal, ResponsiveModalClose, ResponsiveModalContent, ResponsiveModalDescription,
+    ResponsiveModalFooter, ResponsiveModalHeader, ResponsiveModalTitle
+} from '@/components/ui/responsive-modal';
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+    DropdownMenuSeparator, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Modal } from '@/components/ui/Modal';
-import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
-import { BatchFormData } from '@/schemas/batch';
-import { Batch as BatchType, Medicine, PageProps, PaginatedResponse, Supplier } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import {
+    Batch as BatchType, Medicine, PageProps, PaginatedResponse, Supplier, StockTransactionTypeEnumMap
+} from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash, Shuffle, MinusCircle, CircleArrowOutUpRight, Undo2, ArchiveX } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
+// Assuming base columns are defined elsewhere correctly
 import { batchColumns as baseBatchColumns, batchColumnVisibility } from './table-definition';
+// Import the specific form definitions we need
+import { resourceFormDefinitions } from '@/definitions/form-definitions';
 
-// Define the props specific to this page
+
+// Props Interface remains the same
 interface BatchesIndexProps extends PageProps {
     batches: PaginatedResponse<BatchType>;
     medicines: Medicine[];
     suppliers: Supplier[];
+    transactionTypes: StockTransactionTypeEnumMap;
 }
 
-export default function Index({ batches: paginatedBatches, medicines, suppliers }: BatchesIndexProps) {
-    // Modal state management
-    const [modalState, setModalState] = useState<{
-        mode: 'create' | 'edit' | 'show' | null;
-        data: BatchType | null;
-    }>({ mode: null, data: null });
+// State Interfaces remain the same
+interface TransactionModalState {
+    isOpen: boolean;
+    transactionType?: string | null;
+    selectedMedicine?: Medicine | null;
+    selectedBatch?: BatchType | null;
+}
+interface BatchInfoModalState {
+    mode: 'edit_metadata' | 'show_details' | null;
+    data: BatchType | null;
+}
+
+export default function Index({ auth }: PageProps) { // Get auth if needed
+    const {
+        batches: paginatedBatches,
+        medicines,
+        suppliers,
+        transactionTypes,
+        errors: pageErrors,
+        filters: currentFilters // Capture filters passed from controller
+    } = usePage<BatchesIndexProps>().props;
+
+    const [batchInfoModal, setBatchInfoModal] = useState<BatchInfoModalState>({ mode: null, data: null });
+    const [transactionModal, setTransactionModal] = useState<TransactionModalState>({ isOpen: false });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // sonner's toast is used directly, no hook needed
 
-    const isModalOpen = modalState.mode !== null;
-    const isEditing = modalState.mode === 'edit';
+    const isBatchInfoModalOpen = batchInfoModal.mode !== null;
 
-    // --- Modal Control Functions ---
-    const openModal = useCallback((mode: 'create' | 'edit' | 'show', data: BatchType | null = null) => {
-        setModalState({ mode, data });
+    // --- Modal Control Functions (remain the same) ---
+    const openBatchInfoModal = useCallback((mode: 'edit_metadata' | 'show_details', data: BatchType) => {
+        setBatchInfoModal({ mode, data });
+    }, []);
+    const closeBatchInfoModal = useCallback(() => { // useCallback for stability
+        setBatchInfoModal({ mode: null, data: null });
+        setIsSubmitting(false);
+    }, []);
+    const openTransactionModal = useCallback((
+        initialTransactionType: string | null = null,
+        initialMedicine: Medicine | null = null,
+        initialBatch: BatchType | null = null
+    ) => {
+        setTransactionModal({
+            isOpen: true,
+            transactionType: initialTransactionType,
+            selectedMedicine: initialMedicine,
+            selectedBatch: initialBatch,
+        });
+    }, []);
+    const closeTransactionModal = useCallback(() => { // useCallback
+        setTransactionModal({ isOpen: false });
+        setIsSubmitting(false);
     }, []);
 
-    const closeModal = () => {
-        setModalState({ mode: null, data: null });
-        setIsSubmitting(false);
-    };
+    // --- Form Submission Handlers (remain the same concept) ---
+    const handleEditBatchMetadataSubmit: SubmitHandler<any> = (formData) => {
+        if (!batchInfoModal.data) return;
 
-    // --- Get Form Definition ---
-    const batchFormDefinition = resourceFormDefinitions.batches;
-    const batchSchema = batchFormDefinition.schema;
-    const batchFieldConfig = useMemo(() => {
-        if (typeof batchFormDefinition.getFieldsWithOptions === 'function') {
-            return batchFormDefinition.getFieldsWithOptions({ medicines, suppliers }); // Pass dependencies as object
-        }
-        return batchFormDefinition.fields;
-    }, [medicines, suppliers, batchFormDefinition]);
-
-    // --- Form Submission Handler ---
-    const handleFormSubmit: SubmitHandler<BatchFormData> = (formData) => {
         setIsSubmitting(true);
-        const url = isEditing ? route('stock.update', modalState.data!.id) : route('stock.store');
-        const method = isEditing ? 'put' : 'post';
-
-        router[method](url, formData, {
+        router.put(route('stock.update', batchInfoModal.data.id), formData, {
             preserveScroll: true,
-            onSuccess: () => {
-                closeModal();
-                toast.success(`Batch ${isEditing ? 'updated' : 'created'} successfully!`);
-            },
-            onError: (errors) => {
-                console.error('Backend validation errors:', errors);
-                const errorMessages = Object.values(errors).flat().join(' ');
-                toast.error(`Error ${isEditing ? 'updating' : 'creating'} batch`, {
-                    description: errorMessages || 'An unexpected error occurred.',
-                });
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
-            },
+            onSuccess: () => { closeBatchInfoModal(); toast.success(`Batch metadata updated successfully!`); },
+            onError: (errors) => { /* ... */ toast.error('Error updating batch metadata' + Object.values(errors).flat().join(' ')); },
+            onFinish: () => setIsSubmitting(false),
+        });
+    };
+    const handleStockTransactionSubmit: SubmitHandler<any> = (formData) => {
+        setIsSubmitting(true);
+        router.post(route('stock.transaction'), formData, {
+            preserveScroll: true,
+            onSuccess: () => { closeTransactionModal(); toast.success(`Stock transaction processed successfully!`); },
+            onError: (errors) => { /* ... */ toast.error('Error processing transaction' + Object.values(errors).flat().join(' ')); },
+            onFinish: () => setIsSubmitting(false),
         });
     };
 
-    // --- Define Table Columns, modifying the actions cell from table-definition ---
+    // --- Define Table Columns (useMemo remains the same) ---
     const columns: ColumnDef<BatchType>[] = useMemo(() => {
-        // Find the actions column definition from the base file
-        const actionsColumnDef = baseBatchColumns.find((col) => col.id === 'actions');
-        if (!actionsColumnDef || !actionsColumnDef.cell) {
-            console.warn('Actions column definition not found or is invalid in table-definition.tsx');
-            return baseBatchColumns; // Return base columns if actions are missing
-        }
-
-        // Create a new actions column definition that calls openModal
-        const modifiedActionsColumn: ColumnDef<BatchType> = {
-            ...actionsColumnDef, // Copy other properties like id
-            cell: ({ row }) => {
-                // Override the cell renderer
-                const batch = row.original;
-                return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {/* Modified View Item */}
-                            <DropdownMenuItem onClick={() => openModal('show', batch)}>
-                                <Eye className="mr-2 h-4 w-4" /> {/* Add margin */}
-                                <span>View</span>
-                            </DropdownMenuItem>
-                            {/* Modified Edit Item */}
-                            <DropdownMenuItem onClick={() => openModal('edit', batch)}>
-                                <Pencil className="mr-2 h-4 w-4" /> {/* Add margin */}
-                                <span>Edit</span>
-                            </DropdownMenuItem>
-                            {/* Delete Item with AlertDialog (Structure from your table-definition) */}
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onSelect={(e) => e.preventDefault()} // Important to prevent auto-close
-                                    >
-                                        <Trash className="mr-2 h-4 w-4" /> {/* Add margin */}
-                                        <span>Delete</span>
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the batch "{batch.batch_number}".
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => {
-                                                // Keep the delete logic here
-                                                router.delete(route('stock.destroy', batch.id), {
-                                                    preserveScroll: true,
-                                                    onSuccess: () => toast.success('Batch deleted successfully'),
-                                                    onError: (errors) =>
-                                                        toast.error('Error deleting batch', {
-                                                            description: Object.values(errors).flat().join(' '),
-                                                        }),
-                                                });
-                                            }}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                            Delete
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                );
+        return [
+            ...baseBatchColumns.filter((col) => col.id !== 'actions'),
+            {
+                id: 'actions',
+                cell: ({ row }) => {
+                    const batch = row.original;
+                    return (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Batch Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => openBatchInfoModal('show_details', batch)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openBatchInfoModal('edit_metadata', batch)}><Pencil className="mr-2 h-4 w-4" /> Edit Metadata</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Stock Transactions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.OUT_DISPENSE.valueOf(), batch.medicine, batch)}><CircleArrowOutUpRight className="mr-2 h-4 w-4" /> Dispense</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.ADJUST_ADD.valueOf(), batch.medicine, batch)}><PlusCircle className="mr-2 h-4 w-4" /> Adjust (Add)</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.ADJUST_SUB.valueOf(), batch.medicine, batch)}><MinusCircle className="mr-2 h-4 w-4" /> Adjust (Subtract)</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.DISPOSAL_DAMAGED.valueOf(), batch.medicine, batch)}><ArchiveX className="mr-2 h-4 w-4" /> Dispose (Damaged)</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.DISPOSAL_EXPIRED.valueOf(), batch.medicine, batch)}><ArchiveX className="mr-2 h-4 w-4" /> Dispose (Expired)</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.RETURN_SUPPLIER.valueOf(), batch.medicine, batch)}><Undo2 className="mr-2 h-4 w-4" /> Return to Supplier</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild><DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}><Trash className="mr-2 h-4 w-4" /> Delete Batch</DropdownMenuItem></AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action will attempt to dispose of remaining stock and delete the batch record for "{batch.batch_number}". Cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => { router.delete(route('stock.destroy', batch.id), { preserveScroll: true, onSuccess: () => toast.success('Batch deleted.'), onError: (e) => toast.error('Delete failed.', { description: Object.values(e).flat().join(' ') }) }); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    );
+                },
             },
-        };
+        ];
+    }, [openBatchInfoModal, openTransactionModal]); // Include dependencies
 
-        // Return all columns except the original actions column, plus the modified one
-        return [...baseBatchColumns.filter((col) => col.id !== 'actions'), modifiedActionsColumn];
-    }, [openModal]); // Dependency on openModal
+    // --- Modal Title/Description Logic (remain the same) ---
+    const getBatchInfoModalTitle = () => { /* ... */ return batchInfoModal.mode === 'edit_metadata' ? `Edit Metadata` : 'Batch Details'; };
+    const getBatchInfoModalDescription = () => { /* ... */ return 'View or edit batch metadata.'; };
 
-    // --- Modal Title Logic ---
-    const getModalTitle = () => {
-        switch (modalState.mode) {
-            case 'create':
-                return 'Add New Batch';
-            case 'edit':
-                return `Edit Batch: ${modalState.data?.batch_number ?? ''}`;
-            case 'show':
-                return `Batch Details: ${modalState.data?.batch_number ?? ''}`;
-            default:
-                return '';
-        }
-    };
+    // --- Prepare Batch Metadata Form Config ---
+    // Use useMemo to avoid recomputing on every render
+    const batchMetadataFieldConfig = useMemo(() => {
+        return resourceFormDefinitions.batchMetadata.getFieldsWithOptions({ suppliers });
+    }, [suppliers]);
+
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Batches', href: '/batches' }]}>
-            <Head title="Batches" />
+        <AppLayout breadcrumbs={[{ title: 'Stock', href: route('stock.index') }]}>
+            <Head title="Stock Batches" />
             <div className="container mx-auto p-4">
                 <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Batches</h1>
-                    <Button onClick={() => openModal('create')}>
+                    <h1 className="text-2xl font-bold">Stock</h1>
+                    <Button onClick={() => openTransactionModal()}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Batch
+                        New Stock Transaction
                     </Button>
                 </div>
 
-                {/* Data Table */}
                 <DataTable
                     columns={columns}
                     paginatedData={paginatedBatches}
-                    searchKey="batch_number"
-                    searchPlaceholder="Search batches..."
+                    searchKey='batch_number'
+                    searchPlaceholder='Search by Batch Number...'
+                    filterConfig={{
+                        filter: currentFilters?.filter || '',
+                        filterBy: currentFilters?.filterBy || 'medicine_name',
+                        filterByOptions: [
+                            { value: 'medicine_name', label: 'Medicine Name' },
+                            { value: 'batch_number', label: 'Batch No.' },
+                            { value: 'supplier_name', label: 'Supplier Name' },
+                        ],
+                        dateFilters: [
+                            { key: 'expiry_from', label: 'Expiry From', value: currentFilters?.expiry_from },
+                            { key: 'expiry_to', label: 'Expiry To', value: currentFilters?.expiry_to },
+                        ]
+                    }}
+                    sortConfig={{ // Pass current sort state
+                        sort: currentFilters?.sort || 'expiry_date',
+                        direction: currentFilters?.direction || 'asc',
+                    }}
+
                     inertiaVisitUrl={route('stock.index')}
-                    inertiaDataPropName="batches"
+                    inertiaDataPropName="batches" // Default, often not needed
                     initialVisibility={batchColumnVisibility}
-                    pageSizeOptions={[10, 20, 50, 100]}
-                    exportFileName={`batches-${new Date().toISOString().split('T')[0]}`}
+                    pageSizeOptions={[10, 15, 20, 50, 100]}
+                    exportFileName={`stock-batches-${new Date().toISOString().split('T')[0]}`}
                 />
             </div>
 
-            {/* Reusable Modal */}
-            <Modal
-                title={getModalTitle()}
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                footerContent={
-                    modalState.mode === 'show' ? (
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary" onClick={closeModal}>
-                                Close
-                            </Button>
-                        </DialogClose>
-                    ) : null
-                }
+            {/* Modal for Viewing Batch Details or Editing Batch METADATA */}
+            <ResponsiveModal
+                open={isBatchInfoModalOpen}
+                onOpenChange={(isOpen) => !isOpen && closeBatchInfoModal()}
             >
-                {/* Conditionally Render Form or Details View */}
-                {(modalState.mode === 'create' || modalState.mode === 'edit') && (
-                    <ResourceForm
-                        schema={batchSchema}
-                        fieldConfig={batchFieldConfig}
-                        initialData={modalState.mode === 'edit' ? modalState.data : null}
-                        onSubmit={handleFormSubmit}
-                        onCancel={closeModal}
-                        isLoading={isSubmitting}
-                        submitButtonText={isEditing ? 'Update Batch' : 'Create Batch'}
-                    />
-                )}
+                <ResponsiveModalContent>
+                    <ResponsiveModalHeader>
+                        <ResponsiveModalTitle>{getBatchInfoModalTitle()} {batchInfoModal.data?.batch_number}</ResponsiveModalTitle>
+                        <ResponsiveModalDescription>{getBatchInfoModalDescription()}</ResponsiveModalDescription>
+                    </ResponsiveModalHeader>
 
-                {modalState.mode === 'show' && modalState.data && <BatchDetails batch={modalState.data} />}
-            </Modal>
+                    {batchInfoModal.mode === 'edit_metadata' && batchInfoModal.data && (
+                        <EditBatchMetadataForm // Use the NEW dedicated component
+                            // Pass necessary props
+                            schema={resourceFormDefinitions.batchMetadata.schema}
+                            fieldConfig={batchMetadataFieldConfig} // Use the prepared config
+                            initialData={batchInfoModal.data} // Pass existing data
+                            onSubmit={handleEditBatchMetadataSubmit}
+                            onCancel={closeBatchInfoModal}
+                            isLoading={isSubmitting}
+                        />
+                    )}
+                    {batchInfoModal.mode === 'show_details' && batchInfoModal.data && (
+                        <>
+                            <div className="p-4 border-t"> {/* Add padding and separator */}
+                                <BatchDetails batch={batchInfoModal.data} />
+                            </div>
+                            <ResponsiveModalFooter>
+                                <ResponsiveModalClose asChild>
+                                    <Button type="button" variant="outline" onClick={closeBatchInfoModal}>Close</Button>
+                                </ResponsiveModalClose>
+                            </ResponsiveModalFooter>
+                        </>
+                    )}
+                </ResponsiveModalContent>
+            </ResponsiveModal>
+
+            {/* UNIFIED STOCK TRANSACTION MODAL */}
+            <ResponsiveModal
+                open={transactionModal.isOpen}
+                onOpenChange={(isOpen) => !isOpen && closeTransactionModal()}
+            >
+                <ResponsiveModalContent className="max-w-2xl"> {/* Example size adjustment */}
+                    <ResponsiveModalHeader>
+                        <ResponsiveModalTitle>
+                            Process Stock Transaction
+                            {transactionModal.transactionType && `: ${transactionTypes[transactionModal.transactionType] || transactionModal.transactionType}`}
+                        </ResponsiveModalTitle>
+                        <ResponsiveModalDescription>
+                            Select transaction type and fill in the details below.
+                        </ResponsiveModalDescription>
+                    </ResponsiveModalHeader>
+
+                    {/* Ensure the key changes when the modal re-opens with different initial state */}
+                    {/* This helps react-hook-form reset correctly */}
+                    <StockTransactionForm // Use the NEW dedicated component
+                        key={transactionModal.isOpen ? `open-${transactionModal.selectedBatch?.id ?? 'new'}-${transactionModal.transactionType}` : 'closed'}
+                        // Pass necessary props
+                        isOpen={transactionModal.isOpen}
+                        initialTransactionType={transactionModal.transactionType}
+                        initialMedicine={transactionModal.selectedMedicine}
+                        initialBatch={transactionModal.selectedBatch}
+                        medicines={medicines}
+                        suppliers={suppliers}
+                        transactionTypes={transactionTypes} // Pass the enum map
+                        onSubmit={handleStockTransactionSubmit}
+                        onCancel={closeTransactionModal}
+                        isLoading={isSubmitting}
+                        backendErrors={pageErrors}
+                    />
+                </ResponsiveModalContent>
+            </ResponsiveModal>
         </AppLayout>
     );
 }
+
+// Dummy StockTransactionType enum values for frontend actions (replace with actual enum values if possible)
+// This is better defined in your types/index.d.ts based on StockTransactionTypeEnumMap
+const StockTransactionType = {
+    IN_NEW_BATCH: 'IN_NEW_BATCH',
+    OUT_DISPENSE: 'OUT_DISPENSE',
+    ADJUST_ADD: 'ADJUST_ADD',
+    ADJUST_SUB: 'ADJUST_SUB',
+    DISPOSAL_EXPIRED: 'DISPOSAL_EXPIRED',
+    DISPOSAL_DAMAGED: 'DISPOSAL_DAMAGED',
+    RETURN_SUPPLIER: 'RETURN_SUPPLIER',
+    INITIAL_STOCK: 'INITIAL_STOCK',
+} as const; // Use 'as const' for better type inference

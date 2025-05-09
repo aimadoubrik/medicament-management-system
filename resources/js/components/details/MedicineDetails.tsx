@@ -1,8 +1,7 @@
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Medicine } from '@/types';
 import { format } from 'date-fns';
-import { AlertTriangle, Calendar, Factory, Info, List, Package, Pill } from 'lucide-react';
+import { AlertTriangle, Calendar, Factory, Info, Package, Pill } from 'lucide-react';
 
 interface MedicineDetailsProps {
     medicine: Medicine;
@@ -30,14 +29,10 @@ export function MedicineDetails({ medicine }: MedicineDetailsProps) {
                             {medicine.name}
                         </CardTitle>
                         <CardDescription className="mt-1 text-sm font-medium">
-                            {medicine.strength && <span className="text-primary/80">{medicine.strength}</span>}
-                            {medicine.strength && ' • '}
-                            <span>Generic Name: {medicine.generic_name ?? 'N/A'}</span>
+                            {medicine.dosage && <span className="text-primary/80">{medicine.dosage}</span>}
+                            {medicine.dosage && ' • '}
                         </CardDescription>
                     </div>
-                    <Badge variant={medicine.requires_prescription ? 'destructive' : 'secondary'} className="ml-2">
-                        {medicine.requires_prescription ? 'Prescription Only' : 'OTC'}
-                    </Badge>
                 </div>
             </CardHeader>
 
@@ -46,18 +41,16 @@ export function MedicineDetails({ medicine }: MedicineDetailsProps) {
                 <div className="grid grid-cols-1 gap-x-8 gap-y-4">
                     <DetailItem icon={<Package className="text-muted-foreground h-4 w-4" />} label="Form" value={medicine.form ?? 'N/A'} />
 
-                    <DetailItem icon={<List className="text-muted-foreground h-4 w-4" />} label="Category" value={medicine.category?.name ?? 'N/A'} />
-
                     <DetailItem
                         icon={<Factory className="text-muted-foreground h-4 w-4" />}
-                        label="Manufacturer"
-                        value={medicine.manufacturer ?? 'N/A'}
+                        label="Manufacturer/Distributor"
+                        value={medicine.manufacturer_distributor ?? 'N/A'}
                     />
 
                     <DetailItem
                         icon={<AlertTriangle className="text-muted-foreground h-4 w-4" />}
                         label="Low Stock Threshold"
-                        value={medicine.low_stock_threshold ?? 'N/A'}
+                        value={medicine.reorder_level ?? 'N/A'}
                     />
 
                     <DetailItem

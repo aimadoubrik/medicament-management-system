@@ -1,4 +1,4 @@
-import { createBooleanColumn, createDateColumn, createSelectionColumn, createTextColumn } from '@/components/data-table/column-def';
+import { createDateColumn, createNumberColumn, createSelectionColumn, createTextColumn } from '@/components/data-table/column-def';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -29,20 +29,21 @@ import { toast } from 'sonner';
 export const medicineColumns: ColumnDef<Medicine>[] = [
     createSelectionColumn<Medicine>(),
     createTextColumn<Medicine>('name', 'Name'),
-    createTextColumn<Medicine>('generic_name', 'Generic Name'),
-    createTextColumn<Medicine>('manufacturer', 'Manufacturer'),
-    createTextColumn<Medicine>('strength', 'Strength'),
+    createTextColumn<Medicine>('manufacturer_distributor', 'Manufacturer/Distributor'),
+    {
+        accessorKey: 'total_stock',
+        header: 'Total Stock',
+        cell: ({ row }) => {
+            return row.original.medicine_stock_summaries?.total_quantity_in_stock || 0;
+        }
+    },
+    createTextColumn<Medicine>('dosage', 'Dosage'),
     createTextColumn<Medicine>('form', 'Form'),
-    createBooleanColumn<Medicine>('requires_prescription', 'Prescription Required'),
+    createTextColumn<Medicine>('unit_of_measure', 'Unit of Measure'),
     createDateColumn<Medicine>('created_at', 'Created'),
     createDateColumn<Medicine>('updated_at', 'Updated'),
-    {
-        accessorFn: (row) => row.category.name,
-        id: 'category',
-        header: 'Category',
-    },
+    createTextColumn<Medicine>('reorder_level', 'Reorder Level'),
     createTextColumn<Medicine>('description', 'Description'),
-    createTextColumn<Medicine>('low_stock_threshold', 'Low Stock Threshold'),
     {
         id: 'actions',
         cell: ({ row }) => {
@@ -107,14 +108,13 @@ export const medicineColumns: ColumnDef<Medicine>[] = [
 // Default visibility for responsive design
 export const medicineColumnVisibility = {
     name: true,
-    generic_name: true,
-    manufacturer: false,
-    strength: false,
+    manufacturer_distributor: true,
+    dosage: false,
     form: false,
+    unit_of_measure: false,
+    reorder_level: true,
     description: false,
-    'category.name': true,
-    requires_prescription: true,
-    low_stock_threshold: false,
+    'medicine_stock_summaries.total_quantity_in_stock': true,
     created_at: false,
     updated_at: false,
 };

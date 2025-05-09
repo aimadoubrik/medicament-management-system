@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Batch extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'batch_number',
@@ -32,6 +34,11 @@ class Batch extends Model
         return $this->belongsTo(Medicine::class);
     }
 
+    public function stockLedgerEntries()
+    {
+        return $this->hasMany(StockLedgerEntry::class);
+    }
+
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
@@ -51,4 +58,15 @@ class Batch extends Model
     {
         return $query->where('current_quantity', '>', 0);
     }
+
+    // protected function getCurrentQuantityAttribute()
+    // {
+    //     $latestEntry = $this->stockLedgerEntries()->latest()->first();
+
+    //     if ($latestEntry) {
+    //         return $latestEntry->quantity_after_transaction;
+    //     }
+
+    //     return $this->stockLedgerEntries()->sum('quantity_change');
+    // }
 }

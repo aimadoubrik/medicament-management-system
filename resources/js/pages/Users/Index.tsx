@@ -13,7 +13,16 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { DialogClose } from '@/components/ui/dialog';
+// Import the new ResponsiveModal components
+import {
+    ResponsiveModal,
+    ResponsiveModalDescription,
+    ResponsiveModalContent,
+    ResponsiveModalHeader,
+    ResponsiveModalFooter,
+    ResponsiveModalTitle,
+    ResponsiveModalClose, // Use this for close actions
+} from '@/components/ui/responsive-modal'; // Adjusted path
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,7 +31,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Modal } from '@/components/ui/Modal';
 import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { UserFormData } from '@/schemas/user';
@@ -48,7 +56,6 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
         data: UserType | null;
     }>({ mode: null, data: null });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    // sonner's toast is used directly, no hook needed
 
     const isModalOpen = modalState.mode !== null;
     const isEditing = modalState.mode === 'edit';
@@ -98,20 +105,17 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
         });
     };
 
-    // --- Define Table Columns, modifying the actions cell from table-definition ---
+    // --- Define Table Columns ---
     const columns: ColumnDef<UserType>[] = useMemo(() => {
-        // Find the actions column definition from the base file
         const actionsColumnDef = baseUserColumns.find((col) => col.id === 'actions');
         if (!actionsColumnDef || !actionsColumnDef.cell) {
             console.warn('Actions column definition not found or is invalid in table-definition.tsx');
-            return baseUserColumns; // Return base columns if actions are missing
+            return baseUserColumns;
         }
 
-        // Create a new actions column definition that calls openModal
         const modifiedActionsColumn: ColumnDef<UserType> = {
-            ...actionsColumnDef, // Copy other properties like id
+            ...actionsColumnDef,
             cell: ({ row }) => {
-                // Override the cell renderer
                 const user = row.original;
                 return (
                     <DropdownMenu>
@@ -124,24 +128,21 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            {/* Modified View Item */}
                             <DropdownMenuItem onClick={() => openModal('show', user)}>
-                                <Eye className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <Eye className="mr-2 h-4 w-4" />
                                 <span>View</span>
                             </DropdownMenuItem>
-                            {/* Modified Edit Item */}
                             <DropdownMenuItem onClick={() => openModal('edit', user)}>
-                                <Pencil className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                <Pencil className="mr-2 h-4 w-4" />
                                 <span>Edit</span>
                             </DropdownMenuItem>
-                            {/* Delete Item with AlertDialog (Structure from your table-definition) */}
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <DropdownMenuItem
                                         variant="destructive"
-                                        onSelect={(e) => e.preventDefault()} // Important to prevent auto-close
+                                        onSelect={(e) => e.preventDefault()}
                                     >
-                                        <Trash className="mr-2 h-4 w-4" /> {/* Add margin */}
+                                        <Trash className="mr-2 h-4 w-4" />
                                         <span>Delete</span>
                                     </DropdownMenuItem>
                                 </AlertDialogTrigger>
@@ -156,7 +157,6 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={() => {
-                                                // Keep the delete logic here
                                                 router.delete(route('users.destroy', user.id), {
                                                     preserveScroll: true,
                                                     onSuccess: () => toast.success('User deleted successfully'),
@@ -178,10 +178,8 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                 );
             },
         };
-
-        // Return all columns except the original actions column, plus the modified one
         return [...baseUserColumns.filter((col) => col.id !== 'actions'), modifiedActionsColumn];
-    }, [openModal]); // Dependency on openModal
+    }, [openModal]);
 
     // --- Modal Title Logic ---
     const getModalTitle = () => {
@@ -192,6 +190,20 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                 return `Edit User: ${modalState.data?.name ?? ''}`;
             case 'show':
                 return `User Details: ${modalState.data?.name ?? ''}`;
+            default:
+                return '';
+        }
+    };
+
+    // --- Modal Description Logic ---
+    const getModalDescription = () => {
+        switch (modalState.mode) {
+            case 'create':
+                return 'Create a new user by filling out the form below.';
+            case 'edit':
+                return 'Edit an existing user by making changes to the form below.';
+            case 'show':
+                return 'View details of an existing user.';
             default:
                 return '';
         }
@@ -209,7 +221,6 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                     </Button>
                 </div>
 
-                {/* Data Table */}
                 <DataTable
                     columns={columns}
                     paginatedData={paginatedUsers}
@@ -223,36 +234,52 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                 />
             </div>
 
-            {/* Reusable Modal */}
-            <Modal
-                title={getModalTitle()}
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                footerContent={
-                    modalState.mode === 'show' ? (
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary" onClick={closeModal}>
-                                Close
-                            </Button>
-                        </DialogClose>
-                    ) : null
-                }
+            {/* Updated Reusable Modal using the new ResponsiveModal components */}
+            <ResponsiveModal
+                open={isModalOpen}
+                onOpenChange={(isOpen) => {
+                    if (!isOpen) {
+                        closeModal();
+                    }
+                }}
             >
-                {/* Conditionally Render Form or Details View */}
-                {(modalState.mode === 'create' || modalState.mode === 'edit') && (
-                    <ResourceForm
-                        schema={userSchema}
-                        fieldConfig={userFieldConfig}
-                        initialData={modalState.mode === 'edit' ? modalState.data : null}
-                        onSubmit={handleFormSubmit}
-                        onCancel={closeModal}
-                        isLoading={isSubmitting}
-                        submitButtonText={isEditing ? 'Update User' : 'Create User'}
-                    />
-                )}
+                <ResponsiveModalContent side="bottom"> {/* Default side, adjust if needed */}
+                    <ResponsiveModalHeader>
+                        <ResponsiveModalTitle>{getModalTitle()}</ResponsiveModalTitle>
+                        <ResponsiveModalDescription>{getModalDescription()}</ResponsiveModalDescription>
+                    </ResponsiveModalHeader>
 
-                {modalState.mode === 'show' && modalState.data && <UserDetails user={modalState.data} />}
-            </Modal>
+                    {/* Content: Form or Details View */}
+                    {(modalState.mode === 'create' || modalState.mode === 'edit') && (
+                        <ResourceForm
+                            schema={userSchema}
+                            fieldConfig={userFieldConfig}
+                            initialData={modalState.mode === 'edit' ? modalState.data : null}
+                            onSubmit={handleFormSubmit}
+                            onCancel={closeModal}
+                            isLoading={isSubmitting}
+                            submitButtonText={isEditing ? 'Update User' : 'Create User'}
+                        />
+                    )}
+
+                    {modalState.mode === 'show' && modalState.data && (
+                        <div className="p-1"> {/* Add padding if UserDetails doesn't have it */}
+                            <UserDetails user={modalState.data} />
+                        </div>
+                    )}
+
+                    {/* Footer for 'show' mode (Close button) */}
+                    {modalState.mode === 'show' && (
+                        <ResponsiveModalFooter>
+                            <ResponsiveModalClose asChild>
+                                <Button type="button" variant="secondary">
+                                    Close
+                                </Button>
+                            </ResponsiveModalClose>
+                        </ResponsiveModalFooter>
+                    )}
+                </ResponsiveModalContent>
+            </ResponsiveModal>
         </AppLayout>
     );
 }

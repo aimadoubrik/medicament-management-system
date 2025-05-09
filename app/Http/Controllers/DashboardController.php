@@ -19,7 +19,7 @@ class DashboardController extends Controller
         // --- Configuration ---
         // Get thresholds from config (provide defaults if not set)
         // Example: Put these in config/inventory.php or config/app.php
-        $lowStockThreshold = config('inventory.low_stock_threshold', 10);
+        $lowStockThreshold = config('inventory.reorder_level', 10);
         $expiringSoonDays = config('inventory.expiring_soon_days', 30);
 
         // --- Date Calculation ---

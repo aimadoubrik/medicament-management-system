@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
-use App\Models\Category;
 use App\Models\Medicine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -26,8 +25,7 @@ class MedicineController extends Controller
             'filterBy' => 'nullable|string|max:50',
         ]);
 
-        $query = Medicine::query()
-            ->with('category');
+        $query = Medicine::query()->with('medicineStockSummaries');
 
         // --- Filtering ---
         $filterValue = $request->input('filter');
@@ -47,6 +45,8 @@ class MedicineController extends Controller
         // Ensure the sort column exists
         if ($sortColumn && Schema::hasColumn('medicines', $sortColumn)) {
             $query->orderBy($sortColumn, $sortDirection);
+        } elseif ($sortColumn && Schema::hasColumn('medicine_stock_summaries', $sortColumn)) {
+            $query->orderBy('medicine_stock_summaries.'.$sortColumn, $sortDirection);
         } else {
             // Fallback sorting if provided column is invalid
             $query->orderBy('name', 'desc');
@@ -60,11 +60,8 @@ class MedicineController extends Controller
             // Important: Append the query string parameters to pagination links
             ->withQueryString();
 
-        $categories = Category::all();
-
         return Inertia::render('Medicines/Index', [
             'medicines' => $medicines,
-            'categories' => $categories,
         ]);
     }
 
@@ -86,7 +83,7 @@ class MedicineController extends Controller
      */
     public function show(string $id)
     {
-        $medicine = Medicine::with('category')->findOrFail($id);
+        $medicine = Medicine::findOrFail($id);
 
         return Inertia::render('Medicines/Show', [
             'medicine' => $medicine,

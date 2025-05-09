@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Batch } from '@/types';
 import { format } from 'date-fns';
-import { AlertTriangle, Calendar, Factory, List, Package, Pill } from 'lucide-react';
+import { AlertTriangle, Calendar, Factory, Package, Pill } from 'lucide-react';
 
 interface BatchDetailsProps {
     batch: Batch;
@@ -38,23 +38,21 @@ export function BatchDetails({ batch }: BatchDetailsProps) {
                 <div className="grid grid-cols-1 gap-x-8 gap-y-4">
                     <DetailItem icon={<Package className="text-muted-foreground h-4 w-4" />} label="Form" value={batch.quantity_received ?? 'N/A'} />
 
-                    <DetailItem icon={<List className="text-muted-foreground h-4 w-4" />} label="Category" value={batch.current_quantity ?? 'N/A'} />
-
                     <DetailItem
                         icon={<Factory className="text-muted-foreground h-4 w-4" />}
-                        label="Manufacturer"
+                        label="Manufacture Date"
                         value={batch.manufacture_date ?? 'N/A'}
                     />
 
                     <DetailItem
                         icon={<AlertTriangle className="text-muted-foreground h-4 w-4" />}
-                        label="Low Stock Threshold"
+                        label="Expiry Date"
                         value={batch.expiry_date ?? 'N/A'}
                     />
 
-                    <DetailItem icon={<Calendar className="text-muted-foreground h-4 w-4" />} label="Created" value={formatDate(batch.created_at)} />
+                    <DetailItem icon={<Calendar className="text-muted-foreground h-4 w-4" />} label="Created at" value={formatDate(batch.created_at)} />
 
-                    <DetailItem icon={<Calendar className="text-muted-foreground h-4 w-4" />} label="Updated" value={formatDate(batch.updated_at)} />
+                    <DetailItem icon={<Calendar className="text-muted-foreground h-4 w-4" />} label="Updated at" value={formatDate(batch.updated_at)} />
                 </div>
             </CardContent>
         </Card>
