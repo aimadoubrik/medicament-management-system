@@ -310,7 +310,7 @@ export function ResourceForm<TFormValues extends FieldValues>({
                                             {...commonProps}
                                             placeholder={fieldConf.placeholder}
                                             value={Number(controllerField.value ?? 0)}
-                                            onValueChange={controllerField.onChange}
+                                            onChange={controllerField.onChange}
                                             step={fieldConf.step}
                                         />
                                     );
