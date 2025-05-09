@@ -4,34 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Medicine extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',
-        'generic_name',
-        'manufacturer',
-        'strength',
+        'manufacturer_distributor',
+        'dosage',
         'form',
+        'unit_of_measure',
+        'reorder_level',
         'description',
-        'requires_prescription',
-        'low_stock_threshold',
-        'category_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'requires_prescription' => 'boolean',
-            'low_stock_threshold' => 'integer',
+            'reorder_level' => 'integer',
         ];
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
     }
 
     public function batches()
@@ -39,14 +33,24 @@ class Medicine extends Model
         return $this->hasMany(Batch::class);
     }
 
+    public function stockLedgerEntries()
+    {
+        return $this->hasMany(StockLedgerEntry::class);
+    }
+
+    public function medicineStockSummaries()
+    {
+        return $this->hasOne(MedicineStockSummary::class);
+    }
+
     public function getTotalStockAttribute(): int
     {
-        return $this->batches()->sum('current_quantity');
+        return MedicineStockSummary::where('medicine_id', $this->id)->value('total_quantity_in_stock');
     }
 
     public function lowStock($query, $threshold = null)
     {
-        $threshold = $threshold ?? $this->low_stock_threshold;
+        $threshold = $threshold ?? $this->reorder_level;
 
         return $query->whereHas('batches', function ($query) use ($threshold) {
             $query->havingRaw('SUM(quantity) < ?', [$threshold]);

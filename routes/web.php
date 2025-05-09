@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Api\MedicineBatchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
@@ -25,13 +26,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('medicines', MedicineController::class);
 
     // Stock routes
-    Route::resource('stock', StockController::class);
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+    Route::post('/stock/transaction', [StockController::class, 'handleTransaction'])
+        ->name('stock.transaction');
+    Route::put('/stock/{batch}', [StockController::class, 'update'])->name('stock.update');
+
+    Route::get('/medicines/{medicine}/batches', [MedicineBatchController::class, 'index'])
+        ->name('api.medicines.batches.index') // Optional name
+        ->middleware('auth'); // Or appropriate middleware like 'web', 'auth'
 
     // Supplier routes
     Route::resource('suppliers', SupplierController::class);
 
-    // Category routes
-    Route::resource('categories', CategoryController::class);
+    // Reports routes
+    Route::resource('reports', ReportsController::class);
 
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

@@ -4,10 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { NumberInput } from '@/components/number-input';
+import { DateTimePicker } from '@/components/ui/datetime-picker';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Controller, DefaultValues, FieldValues, Path, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -15,14 +17,14 @@ import { z } from 'zod';
 export type FieldType = 'text' | 'number' | 'textarea' | 'select' | 'checkbox' | 'date' | 'email' | 'password' | 'tel' | 'url';
 
 // Define structure for select options
-interface SelectOption {
+export interface SelectOption {
     value: string | number;
     label: string;
     disabled?: boolean;
 }
 
 // Define form section for organizing fields
-interface FormSection<TFormValues extends FieldValues> {
+export interface FormSection<TFormValues extends FieldValues> {
     title?: string;
     description?: string;
     fields: FieldConfig<TFormValues>[];
@@ -93,8 +95,6 @@ export function ResourceForm<TFormValues extends FieldValues>({
     gridColumns = 2,
     compact = false,
 }: ResourceFormProps<TFormValues>) {
-    // Track first error field for focus management
-    const firstErrorRef = useRef<string | null>(null);
 
     // Check if fieldConfig is an array of sections or fields
     const hasSections = useMemo(() => {
@@ -128,7 +128,7 @@ export function ResourceForm<TFormValues extends FieldValues>({
                         case 'tel':
                         case 'url':
                         case 'date':
-                            basicDefaults[field.name] = '';
+                            basicDefaults[field.name] = undefined;
                             break;
                         case 'select':
                             basicDefaults[field.name] = field.options?.[0]?.value ?? '';
@@ -163,17 +163,6 @@ export function ResourceForm<TFormValues extends FieldValues>({
         watch,
         formState: { errors, isSubmitting, isDirty, dirtyFields },
     } = form;
-
-    // Handle focus on first error after submission attempt
-    useEffect(() => {
-        if (firstErrorRef.current) {
-            const errorElement = document.getElementById(firstErrorRef.current);
-            if (errorElement) {
-                errorElement.focus();
-                firstErrorRef.current = null;
-            }
-        }
-    }, [errors]);
 
     // Reset form when initialData changes
     useEffect(() => {
@@ -221,11 +210,6 @@ export function ResourceForm<TFormValues extends FieldValues>({
         if (fieldConf.hidden || !isFieldVisible(fieldConf)) return null;
 
         const error = errors[fieldConf.name]?.message as string | undefined;
-
-        // Set first error reference for focus management
-        if (error && !firstErrorRef.current) {
-            firstErrorRef.current = fieldConf.name;
-        }
 
         const fieldWrapperClasses = cn(
             'relative',
@@ -322,34 +306,32 @@ export function ResourceForm<TFormValues extends FieldValues>({
                                     );
                                 case 'number':
                                     return (
-                                        <Input
-                                            type="number"
+                                        <NumberInput
                                             {...commonProps}
                                             placeholder={fieldConf.placeholder}
-                                            value={controllerField.value ?? ''}
-                                            min={fieldConf.min}
-                                            max={fieldConf.max}
+                                            value={Number(controllerField.value ?? 0)}
+                                            onValueChange={controllerField.onChange}
                                             step={fieldConf.step}
-                                            autoFocus={fieldConf.autoFocus}
                                         />
                                     );
                                 case 'date': {
                                     const value = controllerField.value as unknown;
                                     const dateValue =
                                         value instanceof Date
-                                            ? value.toISOString().split('T')[0]
+                                            ? value
                                             : typeof value === 'string' && value.includes('T')
-                                              ? value.split('T')[0]
+                                              ? new Date(value)
                                               : typeof value === 'string'
-                                                ? value
-                                                : '';
+                                                ? new Date(value)
+                                                : new Date();
                                     return (
-                                        <Input
-                                            type="date"
+                                        <DateTimePicker
                                             {...commonProps}
+                                            ref={controllerField.ref}
                                             placeholder={fieldConf.placeholder}
                                             value={dateValue}
-                                            autoFocus={fieldConf.autoFocus}
+                                            onChange={controllerField.onChange}
+                                            granularity='day'
                                         />
                                     );
                                 }

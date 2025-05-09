@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataTablePagination } from './pagination';
+import { ColumnFilterComponent } from './column-filter';
 import { DataTableProps } from './types';
 import { DataTableViewOptions } from './view-options';
 
@@ -21,12 +22,13 @@ import {
     PaginationState,
     Table as ReactTable,
     Row,
-    // ColumnFiltersState, // Uncomment if using server-side column filters
+    ColumnFiltersState, // Uncomment if using server-side column filters
     SortingState,
     VisibilityState,
     flexRender,
     getCoreRowModel,
     useReactTable,
+    getFilteredRowModel,
 } from '@tanstack/react-table';
 
 // Import export libraries
@@ -77,7 +79,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     // --- State Management ---
     const [sorting, setSorting] = useState<SortingState>([]);
-    // const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // Keep if server-side column filters needed
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // Keep if server-side column filters needed
     const [globalFilter, setGlobalFilter] = useState<string>(''); // For the main search input
     const [searchValue, setSearchValue] = useState<string>(''); // Immediate value for the search input UI
     const [rowSelection, setRowSelection] = useState({});
@@ -121,9 +123,9 @@ export function DataTable<TData, TValue>({
         }
 
         // Add specific column filters if implemented
-        // if (columnFilters.length > 0) {
-        //     params.filters = JSON.stringify(columnFilters);
-        // }
+        if (columnFilters.length > 0) {
+            params.filters = JSON.stringify(columnFilters);
+        }
 
         // Make the Inertia request
         router.get(inertiaVisitUrl, params, {
@@ -138,7 +140,7 @@ export function DataTable<TData, TValue>({
         pagination.pageSize,
         sorting,
         globalFilter,
-        // columnFilters, // Add if implementing server-side column filters
+        columnFilters, // Add if implementing server-side column filters
         inertiaVisitUrl,
         searchKey,
         inertiaDataPropName, // *** ADDED: Ensure effect runs if prop name changes (unlikely but good practice) ***
@@ -171,6 +173,7 @@ export function DataTable<TData, TValue>({
         data: paginatedData.data ?? [], // Data for the current page
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
 
         // Configure manual server-side operations
         manualPagination: true,
@@ -180,7 +183,7 @@ export function DataTable<TData, TValue>({
         // State managed by React
         state: {
             sorting,
-            // columnFilters, // Enable if using server-side column filters
+            columnFilters, // Enable if using server-side column filters
             columnVisibility,
             rowSelection,
             pagination,
@@ -188,7 +191,7 @@ export function DataTable<TData, TValue>({
 
         // Handlers to update React state
         onSortingChange: setSorting,
-        // onColumnFiltersChange: setColumnFilters, // Enable if using server-side column filters
+        onColumnFiltersChange: setColumnFilters, // Enable if using server-side column filters
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
         onPaginationChange: setPagination, // Updates local state, triggering useEffect fetch
@@ -323,6 +326,7 @@ export function DataTable<TData, TValue>({
                                             key={header.id}
                                             style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                                             colSpan={header.colSpan}
+                                            className={header.column.getCanSort() ? 'cursor-pointer select-none' : ''}
                                         >
                                             {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                         </TableHead>

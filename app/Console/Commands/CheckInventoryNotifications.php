@@ -49,7 +49,7 @@ class CheckInventoryNotifications extends Command
             return self::SUCCESS;
         }
 
-        $lowStockThreshold = config('inventory.low_stock_threshold', 10); // Default threshold
+        $lowStockThreshold = config('inventory.reorder_level', 10); // Default threshold
 
         // --- Check for Low Stock ---
         $this->info('Checking for low stock medicines...');
@@ -62,7 +62,7 @@ class CheckInventoryNotifications extends Command
 
         // Filter medicines whose total stock is at or below their threshold
         $lowStockMedicines = $potentiallyLowStock->filter(function ($medicine) use ($lowStockThreshold) {
-            $threshold = $medicine->low_stock_threshold ?? $lowStockThreshold; // Use specific or default threshold
+            $threshold = $medicine->reorder_level ?? $lowStockThreshold; // Use specific or default threshold
 
             return $medicine->current_total_stock !== null && $medicine->current_total_stock <= $threshold;
         });
@@ -70,7 +70,7 @@ class CheckInventoryNotifications extends Command
         if ($lowStockMedicines->isNotEmpty()) {
             $this->info("Found {$lowStockMedicines->count()} low stock medicines. Notifying admins...");
             foreach ($lowStockMedicines as $medicine) {
-                $threshold = $medicine->low_stock_threshold ?? $lowStockThreshold;
+                $threshold = $medicine->reorder_level ?? $lowStockThreshold;
 
                 // Optional: Add logic here to prevent sending the *same* notification too frequently
                 // (e.g., check the last notification time for this medicine)

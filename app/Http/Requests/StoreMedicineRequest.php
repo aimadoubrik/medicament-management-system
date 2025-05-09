@@ -23,14 +23,12 @@ class StoreMedicineRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'generic_name' => 'required|string|max:255',
-            'manufacturer' => 'required|string|max:255',
-            'strength' => 'required|string|max:255',
+            'manufacturer_distributor' => 'required|string|max:255',
+            'dosage' => 'required|string|max:255',
             'form' => 'required|string|max:255',
+            'unit_of_measure' => 'required|string|max:255',
+            'reorder_level' => 'required|numeric|integer|min:0',
             'description' => 'nullable|string',
-            'requires_prescription' => 'required|boolean',
-            'low_stock_threshold' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
         ];
     }
 }

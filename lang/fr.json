@@ -47,8 +47,8 @@
             "medicines": "Médicaments",
             "stock": "Stock",
             "suppliers": "Fournisseurs",
-            "categories": "Catégories",
-            "users": "Utilisateurs"
+            "users": "Utilisateurs",
+            "reports": "Rapports"
         },
         "user_menu": {
             "settings": "Paramètres",
@@ -64,34 +64,6 @@
         "fetch_unread_count_error": "Échec de la récupération du nombre de notifications non lues :",
         "load_notification_count_error": "Échec du chargement du nombre de notifications.",
         "notifications_aria_label": "Notifications"
-    },
-    "categories": {
-        "table": {
-            "headers": {
-                "id": "ID",
-                "name": "Nom",
-                "description": "Déscription",
-                "created_at": "Crée le",
-                "updated_at": "Mis à jour le"
-            }
-        },
-        "form": {
-            "name": "Nom",
-            "description": "Description",
-            "submit": "Soumettre",
-            "cancel": "Annuler",
-            "reset": "Réinitialiser"
-        },
-        "modal": {
-            "title": "Formulaire de Catégorie",
-            "add": "Ajouter une Catégorie",
-            "edit": "Modifier la Catégorie",
-            "show": "Voir la Catégorie",
-            "delete": "Supprimer la Catégorie",
-            "delete_confirmation": "Etes-vous sur de vouloir supprimer cette catégorie?",
-            "delete_success": "Catégorie supprimée avec succесс",
-            "delete_error": "Une erreur s'est produite lors de la suppression de la catégorie"
-        }
     },
     "pages": {
         "settings": {

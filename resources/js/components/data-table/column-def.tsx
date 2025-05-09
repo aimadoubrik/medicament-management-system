@@ -29,6 +29,9 @@ export function createTextColumn<TData>(accessorKey: keyof TData & string, heade
         cell: ({ row }) => <span>{row.getValue(accessorKey)}</span>,
         meta: {
             exportHeader: header,
+            filter: true,
+            filterType: 'text',
+            filterPlaceholder: header,
         },
     };
 }

@@ -22,12 +22,12 @@ class StoreBatchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'batch_number' => 'required|string|unique:batches',
+            'batch_number' => 'required|string|max:255',
             'medicine_id' => 'required|exists:medicines,id',
             'supplier_id' => 'required|exists:suppliers,id',
-            'quantity_received' => 'required|integer|min:1',
+            'quantity_received' => 'required|integer|min:0',
             'current_quantity' => 'required|integer|min:0',
-            'manufacture_date' => 'required|date|before:expiry_date',
+            'manufacture_date' => 'required|date|before_or_equal:today',
             'expiry_date' => 'required|date|after:manufacture_date',
         ];
     }

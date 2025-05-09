@@ -2,202 +2,228 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreBatchRequest;
+use App\Enums\StockTransactionType; // Import your Enum
+use App\Exceptions\InsufficientStockException; // Your new unified request
+use App\Http\Requests\HandleStockTransactionRequest; // For batch metadata updates
 use App\Http\Requests\UpdateBatchRequest;
 use App\Models\Batch;
 use App\Models\Medicine;
 use App\Models\Supplier;
+use App\Models\User;
+use App\Services\StockManagementService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use Inertia\Inertia;
+use Inertia\Inertia; // Your custom exception
 
 class StockController extends Controller
 {
+    protected $stockManagementService;
+
+    public function __construct(StockManagementService $stockManagementService)
+    {
+        $this->stockManagementService = $stockManagementService;
+
+        // It's good practice to apply authorization here or via route definitions
+        // Example:
+        // $this->middleware('auth'); // Ensure user is authenticated
+        // $this->authorizeResource(Batch::class, 'batch'); // If using resource controller & policies
+        // Or per method:
+        // $this->middleware('can:viewAny,App\Models\Batch')->only('index');
+        // $this->middleware('can:create,App\Models\Batch')->only('handleTransaction'); // Assuming 'create' covers new batch via transaction
+        // $this->middleware('can:update,batch')->only('update'); // 'batch' here is the route parameter name
+        // $this->middleware('can:delete,batch')->only('destroy');
+    }
+
     /**
      * Display a listing of the resource with server-side processing.
      */
     public function index(Request $request)
     {
-        // 1. Validate incoming request parameters
-        $request->validate([
+        $validatedIndexRequest = $request->validate([
             'page' => 'sometimes|integer|min:1',
             'perPage' => 'sometimes|integer|min:1|max:100',
             'sort' => 'nullable|string|max:50',
             'direction' => 'nullable|string|in:asc,desc',
-            'filter' => 'nullable|string|max:100', // Global filter value
-            // Column for global filter (e.g., 'medicine_name', 'batch_number')
-            'filterBy' => 'nullable|string|max:50',
-            'expiry_from' => 'nullable|date',
-            'expiry_to' => 'nullable|date',
+            'filter' => 'nullable|string|max:100',
+            'filterBy' => 'nullable|string|in:medicine_name,supplier_name,batch_number,expiry_date', // Be explicit
+            'expiry_from' => 'nullable|date_format:Y-m-d',
+            'expiry_to' => 'nullable|date_format:Y-m-d|after_or_equal:expiry_from',
         ]);
 
-        // 2. Start building the query
-        // *** USE 'medicine' relationship name (assuming it exists in Batch model) ***
         $query = Batch::query()->with(['medicine', 'supplier']);
 
-        // 3. Apply Filtering
-        $filterValue = $request->input('filter');
-        // Default filter column or get from request
-        $filterColumn = $request->input('filterBy', 'medicine_name'); // Default to searching medicine name
+        $filterValue = $validatedIndexRequest['filter'] ?? null;
+        $filterColumn = $validatedIndexRequest['filterBy'] ?? 'medicine_name';
 
         if ($filterValue) {
             if ($filterColumn === 'medicine_name') {
-                // Search by related medicine name
-                // *** USE 'medicine' relationship ***
-                $query->whereHas('medicine', function ($q) use ($filterValue) {
-                    $q->where('name', 'like', '%'.$filterValue.'%');
-                });
-            } elseif (Schema::hasColumn('batches', $filterColumn)) {
-                // Search directly on batches table if column exists
-                $query->where($filterColumn, 'like', '%'.$filterValue.'%');
+                $query->whereHas('medicine', fn ($q) => $q->where('name', 'like', "%{$filterValue}%"));
+            } elseif ($filterColumn === 'supplier_name') {
+                $query->whereHas('supplier', fn ($q) => $q->where('name', 'like', "%{$filterValue}%"));
+            } elseif (Schema::hasColumn('batches', $filterColumn)) { // e.g., batch_number
+                $query->where($filterColumn, 'like', "%{$filterValue}%");
             }
-            // Add more specific filterBy conditions if needed (e.g., supplier name)
-            // elseif ($filterColumn === 'supplier_name') {
-            //     $query->whereHas('supplier', fn($q) => $q->where('name', 'like', "%{$filterValue}%"));
-            // }
         }
 
-        // Apply date range filters
-        $query->when($request->expiry_from, function ($query, $date) {
-            $query->where('expiry_date', '>=', $date);
-        });
-        $query->when($request->expiry_to, function ($query, $date) {
-            $query->where('expiry_date', '<=', $date);
-        });
+        $query->when($validatedIndexRequest['expiry_from'] ?? null, fn ($q, $date) => $q->where('expiry_date', '>=', $date));
+        $query->when($validatedIndexRequest['expiry_to'] ?? null, fn ($q, $date) => $q->where('expiry_date', '<=', $date));
 
-        // 4. Apply Sorting
-        $sortColumn = $request->input('sort', 'expiry_date'); // Default sort column
-        $sortDirection = $request->input('direction', 'asc'); // Default direction
+        $sortColumn = $validatedIndexRequest['sort'] ?? 'expiry_date';
+        $sortDirection = $validatedIndexRequest['direction'] ?? 'asc';
 
-        // Check if the sort column exists on the 'batches' table directly
-        if (Schema::hasColumn('batches', $sortColumn)) {
+        // Whitelist sortable columns for security and clarity
+        $allowedSortColumns = ['batch_number', 'manufacture_date', 'expiry_date', 'current_quantity', 'created_at', 'updated_at']; // Add batch table columns
+        $relatedSortColumns = ['medicine_name', 'supplier_name'];
+
+        if (in_array($sortColumn, $allowedSortColumns) && Schema::hasColumn('batches', $sortColumn)) {
             $query->orderBy($sortColumn, $sortDirection);
         } elseif ($sortColumn === 'medicine_name') {
-            // Sort by related medicine name
-            // *** USE Medicine model and assume 'medicine_id' foreign key ***
-            $query->orderBy(
-                Medicine::select('name')->whereColumn('medicines.id', 'batches.medicine_id'),
-                $sortDirection
-            );
+            $query->orderBy(Medicine::select('name')->whereColumn('medicines.id', 'batches.medicine_id'), $sortDirection);
         } elseif ($sortColumn === 'supplier_name') {
-            // Sort by related supplier name
-            $query->orderBy(
-                Supplier::select('name')->whereColumn('suppliers.id', 'batches.supplier_id'),
-                $sortDirection
-            );
+            $query->orderBy(Supplier::select('name')->whereColumn('suppliers.id', 'batches.supplier_id'), $sortDirection);
         } else {
-            // Fallback sorting
             $query->orderBy('expiry_date', 'asc');
         }
 
-        // 5. Apply Pagination
-        $perPage = $request->input('perPage', 10); // Default items per page
+        $perPage = $validatedIndexRequest['perPage'] ?? 15; // Adjusted default
+        $batches = $query->paginate($perPage)->withQueryString();
 
-        $batches = $query->paginate($perPage)
-            ->withQueryString(); // Append query string parameters
-
-        // 6. Return Inertia response
         return Inertia::render('Stock/Index', [
-            // *** Return the paginator object directly ***
             'batches' => $batches,
-            // Pass back validated filters to potentially populate filter inputs
-            'filters' => $request->only(['filter', 'filterBy', 'expiry_from', 'expiry_to', 'sort', 'direction', 'page', 'perPage']),
-            // Pass medicines for dropdowns if needed for filtering UI
-            'medicines' => Medicine::select('id', 'name', 'strength')->get(),
-            // Pass suppliers for dropdowns if needed for filtering UI
-            'suppliers' => Supplier::select('id', 'name')->get(),
+            'filters' => $validatedIndexRequest,
+            'medicines' => Medicine::select('id', 'name', 'dosage')->orderBy('name')->get(),
+            'suppliers' => Supplier::select('id', 'name')->orderBy('name')->get(),
+            'transactionTypes' => StockTransactionType::asSelectArray(), // For the unified transaction modal
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Handle various stock transactions.
      */
-    public function store(StoreBatchRequest $request)
+    public function handleTransaction(HandleStockTransactionRequest $request)
     {
-        // Ensure current_quantity is set correctly, often same as quantity_received on store
+        Log::info('Handling stock transaction.', ['user_id' => Auth::id(), 'request_data' => $request->all()]);
         $validatedData = $request->validated();
-        // *** Ensure StoreBatchRequest validates 'medicine_id' instead of 'product_id' ***
-        if (! isset($validatedData['current_quantity'])) {
-            $validatedData['current_quantity'] = $validatedData['quantity_received'];
+        $user = $request->user(); // Or Auth::user() if middleware ensures authentication
+
+        // The Form Request (HandleStockTransactionRequest) handles validation.
+        // If validation fails, Laravel automatically redirects back with errors.
+        // Thus, we only reach here if validation passes.
+
+        try {
+            // It's good practice for the service method to handle its own DB transaction
+            // if it performs multiple database operations. If not, wrap it here.
+            // Assuming StockManagementService->processTransaction handles its own atomicity.
+            $result = $this->stockManagementService->processTransaction($validatedData, $user);
+
+            $successMessage = $result['message'] ?? 'Transaction processed successfully.';
+
+            return redirect()->route('stock.index')->with('success', $successMessage);
+        } catch (InsufficientStockException $e) {
+            // The form request key for quantity is 'quantity_change_input'
+            return back()->withErrors(['quantity_change_input' => $e->getMessage()])->withInput();
+        } catch (\Illuminate\Database\QueryException $e) { // More specific DB errors
+            Log::error('Stock transaction database error: '.$e->getMessage(), ['sql' => $e->getSql(), 'bindings' => $e->getBindings(), 'request_data' => $validatedData]);
+
+            return back()->with('error', 'A database error occurred. Please try again.')->withInput();
+        } catch (\Exception $e) {
+            Log::error('Stock transaction failed: '.$e->getMessage(), [
+                'file' => $e->getFile().':'.$e->getLine(),
+                'request_data' => $validatedData,
+                // 'trace' => $e->getTraceAsString(), // Optionally log trace for non-production
+            ]);
+
+            return back()->with('error', 'An unexpected error occurred: '.$e->getMessage())->withInput();
         }
-
-        Batch::create($validatedData);
-
-        return redirect()->route('stock.index')
-            ->with('success', 'Batch created successfully.');
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified batch's metadata in storage.
+     * This should NOT be used for quantity adjustments.
      */
-    public function update(UpdateBatchRequest $request, string $stockId)
+    public function update(UpdateBatchRequest $request, Batch $batch)
     {
-
-        $batch = Batch::findOrFail($stockId);
-
+        // Consider authorization: $this->authorize('update', $batch);
         $validatedData = $request->validated();
 
         if (empty($validatedData)) {
-            return redirect()->route('stock.index')->with('warning', 'No changes detected or data provided.');
+
+            Log::warning('No changes were provided to update.', ['batch_id' => $batch->id, 'user_id' => Auth::id()]);
+
+            return redirect()->route('stock.index')->with('info', 'No changes were provided to update.');
         }
 
-        $updated = false;
+        // Explicitly prevent direct updates to quantity fields through this metadata update method
+        if (isset($validatedData['quantity_received']) || isset($validatedData['current_quantity'])) {
+
+            Log::warning('Redirecting back with error message.', ['batch_id' => $batch->id, 'user_id' => Auth::id()]);
+
+            // You could choose to return an error or just ignore these fields
+            return redirect()->back()->withErrors(['message' => 'Quantity fields cannot be updated here. Please use a stock transaction.'])->withInput();
+        }
+
         try {
-            $updated = $batch->update($validatedData);
+            $batch->update($validatedData);
+
+            Log::info('Batch metadata updated successfully.', ['batch_id' => $batch->id, 'user_id' => Auth::id()]);
+
+            return redirect()->route('stock.index')->with('success', 'Batch metadata updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'An error occurred while updating the batch.');
-        }
+            Log::error('Batch metadata update failed: '.$e->getMessage(), ['batch_id' => $batch->id]);
 
-        if ($updated) {
-            return redirect()->route('stock.index')->with('success', 'Batch updated successfully.');
-        } else {
-            return redirect()->route('stock.index')->with('info', 'Batch update processed, but no changes were saved.');
+            return redirect()->back()->withInput()->with('error', 'An error occurred while updating batch metadata.');
         }
     }
 
     /**
-     * Adjust the stock quantity for a specific batch.
+     * Remove the specified batch from storage (soft delete).
      */
-    public function adjust(Request $request, Batch $batch) // Route model binding
+    public function destroy(Batch $batch)
     {
-        $request->validate([
-            'adjustment' => 'required|integer', // Can be positive or negative
-            'reason' => 'required|string|max:255',
-        ]);
+        // Consider authorization: $this->authorize('delete', $batch);
+        $message = '';
 
-        // *** USE current_quantity ***
-        $newQuantity = $batch->current_quantity + $request->adjustment;
+        try {
+            if ($batch->current_quantity > 0) {
+                // Log a final disposal transaction before deleting if stock exists
+                Log::info("Attempting to delete batch {$batch->id} with current stock {$batch->current_quantity}. Performing disposal first.");
+                $this->stockManagementService->processTransaction([
+                    'transaction_type' => StockTransactionType::DISPOSAL_DAMAGED->value, // Or a more specific "DISPOSAL_ON_DELETE"
+                    'medicine_id' => $batch->medicine_id,
+                    'batch_id' => $batch->id,
+                    'quantity_change_input' => $batch->current_quantity,
+                    'notes' => 'System disposal: Batch record deleted with remaining stock of '.$batch->current_quantity.' units.',
+                    'transaction_date' => now()->toDateTimeString(), // Explicitly set transaction date
+                ], Auth::user() ?? User::first() /* Fallback user if needed for system actions, ensure this is handled */);
 
-        if ($newQuantity < 0) {
-            return back()->withErrors(['adjustment' => 'Adjustment results in negative stock.'])->withInput();
+                // Verify stock is now zero before proceeding (optional safety check)
+                $batch->refresh(); // Get the latest state after service call
+                if ($batch->current_quantity > 0) {
+                    throw new \Exception("Failed to zero out stock for batch {$batch->id} before deletion.");
+                }
+                $message = 'Batch stock zeroed out and record deleted successfully.';
+            } else {
+                $message = 'Batch with zero stock deleted successfully.';
+            }
+
+            $batch->delete(); // Soft delete
+
+            if (request()->wantsJson()) {
+                return response()->json(['message' => $message]);
+            }
+
+            return redirect()->route('stock.index')->with('success', $message);
+        } catch (InsufficientStockException $e) { // Should not happen if logic is correct for disposal
+            Log::error('Insufficient stock during batch deletion disposal: '.$e->getMessage(), ['batch_id' => $batch->id]);
+
+            return redirect()->route('stock.index')->with('error', 'Error during pre-deletion stock disposal: '.$e->getMessage());
+        } catch (\Exception $e) {
+            Log::error("Batch deletion failed for batch {$batch->id}: ".$e->getMessage());
+
+            return redirect()->route('stock.index')->with('error', 'Could not delete batch: '.$e->getMessage());
         }
-
-        $batch->update([
-            // *** USE current_quantity ***
-            'current_quantity' => $newQuantity,
-        ]);
-
-        // TODO: Consider logging the adjustment
-        // StockAdjustment::create([...]);
-
-        return redirect()->route('stock.index')
-            ->with('success', 'Stock adjusted successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id) // Route model binding
-    {
-        $batch = Batch::findOrFail($id);
-        $batch->delete();
-
-        // For Inertia, you can either redirect or return a JSON response
-        if (request()->wantsJson()) {
-            return response()->json(['message' => 'Batch deleted successfully']);
-        }
-
-        return redirect()->route('stock.index')
-            ->with('success', 'Batch deleted successfully.');
     }
 }
