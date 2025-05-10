@@ -44,6 +44,7 @@ export interface User {
     name: string;
     email: string;
     role_id: Role['id'];
+    role_name: Role['name'];
     role: Role;
     avatar?: string;
     email_verified_at: string | null;
@@ -127,7 +128,7 @@ export type Medicine = {
     unit_of_measure: string | null;
     reorder_level?: number | null;
     description: string | null;
-    medicine_stock_summaries: MedicineStockSummary[];
+    quantity: number;
     created_at: string;
     updated_at: string;
 };
@@ -156,12 +157,32 @@ export type Batch = {
     medicine: Medicine;
     supplier: Supplier;
     medicine_id: Medicine['id'];
+    medicine_name: Medicine['name'];
     supplier_id: Supplier['id'];
+    supplier_name: Supplier['name'];
     batch_number: string | null;
     quantity_received: number;
     current_quantity: number;
     manufacture_date: Date | null;
     expiry_date: Date;
+    created_at: string;
+    updated_at: string;
+};
+
+export type StockLedgerEntry = {
+    id: number;
+    medicine_id: Medicine['id'];
+    medicine_name: Medicine['name'];
+    batch_id: Batch['id'];
+    batch_number: Batch['batch_number'];
+    transaction_type: string;
+    quantity_change: number;
+    quantity_after_transaction: number | null;
+    transaction_date: string;
+    related_transaction_id: number | null;
+    notes: string | null;
+    user_id: User['id'] | null;
+    user_name: User['name'];
     created_at: string;
     updated_at: string;
 };

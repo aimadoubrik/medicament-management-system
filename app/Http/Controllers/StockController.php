@@ -53,42 +53,43 @@ class StockController extends Controller
             'expiry_to' => 'nullable|date_format:Y-m-d|after_or_equal:expiry_from',
         ]);
 
-        $query = Batch::query()->with(['medicine', 'supplier']);
+        $query = Batch::query()
+            ->leftJoin('medicines', 'batches.medicine_id', '=', 'medicines.id')
+            ->leftJoin('suppliers', 'batches.supplier_id', '=', 'suppliers.id')
+            ->select('batches.*', 'medicines.name as medicine_name', 'suppliers.name as supplier_name');
 
         $filterValue = $validatedIndexRequest['filter'] ?? null;
         $filterColumn = $validatedIndexRequest['filterBy'] ?? 'medicine_name';
 
         if ($filterValue) {
             if ($filterColumn === 'medicine_name') {
-                $query->whereHas('medicine', fn ($q) => $q->where('name', 'like', "%{$filterValue}%"));
+                $query->whereHas('medicine', fn($q) => $q->where('name', 'like', "%{$filterValue}%"));
             } elseif ($filterColumn === 'supplier_name') {
-                $query->whereHas('supplier', fn ($q) => $q->where('name', 'like', "%{$filterValue}%"));
+                $query->whereHas('supplier', fn($q) => $q->where('name', 'like', "%{$filterValue}%"));
             } elseif (Schema::hasColumn('batches', $filterColumn)) { // e.g., batch_number
                 $query->where($filterColumn, 'like', "%{$filterValue}%");
             }
         }
 
-        $query->when($validatedIndexRequest['expiry_from'] ?? null, fn ($q, $date) => $q->where('expiry_date', '>=', $date));
-        $query->when($validatedIndexRequest['expiry_to'] ?? null, fn ($q, $date) => $q->where('expiry_date', '<=', $date));
+        $query->when($validatedIndexRequest['expiry_from'] ?? null, fn($q, $date) => $q->where('expiry_date', '>=', $date));
+        $query->when($validatedIndexRequest['expiry_to'] ?? null, fn($q, $date) => $q->where('expiry_date', '<=', $date));
 
         $sortColumn = $validatedIndexRequest['sort'] ?? 'expiry_date';
         $sortDirection = $validatedIndexRequest['direction'] ?? 'asc';
 
         // Whitelist sortable columns for security and clarity
-        $allowedSortColumns = ['batch_number', 'manufacture_date', 'expiry_date', 'current_quantity', 'created_at', 'updated_at']; // Add batch table columns
-        $relatedSortColumns = ['medicine_name', 'supplier_name'];
+        $allowedSortColumns = array_merge(
+            Schema::getColumnListing('batches'),
+            ['medicine_name', 'supplier_name']
+        );
 
-        if (in_array($sortColumn, $allowedSortColumns) && Schema::hasColumn('batches', $sortColumn)) {
+        if ($sortColumn && in_array($sortColumn, $allowedSortColumns)) {
             $query->orderBy($sortColumn, $sortDirection);
-        } elseif ($sortColumn === 'medicine_name') {
-            $query->orderBy(Medicine::select('name')->whereColumn('medicines.id', 'batches.medicine_id'), $sortDirection);
-        } elseif ($sortColumn === 'supplier_name') {
-            $query->orderBy(Supplier::select('name')->whereColumn('suppliers.id', 'batches.supplier_id'), $sortDirection);
         } else {
             $query->orderBy('expiry_date', 'asc');
         }
 
-        $perPage = $validatedIndexRequest['perPage'] ?? 15; // Adjusted default
+        $perPage = $validatedIndexRequest['perPage'] ?? 10;
         $batches = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Stock/Index', [
@@ -126,17 +127,17 @@ class StockController extends Controller
             // The form request key for quantity is 'quantity_change_input'
             return back()->withErrors(['quantity_change_input' => $e->getMessage()])->withInput();
         } catch (\Illuminate\Database\QueryException $e) { // More specific DB errors
-            Log::error('Stock transaction database error: '.$e->getMessage(), ['sql' => $e->getSql(), 'bindings' => $e->getBindings(), 'request_data' => $validatedData]);
+            Log::error('Stock transaction database error: ' . $e->getMessage(), ['sql' => $e->getSql(), 'bindings' => $e->getBindings(), 'request_data' => $validatedData]);
 
             return back()->with('error', 'A database error occurred. Please try again.')->withInput();
         } catch (\Exception $e) {
-            Log::error('Stock transaction failed: '.$e->getMessage(), [
-                'file' => $e->getFile().':'.$e->getLine(),
+            Log::error('Stock transaction failed: ' . $e->getMessage(), [
+                'file' => $e->getFile() . ':' . $e->getLine(),
                 'request_data' => $validatedData,
                 // 'trace' => $e->getTraceAsString(), // Optionally log trace for non-production
             ]);
 
-            return back()->with('error', 'An unexpected error occurred: '.$e->getMessage())->withInput();
+            return back()->with('error', 'An unexpected error occurred: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -172,7 +173,7 @@ class StockController extends Controller
 
             return redirect()->route('stock.index')->with('success', 'Batch metadata updated successfully.');
         } catch (\Exception $e) {
-            Log::error('Batch metadata update failed: '.$e->getMessage(), ['batch_id' => $batch->id]);
+            Log::error('Batch metadata update failed: ' . $e->getMessage(), ['batch_id' => $batch->id]);
 
             return redirect()->back()->withInput()->with('error', 'An error occurred while updating batch metadata.');
         }
@@ -195,7 +196,7 @@ class StockController extends Controller
                     'medicine_id' => $batch->medicine_id,
                     'batch_id' => $batch->id,
                     'quantity_change_input' => $batch->current_quantity,
-                    'notes' => 'System disposal: Batch record deleted with remaining stock of '.$batch->current_quantity.' units.',
+                    'notes' => 'System disposal: Batch record deleted with remaining stock of ' . $batch->current_quantity . ' units.',
                     'transaction_date' => now()->toDateTimeString(), // Explicitly set transaction date
                 ], Auth::user() ?? User::first() /* Fallback user if needed for system actions, ensure this is handled */);
 
@@ -217,13 +218,13 @@ class StockController extends Controller
 
             return redirect()->route('stock.index')->with('success', $message);
         } catch (InsufficientStockException $e) { // Should not happen if logic is correct for disposal
-            Log::error('Insufficient stock during batch deletion disposal: '.$e->getMessage(), ['batch_id' => $batch->id]);
+            Log::error('Insufficient stock during batch deletion disposal: ' . $e->getMessage(), ['batch_id' => $batch->id]);
 
-            return redirect()->route('stock.index')->with('error', 'Error during pre-deletion stock disposal: '.$e->getMessage());
+            return redirect()->route('stock.index')->with('error', 'Error during pre-deletion stock disposal: ' . $e->getMessage());
         } catch (\Exception $e) {
-            Log::error("Batch deletion failed for batch {$batch->id}: ".$e->getMessage());
+            Log::error("Batch deletion failed for batch {$batch->id}: " . $e->getMessage());
 
-            return redirect()->route('stock.index')->with('error', 'Could not delete batch: '.$e->getMessage());
+            return redirect()->route('stock.index')->with('error', 'Could not delete batch: ' . $e->getMessage());
         }
     }
 }

@@ -183,30 +183,12 @@ export default function Index({ auth }: PageProps) { // Get auth if needed
                 <DataTable
                     columns={columns}
                     paginatedData={paginatedBatches}
-                    searchKey='batch_number'
-                    searchPlaceholder='Search by Batch Number...'
-                    filterConfig={{
-                        filter: currentFilters?.filter || '',
-                        filterBy: currentFilters?.filterBy || 'medicine_name',
-                        filterByOptions: [
-                            { value: 'medicine_name', label: 'Medicine Name' },
-                            { value: 'batch_number', label: 'Batch No.' },
-                            { value: 'supplier_name', label: 'Supplier Name' },
-                        ],
-                        dateFilters: [
-                            { key: 'expiry_from', label: 'Expiry From', value: currentFilters?.expiry_from },
-                            { key: 'expiry_to', label: 'Expiry To', value: currentFilters?.expiry_to },
-                        ]
-                    }}
-                    sortConfig={{ // Pass current sort state
-                        sort: currentFilters?.sort || 'expiry_date',
-                        direction: currentFilters?.direction || 'asc',
-                    }}
-
+                    searchKey='medicine_name'
+                    searchPlaceholder='Search by medicine...'
                     inertiaVisitUrl={route('stock.index')}
-                    inertiaDataPropName="batches" // Default, often not needed
+                    inertiaDataPropName="batches"
                     initialVisibility={batchColumnVisibility}
-                    pageSizeOptions={[10, 15, 20, 50, 100]}
+                    pageSizeOptions={[10, 20, 50, 100]}
                     exportFileName={`stock-batches-${new Date().toISOString().split('T')[0]}`}
                 />
             </div>
