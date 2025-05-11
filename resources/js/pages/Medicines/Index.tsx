@@ -49,6 +49,8 @@ interface MedicinesIndexProps extends PageProps {
 }
 
 export default function Index({ medicines: paginatedMedicines }: MedicinesIndexProps) {
+
+    console.log(paginatedMedicines);
     
     // Modal state management
     const [modalState, setModalState] = useState<{

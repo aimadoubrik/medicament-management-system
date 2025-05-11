@@ -32,14 +32,8 @@ export const batchColumns: ColumnDef<Batch>[] = [
     createNumberColumn<Batch>('current_quantity', 'Current Quantity'),
     createDateColumn<Batch>('manufacture_date', 'Manufacture Date'),
     createDateColumn<Batch>('expiry_date', 'Expiry Date'),
-    {
-        accessorFn: (row) => row.medicine.name,
-        header: 'Medicine',
-    },
-    {
-        accessorFn: (row) => row.supplier.name,
-        header: 'Supplier',
-    },
+    createTextColumn<Batch>('medicine_name', 'Medicine'),
+    createTextColumn<Batch>('supplier_name', 'Supplier'),
     createDateColumn<Batch>('created_at', 'Created'),
     createDateColumn<Batch>('updated_at', 'Updated'),
     {
@@ -110,8 +104,8 @@ export const batchColumnVisibility = {
     current_quantity: true,
     manufacture_date: false,
     expiry_date: true,
-    'medicine.name': false,
-    'supplier.name': false,
+    medicine_name: true,
+    supplier_name: false,
     created_at: false,
     updated_at: false,
 };

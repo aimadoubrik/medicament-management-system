@@ -51,6 +51,7 @@ export function EditBatchMetadataForm({
             isLoading={isLoading}
             submitButtonText="Update Metadata"
             layout='grid'
+            gridColumns={1}
         />
     );
 }

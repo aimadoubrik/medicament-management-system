@@ -30,13 +30,7 @@ export const medicineColumns: ColumnDef<Medicine>[] = [
     createSelectionColumn<Medicine>(),
     createTextColumn<Medicine>('name', 'Name'),
     createTextColumn<Medicine>('manufacturer_distributor', 'Manufacturer/Distributor'),
-    {
-        accessorKey: 'total_stock',
-        header: 'Total Stock',
-        cell: ({ row }) => {
-            return row.original.medicine_stock_summaries?.total_quantity_in_stock || 0;
-        }
-    },
+    createNumberColumn<Medicine>('quantity', 'Quantity'),
     createTextColumn<Medicine>('dosage', 'Dosage'),
     createTextColumn<Medicine>('form', 'Form'),
     createTextColumn<Medicine>('unit_of_measure', 'Unit of Measure'),
@@ -114,7 +108,7 @@ export const medicineColumnVisibility = {
     unit_of_measure: false,
     reorder_level: true,
     description: false,
-    'medicine_stock_summaries.total_quantity_in_stock': true,
+    quantity: true,
     created_at: false,
     updated_at: false,
 };

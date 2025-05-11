@@ -32,14 +32,7 @@ export const userColumns: ColumnDef<User>[] = [
     createTextColumn<User>('email', 'Email'),
     createDateColumn<User>('created_at', 'Created'),
     createDateColumn<User>('updated_at', 'Updated'),
-    {
-        id: 'role',
-        header: 'Role',
-        cell: ({ row }) => {
-            const user = row.original;
-            return <span className="capitalize">{user.role.name}</span>;
-        },
-    },
+    createTextColumn<User>('role_name', 'Role'),
     {
         id: 'actions',
         cell: ({ row }) => {
@@ -105,7 +98,7 @@ export const userColumns: ColumnDef<User>[] = [
 export const userColumnVisibility = {
     name: true,
     email: true,
-    'role.name': true,
+    role_name: true,
     created_at: false,
     updated_at: false,
 };

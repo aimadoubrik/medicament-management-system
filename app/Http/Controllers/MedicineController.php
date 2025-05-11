@@ -8,6 +8,7 @@ use App\Models\Medicine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class MedicineController extends Controller
 {
@@ -25,7 +26,9 @@ class MedicineController extends Controller
             'filterBy' => 'nullable|string|max:50',
         ]);
 
-        $query = Medicine::query()->with('medicineStockSummaries');
+        $query = Medicine::query()
+            ->leftJoin('medicine_stock_summaries', 'medicines.id', '=', 'medicine_stock_summaries.medicine_id')
+            ->select('medicines.*', DB::raw('COALESCE(medicine_stock_summaries.total_quantity_in_stock, 0) as quantity'));
 
         // --- Filtering ---
         $filterValue = $request->input('filter');
@@ -39,14 +42,17 @@ class MedicineController extends Controller
         }
 
         // --- Sorting ---
+        $allowedSortColumns = array_merge(
+            Schema::getColumnListing('medicines'),
+            ['quantity']
+        );
+
         $sortColumn = $request->input('sort', 'name'); // Default sort column
         $sortDirection = $request->input('direction', 'desc'); // Default direction
 
         // Ensure the sort column exists
-        if ($sortColumn && Schema::hasColumn('medicines', $sortColumn)) {
+        if ($sortColumn && in_array($sortColumn, $allowedSortColumns)) {
             $query->orderBy($sortColumn, $sortDirection);
-        } elseif ($sortColumn && Schema::hasColumn('medicine_stock_summaries', $sortColumn)) {
-            $query->orderBy('medicine_stock_summaries.'.$sortColumn, $sortDirection);
         } else {
             // Fallback sorting if provided column is invalid
             $query->orderBy('name', 'desc');

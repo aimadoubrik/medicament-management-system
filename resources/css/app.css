@@ -69,6 +69,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -165,9 +166,9 @@
     --chart-5: oklch(0.55 0.01 58.07);
     --sidebar: oklch(0.27 0.01 34.3);
     --sidebar-foreground: oklch(0.97 0 106.42);
-    --sidebar-primary: oklch(0.7 0.19 47.6);
+    --sidebar-primary: oklch(0.70 0.19 47.60);
     --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: oklch(0.55 0.12 66.44);
+    --sidebar-accent: oklch(0.70 0.19 47.60);
     --sidebar-accent-foreground: oklch(1 0 0);
     --sidebar-border: oklch(0.37 0.01 67.56);
     --sidebar-ring: oklch(0.7 0.19 47.6);
