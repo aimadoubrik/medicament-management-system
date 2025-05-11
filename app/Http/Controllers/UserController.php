@@ -37,7 +37,7 @@ class UserController extends Controller
         // Ensure the filter column exists to prevent errors
         if ($filterValue && $filterColumn && Schema::hasColumn('users', $filterColumn)) {
             // Use 'where' for exact match or 'like' for partial match
-            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
+            $query->where($filterColumn, 'like', '%'.$filterValue.'%');
         }
 
         // --- Sorting ---
@@ -45,7 +45,6 @@ class UserController extends Controller
             Schema::getColumnListing('users'),
             ['role_name']
         );
-
 
         $sortColumn = $request->input('sort', 'name'); // Default sort column
         $sortDirection = $request->input('direction', 'desc'); // Default direction
@@ -104,7 +103,7 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'role_id' => 'required|exists:roles,id',
             'password' => 'nullable|string|min:8',
         ]);

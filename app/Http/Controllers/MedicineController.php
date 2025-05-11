@@ -6,9 +6,9 @@ use App\Http\Requests\StoreMedicineRequest;
 use App\Http\Requests\UpdateMedicineRequest;
 use App\Models\Medicine;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 
 class MedicineController extends Controller
 {
