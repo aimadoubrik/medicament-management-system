@@ -39,7 +39,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('suppliers', SupplierController::class);
 
     // Reports routes
-    Route::resource('reports', ReportsController::class);
+    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+    Route::get('/reports/yearly-report', [ReportsController::class, 'getYearlyReport'])
+        ->name('reports.yearly-report');
 
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -66,5 +68,5 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('locale.set');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
