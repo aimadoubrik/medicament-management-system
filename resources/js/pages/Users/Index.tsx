@@ -35,7 +35,7 @@ import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { UserFormData } from '@/schemas/user';
 import { PageProps, PaginatedResponse, Role, User as UserType } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
@@ -50,6 +50,10 @@ interface UsersIndexProps extends PageProps {
 }
 
 export default function Index({ users: paginatedUsers, roles }: UsersIndexProps) {
+
+    const { props: { auth }, } = usePage<PageProps>();
+    const can = auth?.user?.can || {};
+
     // Modal state management
     const [modalState, setModalState] = useState<{
         mode: 'create' | 'edit' | 'show' | null;
@@ -128,51 +132,57 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => openModal('show', user)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                <span>View</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openModal('edit', user)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                <span>Edit</span>
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onSelect={(e) => e.preventDefault()}
-                                    >
-                                        <Trash className="mr-2 h-4 w-4" />
-                                        <span>Delete</span>
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the user "{user.name}".
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => {
-                                                router.delete(route('users.destroy', user.id), {
-                                                    preserveScroll: true,
-                                                    onSuccess: () => toast.success('User deleted successfully'),
-                                                    onError: (errors) =>
-                                                        toast.error('Error deleting user', {
-                                                            description: Object.values(errors).flat().join(' '),
-                                                        }),
-                                                });
-                                            }}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            {can.viewUser && (
+                                <DropdownMenuItem onClick={() => openModal('show', user)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    <span>View</span>
+                                </DropdownMenuItem>
+                            )}
+                            {can.updateUser && (
+                                <DropdownMenuItem onClick={() => openModal('edit', user)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                            )}
+                            {can.deleteUser && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onSelect={(e) => e.preventDefault()}
                                         >
-                                            Delete
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                                            <Trash className="mr-2 h-4 w-4" />
+                                            <span>Delete</span>
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the user "{user.name}".
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={() => {
+                                                    router.delete(route('users.destroy', user.id), {
+                                                        preserveScroll: true,
+                                                        onSuccess: () => toast.success('User deleted successfully'),
+                                                        onError: (errors) =>
+                                                            toast.error('Error deleting user', {
+                                                                description: Object.values(errors).flat().join(' '),
+                                                            }),
+                                                    });
+                                                }}
+                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            >
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
@@ -215,10 +225,12 @@ export default function Index({ users: paginatedUsers, roles }: UsersIndexProps)
             <div className="container mx-auto p-4">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Users</h1>
-                    <Button onClick={() => openModal('create')}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add User
-                    </Button>
+                    {can.createUser && (
+                        <Button onClick={() => openModal('create')}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add User
+                        </Button>
+                    )}
                 </div>
 
                 <DataTable

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class MedicineController extends Controller
 {
@@ -17,6 +18,12 @@ class MedicineController extends Controller
      */
     public function index(Request $request)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->can('viewAny', Medicine::class)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'page' => 'integer|min:1',
             'perPage' => 'integer|min:1|max:100', // Add max limit
@@ -38,7 +45,7 @@ class MedicineController extends Controller
         // Ensure the filter column exists to prevent errors
         if ($filterValue && $filterColumn && Schema::hasColumn('medicines', $filterColumn)) {
             // Use 'where' for exact match or 'like' for partial match
-            $query->where($filterColumn, 'like', '%'.$filterValue.'%');
+            $query->where($filterColumn, 'like', '%' . $filterValue . '%');
         }
 
         // --- Sorting ---
@@ -76,6 +83,13 @@ class MedicineController extends Controller
      */
     public function store(StoreMedicineRequest $request)
     {
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->can('create', Medicine::class)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validatedData = $request->validated();
 
         // Create the medicine
@@ -89,6 +103,12 @@ class MedicineController extends Controller
      */
     public function show(string $id)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->can('view', Medicine::class)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $medicine = Medicine::findOrFail($id);
 
         return Inertia::render('Medicines/Show', [
@@ -101,6 +121,12 @@ class MedicineController extends Controller
      */
     public function update(UpdateMedicineRequest $request, string $id)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->can('update', Medicine::class)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validatedData = $request->validated();
 
         // Find the medicine and update it
@@ -115,6 +141,12 @@ class MedicineController extends Controller
      */
     public function destroy(string $id)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->can('delete', Medicine::class)) {
+            abort(403, 'Unauthorized action.');
+        }
+
         // Find the medicine and delete it
         $medicine = Medicine::findOrFail($id);
         $medicine->delete();
