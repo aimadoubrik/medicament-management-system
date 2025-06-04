@@ -2,17 +2,17 @@
 
 namespace App\Policies;
 
-use App\Models\Medicine;
+use App\Models\Batch;
 use App\Models\User;
 
-class MedicinePolicy
+class BatchPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true; // Allow viewing any medicine records
+        return true; // Allow viewing any batch records
     }
 
     /**

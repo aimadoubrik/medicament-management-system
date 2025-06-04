@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Authorizable;
 
     /**
      * The attributes that are mass assignable.
@@ -52,8 +53,8 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function isSuperAdmin(): bool
+    public function hasRole(string $role): bool
     {
-        return $this->role?->name === 'superadmin';
+        return $this->role && $this->role->name === $role;
     }
 }

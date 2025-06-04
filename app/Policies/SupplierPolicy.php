@@ -2,17 +2,17 @@
 
 namespace App\Policies;
 
-use App\Models\Medicine;
+use App\Models\Supplier;
 use App\Models\User;
 
-class MedicinePolicy
+class SupplierPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true; // Allow viewing any medicine records
+        return true; // Allow viewing any supplier records
     }
 
     /**

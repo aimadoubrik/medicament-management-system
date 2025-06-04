@@ -53,6 +53,9 @@ interface BatchInfoModalState {
 }
 
 export default function Index({ auth }: PageProps) { // Get auth if needed
+
+    const can = auth?.user?.can || {};
+
     const {
         batches: paginatedBatches,
         medicines,
@@ -128,27 +131,33 @@ export default function Index({ auth }: PageProps) { // Get auth if needed
                             <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><span className="sr-only">Open menu</span><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Batch Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => openBatchInfoModal('show_details', batch)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openBatchInfoModal('edit_metadata', batch)}><Pencil className="mr-2 h-4 w-4" /> Edit Metadata</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Stock Transactions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.OUT_DISPENSE.valueOf(), batch.medicine, batch)}><CircleArrowOutUpRight className="mr-2 h-4 w-4" /> Dispense</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.ADJUST_ADD.valueOf(), batch.medicine, batch)}><PlusCircle className="mr-2 h-4 w-4" /> Adjust (Add)</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.ADJUST_SUB.valueOf(), batch.medicine, batch)}><MinusCircle className="mr-2 h-4 w-4" /> Adjust (Subtract)</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.DISPOSAL_DAMAGED.valueOf(), batch.medicine, batch)}><ArchiveX className="mr-2 h-4 w-4" /> Dispose (Damaged)</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.DISPOSAL_EXPIRED.valueOf(), batch.medicine, batch)}><ArchiveX className="mr-2 h-4 w-4" /> Dispose (Expired)</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.RETURN_SUPPLIER.valueOf(), batch.medicine, batch)}><Undo2 className="mr-2 h-4 w-4" /> Return to Supplier</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild><DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}><Trash className="mr-2 h-4 w-4" /> Delete Batch</DropdownMenuItem></AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action will attempt to dispose of remaining stock and delete the batch record for "{batch.batch_number}". Cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => { router.delete(route('stock.destroy', batch.id), { preserveScroll: true, onSuccess: () => toast.success('Batch deleted.'), onError: (e) => toast.error('Delete failed.', { description: Object.values(e).flat().join(' ') }) }); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
+                                {can.viewAnyBatches && (
+                                    <DropdownMenuItem onClick={() => openBatchInfoModal('show_details', batch)}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
+                                )}
+                                {can.updateBatches && (
+                                    <>
+                                        <DropdownMenuItem onClick={() => openBatchInfoModal('edit_metadata', batch)}><Pencil className="mr-2 h-4 w-4" /> Edit Metadata</DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuLabel>Stock Transactions</DropdownMenuLabel>
+                                        <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.OUT_DISPENSE.valueOf(), batch.medicine, batch)}><CircleArrowOutUpRight className="mr-2 h-4 w-4" /> Dispense</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.ADJUST_ADD.valueOf(), batch.medicine, batch)}><PlusCircle className="mr-2 h-4 w-4" /> Adjust (Add)</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.ADJUST_SUB.valueOf(), batch.medicine, batch)}><MinusCircle className="mr-2 h-4 w-4" /> Adjust (Subtract)</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.DISPOSAL_DAMAGED.valueOf(), batch.medicine, batch)}><ArchiveX className="mr-2 h-4 w-4" /> Dispose (Damaged)</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.DISPOSAL_EXPIRED.valueOf(), batch.medicine, batch)}><ArchiveX className="mr-2 h-4 w-4" /> Dispose (Expired)</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => openTransactionModal(StockTransactionType.RETURN_SUPPLIER.valueOf(), batch.medicine, batch)}><Undo2 className="mr-2 h-4 w-4" /> Return to Supplier</DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild><DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}><Trash className="mr-2 h-4 w-4" /> Delete Batch</DropdownMenuItem></AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This action will attempt to dispose of remaining stock and delete the batch record for "{batch.batch_number}". Cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => { router.delete(route('stock.destroy', batch.id), { preserveScroll: true, onSuccess: () => toast.success('Batch deleted.'), onError: (e) => toast.error('Delete failed.', { description: Object.values(e).flat().join(' ') }) }); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     );
@@ -174,10 +183,12 @@ export default function Index({ auth }: PageProps) { // Get auth if needed
             <div className="container mx-auto p-4">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Stock</h1>
-                    <Button onClick={() => openTransactionModal()}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        New Stock Transaction
-                    </Button>
+                    {can.createBatches && (
+                        <Button onClick={() => openTransactionModal()}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            New Stock Transaction
+                        </Button>
+                    )}
                 </div>
 
                 <DataTable

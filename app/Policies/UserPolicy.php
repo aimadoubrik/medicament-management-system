@@ -10,91 +10,117 @@ class UserPolicy
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can access the super admin area.
+     * Perform pre-authorization checks.
      *
-     * This check depends only on the properties of the user performing the action ($currentUser),
-     * not on any specific target user resource.
+     * Grants 'super_admin' all permissions.
      *
-     * @param  \App\Models\User  $currentUser  The currently authenticated user.
+     * @param  \App\Models\User  $user
+     * @param  string  $ability
+     * @return bool|void
      */
-    public function accessAdminArea(User $currentUser): bool
+    public function before(User $user, $ability)
     {
-
-        // Delegate to the User model method
-        return $currentUser->isSuperAdmin();
+        if ($user->hasRole('superadmin')) {
+            return true;
+        }
     }
 
     /**
      * Determine whether the user can view any models.
+     * (e.g., on a user listing page)
+     *
+     * Super admins can view all. Other roles might be restricted.
+     * For this example, we'll assume only super_admin can see the full list.
+     * You can adjust this to allow other roles like 'manager' if needed.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $currentUser): bool
     {
-        // Check if the user is a super admin
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        // If not, deny access
-        return false;
+        // The 'before' method handles super_admin.
+        // If you want other roles to also view any, add them here:
+        // return $currentUser->hasRole('manager');
+        return false; // Only super_admin (via 'before') can view all by default here
     }
 
     /**
      * Determine whether the user can view the model.
+     * (e.g., a user's profile page)
      */
-    public function view(User $user, User $targetUser): bool
+    public function view(User $currentUser, User $targetUser): bool
     {
-        return $user->isSuperAdmin() || $user->id === $targetUser->id;
+        // The 'before' method handles super_admin.
+        // Users can view their own profile.
+        return $currentUser->id === $targetUser->id;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $currentUser): bool
     {
-        return $user->isSuperAdmin();
+        // The 'before' method handles super_admin.
+        // Example: Allow 'manager' role to also create users
+        // return $currentUser->hasRole('manager');
+        return false; // Only super_admin (via 'before') can create by default here
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, User $targetUser): bool
+    public function update(User $currentUser, User $targetUser): bool
     {
-        return $user->isSuperAdmin();
-
-        // Check if the user is trying to update their own profile
-        return $user->id === $targetUser->id;
-
-        // If not, deny access
+        // The 'before' method handles super_admin.
+        // Users can update their own profile.
+        if ($currentUser->id === $targetUser->id) {
+            return true;
+        }
+        // Example: Allow 'manager' to update users in their department (more complex logic)
+        // For now, only super_admin or self-update.
         return false;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, User $targetUser): bool
+    public function delete(User $currentUser, User $targetUser): bool
     {
-        // Prevent users from deleting themselves
-        if ($user->id === $targetUser->id) {
+        // The 'before' method handles super_admin.
+        // Prevent users from deleting themselves.
+        if ($currentUser->id === $targetUser->id) {
             return false;
         }
-
-        // Only allow super admins to delete other users
-        return $user->isSuperAdmin();
+        // Example: Allow 'manager' to delete users (but not super_admins)
+        // if ($currentUser->hasRole('manager') && !$targetUser->hasRole('super_admin')) {
+        //     return true;
+        // }
+        return false; // Only super_admin (via 'before') can delete by default here
     }
 
-    // /**
-    //  * Determine whether the user can restore the model.
-    //  */
-    // public function restore(User $user, User $model): bool
-    // {
-    //     return false;
-    // }
+    /**
+     * Determine whether the user can change another user's role.
+     */
+    public function changeRole(User $currentUser, User $targetUser): bool
+    {
+        // The 'before' method handles super_admin.
+        // Prevent users from changing their own role via this method.
+        if ($currentUser->id === $targetUser->id) {
+            return false;
+        }
+        // Prevent changing role of a super_admin by non-super_admin
+        if ($targetUser->hasRole('super_admin')) {
+            return false; // Only super_admins can change other super_admins (handled by 'before')
+        }
+        // Example: Allow 'manager' to change roles of users they manage, to non-admin roles.
+        // return $currentUser->hasRole('manager');
+        return false; // Only super_admin (via 'before') can change roles by default
+    }
 
-    // /**
-    //  * Determine whether the user can permanently delete the model.
-    //  */
-    // public function forceDelete(User $user, User $model): bool
-    // {
-    //     return false;
-    // }
+    /**
+     * Determine whether the user can access a general admin area.
+     * This is not tied to a specific User model instance.
+     */
+    public function accessAdminArea(User $currentUser): bool
+    {
+        // The 'before' method handles super_admin.
+        return $currentUser->hasRole('admin') || $currentUser->hasRole('manager'); // Example roles
+    }
 }

@@ -182,7 +182,7 @@ export default function Dashboard({ summaryData, lowStockMedicines, expiredMedic
                                         </Avatar>
                                         <div className="grid gap-1">
                                             <p className="text-sm leading-none font-medium">
-                                                {medicine.medicine.name}
+                                                {medicine.name}
                                                 <span className="text-muted-foreground ml-1 text-xs">(#{medicine.batch_number})</span>
                                             </p>
                                             <p className="text-muted-foreground text-sm">

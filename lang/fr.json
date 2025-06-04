@@ -31,7 +31,7 @@
         "password_placeholder": "Mot de passe",
         "confirm": "Confirmer",
         "confirm_delete": "Confirmer la suppression",
-        "delete_success": "Suppression effectuée avec succесс",
+        "delete_success": "Suppression effectuée avec succès",
         "delete_error": "Une erreur s'est produite lors de la suppression",
         "language": {
             "english": "Anglais",
