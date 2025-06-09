@@ -7,6 +7,7 @@ import { Head } from '@inertiajs/react';
 import { stockLedgerEntryColumns as baseStockLedgerEntryColumns, stockLedgerEntryColumnVisibility } from './table-definition';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -110,26 +111,32 @@ export default function Index({ stockLedgerEntries: paginatedStockLedgerEntries 
         }
     }, [selectedYear, exportFormat, fetchYearlyReport]);
 
-    const getYearlyReportExportData = (reportData: YearlyReportData): { headers: string[][]; body: (string | number)[][] } => {
+    const getYearlyReportExportData = (reportData: YearlyReportRow[]): { headers: (string | { content: string; colSpan: number })[][]; body: (string | number)[][] } => {
         if (!reportData.length || !reportData[0]?.months?.length) {
             return { headers: [['No data available']], body: [] };
         }
 
         const monthNames = reportData[0].months.map((m: MonthlyData) => m.month);
-        const headerRow1: string[] = ['Medicine Name'];
+        const headerRow1: (string | { content: string; colSpan: number })[] = ['Médicament'];
         monthNames.forEach(month => {
-            headerRow1.push(month, '', ''); // Spanning 3 columns for each month
+            headerRow1.push({ content: month, colSpan: 3, styles: { lineWidth: { left: 1, right: 1 }, lineColor: [255, 255, 255] } }); // Spanning 3 columns for each month
         });
-
-        const headerRow2: string[] = ['']; // For medicine name alignment
+        const headerRow2: (string | { content: string; styles: { fillColor: number[] } })[] = ['']; // For medicine name alignment
         monthNames.forEach(() => {
-            headerRow2.push('Received', 'Out', 'Quantity');
+            headerRow2.push(
+                { content: 'Entrée', styles: { fillColor: [23, 195, 178], lineWidth: { left: 1 }, lineColor: [255, 255, 255] } },
+                { content: 'Sortie', styles: { fillColor: [254, 109, 115] } },
+                { content: 'Restant', styles: { fillColor: [34, 124, 157], lineWidth: { right: 1 }, lineColor: [255, 255, 255] } }
+            );
         });
-
         const body = reportData.map((row: YearlyReportRow) => {
             const rowData: (string | number)[] = [row.medicine_name];
             row.months.forEach((m: MonthlyData) => {
-                rowData.push(m.received, m.out, m.quantity);
+                rowData.push(
+                    { content: m.received, styles: { fillColor: [195, 224, 192], lineWidth: { left: 1 }, lineColor: [255, 255, 255] } },
+                    { content: m.out, styles: { fillColor: [255, 192, 203] } },
+                    { content: m.quantity, styles: { fillColor: [204, 229, 220], lineWidth: { right: 1 }, lineColor: [255, 255, 255] } }
+                );
             });
             return rowData;
         });
@@ -140,7 +147,7 @@ export default function Index({ stockLedgerEntries: paginatedStockLedgerEntries 
     const handleExportYearlyExcel = (data: YearlyReportData, year: number) => {
         const { headers, body } = getYearlyReportExportData(data);
         if (headers[0][0] === 'No data available' && body.length === 0) {
-            alert(`No data available to export for ${year}.`); // Or use a more elegant notification
+            toast.error(`No data available to export for ${year}.`);
             return;
         }
         const wsData = [...headers, ...body];
@@ -170,7 +177,7 @@ export default function Index({ stockLedgerEntries: paginatedStockLedgerEntries 
     const handleExportYearlyPdf = (data: YearlyReportData, year: number) => {
         const { headers, body } = getYearlyReportExportData(data);
         if (headers[0][0] === 'No data available' && body.length === 0) {
-            alert(`No data available to export for ${year}.`); // Or use a more elegant notification
+            toast.error(`No data available to export for ${year}.`);
             return;
         }
 
@@ -178,22 +185,23 @@ export default function Index({ stockLedgerEntries: paginatedStockLedgerEntries 
         autoTable(doc, {
             head: headers,
             body: body,
-            styles: { fontSize: 7 }, // Adjusted for potentially more data
-            headStyles: { fillColor: [22, 160, 133], fontSize: 7, fontStyle: 'bold' },
-            margin: { top: 40, right: 20, bottom: 30, left: 20 }, // Added more margin
+            styles: { fontSize: 5 }, // Adjusted for potentially more data
+            headStyles: { fillColor: [22, 160, 133], fontSize: 5, fontStyle: 'bold', halign: 'center', valign: 'middle', cellPadding: { top: 5, right: 0, bottom: 5, left: 0 } },
+            margin: { top: 40, right: 15, bottom: 30, left: 15 }, // Added more margin
             didDrawPage: (hookData) => {
                 // Header
+                doc.setFont('helvetica', 'bold');
                 doc.setFontSize(16);
                 doc.setTextColor(40);
-                doc.text(`Yearly Stock Report - ${year}`, hookData.settings.margin.left, 30);
+                doc.text(`Rapport annuel de stock - ${year}`, hookData.settings.margin.left, 30);
 
                 // Footer
                 doc.setFontSize(10);
                 const pageCount = (doc.internal as any).getNumberOfPages();
-                doc.text(`Page ${hookData.pageNumber} of ${pageCount}`, hookData.settings.margin.left, doc.internal.pageSize.height - 15);
+                doc.text(`${hookData.pageNumber}/${pageCount}`, hookData.settings.margin.left, doc.internal.pageSize.height - 15);
             },
             columnStyles: { // Example: make first column wider if needed
-                0: { cellWidth: 100 },
+                0: { cellWidth: 50 },
             },
             // Ensure table fits, otherwise reduce font or adjust column widths
             tableWidth: 'auto', // 'auto', 'wrap' or a number

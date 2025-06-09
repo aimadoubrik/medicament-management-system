@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use App\Models\User;
+use App\Models\Medicine;
+use App\Models\Supplier;
+use App\Models\Batch;
+use Illuminate\Support\Facades\Gate;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -71,7 +76,7 @@ class HandleInertiaRequests extends Middleware
                 $jsonTranslations = json_decode(File::get($jsonLangPath), true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     // Handle potential JSON decoding error
-                    report(new \Exception("Error decoding JSON language file: {$jsonLangPath}. Error: ".json_last_error_msg()));
+                    report(new \Exception("Error decoding JSON language file: {$jsonLangPath}. Error: " . json_last_error_msg()));
                     $jsonTranslations = [];
                 }
             }
@@ -80,14 +85,64 @@ class HandleInertiaRequests extends Middleware
             return array_merge($phpTranslations, $jsonTranslations);
         });
 
+        $authenticatedUser = $request->user();
+        $authData = null;
+        if ($authenticatedUser) {
+            $authData = [
+                'id' => $authenticatedUser->id,
+                'name' => $authenticatedUser->name,
+                'email' => $authenticatedUser->email,
+                'role_name' => $authenticatedUser->role?->name, // PHP 8 nullsafe operator
+                'can' => [
+                    // Dashboard permissions
+                    'viewDashboard'   => true,
+                    // UserPolicy based permissions
+                    'viewAnyUsers'    => Gate::forUser($authenticatedUser)->allows('viewAny', User::class),
+                    'createUsers'     => Gate::forUser($authenticatedUser)->allows('create', User::class),
+                    'accessAdminArea' => Gate::forUser($authenticatedUser)->allows('accessAdminArea'),
+                    'viewUser'        => Gate::forUser($authenticatedUser)->allows('view', $authenticatedUser),
+                    'updateUser'      => Gate::forUser($authenticatedUser)->allows('update', $authenticatedUser),
+                    'deleteUser'      => Gate::forUser($authenticatedUser)->allows('delete', $authenticatedUser),
+                    'chngeRole'       => Gate::forUser($authenticatedUser)->allows('chngeRole', $authenticatedUser),
+                    // MedicinePolicy based permissions
+                    'viewAnyMedicines' => Gate::forUser($authenticatedUser)->allows('viewAny', Medicine::class),
+                    'viewMedicine'     => Gate::forUser($authenticatedUser)->allows('view', Medicine::class),
+                    'createMedicine'   => Gate::forUser($authenticatedUser)->allows('create', Medicine::class),
+                    'updateMedicine'   => Gate::forUser($authenticatedUser)->allows('update', Medicine::class),
+                    'deleteMedicine'   => Gate::forUser($authenticatedUser)->allows('delete', Medicine::class),
+                    'restoreMedicine'  => Gate::forUser($authenticatedUser)->allows('restore', Medicine::class),
+                    'forceDeleteMedicine' => Gate::forUser($authenticatedUser)->allows('forceDelete', Medicine::class),
+                    // SupplierPolicy based permissions
+                    'viewAnySuppliers' => Gate::forUser($authenticatedUser)->allows('viewAny', Supplier::class),
+                    'viewSupplier'     => Gate::forUser($authenticatedUser)->allows('view', Supplier::class),
+                    'createSupplier'   => Gate::forUser($authenticatedUser)->allows('create', Supplier::class),
+                    'updateSupplier'   => Gate::forUser($authenticatedUser)->allows('update', Supplier::class),
+                    'deleteSupplier'   => Gate::forUser($authenticatedUser)->allows('delete', Supplier::class),
+                    'restoreSupplier'  => Gate::forUser($authenticatedUser)->allows('restore', Supplier::class),
+                    'forceDeleteSupplier' => Gate::forUser($authenticatedUser)->allows('forceDelete', Supplier::class),
+                    // BatchPolicy based permissions
+                    'viewAnyBatches'   => Gate::forUser($authenticatedUser)->allows('viewAny', Batch::class),
+                    'viewBatch'        => Gate::forUser($authenticatedUser)->allows('view', Batch::class),
+                    'createBatch'      => Gate::forUser($authenticatedUser)->allows('create', Batch::class),
+                    'updateBatch'      => Gate::forUser($authenticatedUser)->allows('update', Batch::class),
+                    'deleteBatch'      => Gate::forUser($authenticatedUser)->allows('delete', Batch::class),
+                    'restoreBatch'     => Gate::forUser($authenticatedUser)->allows('restore', Batch::class),
+                    'forceDeleteBatch' => Gate::forUser($authenticatedUser)->allows('forceDelete', Batch::class),
+                    // Report permissions
+                    'viewReports'      => true,
+                    'generateReport'   => true,
+                ],
+            ];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $authData,
             ],
-            'ziggy' => fn (): array => [
+            'ziggy' => fn(): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],

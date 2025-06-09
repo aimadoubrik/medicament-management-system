@@ -35,7 +35,7 @@ import { resourceFormDefinitions } from '@/definitions/form-definitions';
 import AppLayout from '@/layouts/app-layout';
 import { MedicineFormData } from '@/schemas/medicine';
 import { Medicine as MedicineType, PageProps, PaginatedResponse } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal, Pencil, PlusCircle, Trash } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
@@ -50,8 +50,9 @@ interface MedicinesIndexProps extends PageProps {
 
 export default function Index({ medicines: paginatedMedicines }: MedicinesIndexProps) {
 
-    console.log(paginatedMedicines);
-    
+    const { props: { auth } } = usePage<PageProps>();
+    const can = auth?.user?.can || {};
+
     // Modal state management
     const [modalState, setModalState] = useState<{
         mode: 'create' | 'edit' | 'show' | null;
@@ -132,51 +133,57 @@ export default function Index({ medicines: paginatedMedicines }: MedicinesIndexP
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => openModal('show', medicine)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                <span>View</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openModal('edit', medicine)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                <span>Edit</span>
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onSelect={(e) => e.preventDefault()}
-                                    >
-                                        <Trash className="mr-2 h-4 w-4" />
-                                        <span>Delete</span>
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete the medicine "{medicine.name}".
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => {
-                                                router.delete(route('medicines.destroy', medicine.id), {
-                                                    preserveScroll: true,
-                                                    onSuccess: () => toast.success('Medicine deleted successfully'),
-                                                    onError: (errors) =>
-                                                        toast.error('Error deleting medicine', {
-                                                            description: Object.values(errors).flat().join(' '),
-                                                        }),
-                                                });
-                                            }}
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            {can.viewMedicine && (
+                                <DropdownMenuItem onClick={() => openModal('show', medicine)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    <span>View</span>
+                                </DropdownMenuItem>
+                            )}
+                            {can.updateMedicine && (
+                                <DropdownMenuItem onClick={() => openModal('edit', medicine)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                </DropdownMenuItem>
+                            )}
+                            {can.deleteMedicine && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem
+                                            variant="destructive"
+                                            onSelect={(e) => e.preventDefault()}
                                         >
-                                            Delete
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                                            <Trash className="mr-2 h-4 w-4" />
+                                            <span>Delete</span>
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the medicine "{medicine.name}".
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={() => {
+                                                    router.delete(route('medicines.destroy', medicine.id), {
+                                                        preserveScroll: true,
+                                                        onSuccess: () => toast.success('Medicine deleted successfully'),
+                                                        onError: (errors) =>
+                                                            toast.error('Error deleting medicine', {
+                                                                description: Object.values(errors).flat().join(' '),
+                                                            }),
+                                                    });
+                                                }}
+                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            >
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
@@ -219,10 +226,12 @@ export default function Index({ medicines: paginatedMedicines }: MedicinesIndexP
             <div className="container mx-auto p-4">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Medicines</h1>
-                    <Button onClick={() => openModal('create')}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Medicine
-                    </Button>
+                    {can.createMedicine && (
+                        <Button onClick={() => openModal('create')}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Medicine
+                        </Button>
+                    )}
                 </div>
 
                 <DataTable

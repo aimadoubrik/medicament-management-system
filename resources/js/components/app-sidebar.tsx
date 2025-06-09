@@ -41,31 +41,37 @@ export function AppSidebar() {
             title: dashboardTitle,
             href: '/dashboard',
             icon: LayoutGrid,
+            permission: 'viewDashboard',
         },
         {
             title: medicinesTitle,
             href: '/medicines',
             icon: PillBottle,
+            permission: 'viewAnyMedicines',
         },
         {
             title: stockTitle,
             href: '/stock',
             icon: Package,
+            permission: 'viewAnyBatches',
         },
         {
             title: suppliersTitle,
             href: '/suppliers',
             icon: Users,
+            permission: 'viewAnySuppliers',
         },
         {
             title: usersTitle,
             href: '/users',
             icon: Users,
+            permission: 'viewAnyUsers',
         },
         {
             title: reportsTitle,
             href: '/reports',
             icon: FileSpreadsheet,
+            permission: 'viewReports',
         },
     ];
 
